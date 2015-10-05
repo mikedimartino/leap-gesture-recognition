@@ -13,7 +13,7 @@ namespace LeapGestureRecognition.Util
 			var frame = controller.Frame();
 			if (frame.Hands.Count > 0)
 			{
-				string test = "i seen a hand, i swur it";
+				string test = "this is a test string";
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 ﻿<Window x:Class="LeapGestureRecognition.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="SharpGL WPF Application" Height="350" Width="525" 
+        Title="SharpGL WPF Application" Height="600" Width="800" 
         xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF"
 				DataContext="{Binding MainViewModel}"
 >
