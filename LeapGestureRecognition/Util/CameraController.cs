@@ -16,9 +16,10 @@ namespace LeapGestureRecognition.Util
 		public static float FOVY = 60.0f;
 		public static double NearClipPlaneDist = 0.01;
 		public static double FarClipPlaneDist = 10000;
-		public static Vector EyeDefault = new Vector(0, 2000, 2000);
+		public static Vector EyeDefault = new Vector(0.0f, 1054.91f, 2813.11f);
 		public static Vector AtDefault = new Vector(0, 0, 0);
 		public static Vector UpDefault = new Vector(0, 1, 0);
+		public static int ZoomScale = 50;
 
 		public CameraController(OpenGL gl)
 		{
@@ -48,6 +49,14 @@ namespace LeapGestureRecognition.Util
 
 			//  Set the modelview matrix.
 			_gl.MatrixMode(OpenGL.GL_MODELVIEW);
+		}
+
+		public void Zoom(int delta)
+		{
+			Vector zoom = _eye.Normalized * ZoomScale;
+			if (delta > 0) zoom = -zoom; // -Z is into the screen and scroll up gives positive delta, so flip sign.
+			_eye += zoom;
+			UpdateView();
 		}
 
 	}

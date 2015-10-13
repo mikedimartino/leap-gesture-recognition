@@ -25,6 +25,8 @@ namespace LeapGestureRecognition.Util
 
 		public void DrawFrame(Frame frame)
 		{
+			DrawInteractionBox(frame.InteractionBox);
+
 			foreach (Hand hand in frame.Hands)
 			{
 				// Draw wrist position
@@ -62,8 +64,8 @@ namespace LeapGestureRecognition.Util
 			_gl.LoadIdentity();
 			_gl.Color(color.R, color.G, color.B);
 
-			basePosition = MapLeapCoordinateToWorldSpace(basePosition);
-			topPosition = MapLeapCoordinateToWorldSpace(topPosition);
+			//basePosition = MapLeapCoordinateToWorldSpace(basePosition);
+			//topPosition = MapLeapCoordinateToWorldSpace(topPosition);
 
 			// Rotate to correct orientation (run along vector between basePosition and topBosition)
 			// Code inspired by Toby Smith: http://www.thjsmith.com/40/cylinder-between-two-points-opengl-c
@@ -86,11 +88,115 @@ namespace LeapGestureRecognition.Util
 			_gl.LoadIdentity();
 			_gl.Color(color.R, color.G, color.B);
 
-			position = MapLeapCoordinateToWorldSpace(position);
+			//position = MapLeapCoordinateToWorldSpace(position);
 			_gl.Translate(position.x, position.y, position.z);
 			
 			IntPtr sphereQuadric = _gl.NewQuadric(); //TODO: Define these somewhere else so new ones aren't initialized every time
 			_gl.Sphere(sphereQuadric, radius, 25, 25);
+		}
+
+		// Temp, just for drawing pyramid
+		private static float _rotation = 0;
+		public void DrawRotatingPyramid()
+		{
+			//  Load the identity matrix.
+			_gl.LoadIdentity();
+
+			//  Rotate around the Y axis.
+			_gl.Rotate(_rotation, 0.0f, 1.0f, 0.0f);
+
+			//  Draw a coloured pyramid.
+			_gl.Begin(OpenGL.GL_TRIANGLES);
+			_gl.Color(1.0f, 0.0f, 0.0f);
+			_gl.Vertex(0.0f, 1.0f, 0.0f);
+			_gl.Color(0.0f, 1.0f, 0.0f);
+			_gl.Vertex(-1.0f, -1.0f, 1.0f);
+			_gl.Color(0.0f, 0.0f, 1.0f);
+			_gl.Vertex(1.0f, -1.0f, 1.0f);
+			_gl.Color(1.0f, 0.0f, 0.0f);
+			_gl.Vertex(0.0f, 1.0f, 0.0f);
+			_gl.Color(0.0f, 0.0f, 1.0f);
+			_gl.Vertex(1.0f, -1.0f, 1.0f);
+			_gl.Color(0.0f, 1.0f, 0.0f);
+			_gl.Vertex(1.0f, -1.0f, -1.0f);
+			_gl.Color(1.0f, 0.0f, 0.0f);
+			_gl.Vertex(0.0f, 1.0f, 0.0f);
+			_gl.Color(0.0f, 1.0f, 0.0f);
+			_gl.Vertex(1.0f, -1.0f, -1.0f);
+			_gl.Color(0.0f, 0.0f, 1.0f);
+			_gl.Vertex(-1.0f, -1.0f, -1.0f);
+			_gl.Color(1.0f, 0.0f, 0.0f);
+			_gl.Vertex(0.0f, 1.0f, 0.0f);
+			_gl.Color(0.0f, 0.0f, 1.0f);
+			_gl.Vertex(-1.0f, -1.0f, -1.0f);
+			_gl.Color(0.0f, 1.0f, 0.0f);
+			_gl.Vertex(-1.0f, -1.0f, 1.0f);
+			_gl.End();
+
+			//  Nudge the rotation.
+			_rotation += 3.0f;
+		}
+
+		public void DrawInteractionBox(InteractionBox iBox)
+		{
+			_gl.LoadIdentity();
+
+			float tempX = iBox.Center.x - (iBox.Width / 2.0f);
+			float tempY = iBox.Center.y - (iBox.Height / 2.0f);
+			float tempZ = iBox.Center.z - (iBox.Depth / 2.0f);
+			Vector corner = new Vector(tempX, tempY, tempZ);
+
+			tempX += iBox.Width;
+			tempY += iBox.Height;
+			tempZ += iBox.Depth;
+			Vector oppositeCorner = new Vector(tempX, tempY, tempZ);
+
+			int scaleFactor = 10;
+			float xDist = scaleFactor * (iBox.Width / 2.0f);
+			float yDist = scaleFactor * (iBox.Height / 2.0f);
+			float zDist = scaleFactor * (iBox.Depth / 2.0f);
+			
+
+			_gl.Begin(OpenGL.GL_QUADS);
+			//_gl.Vertex(xDist, yDist, -zDist);
+			// Back face
+			_gl.Color(1.0f, 0.0f, 0.0f, 0.1f);
+			_gl.Vertex(-xDist, yDist, -zDist);
+			_gl.Vertex(-xDist, -yDist, -zDist);
+			_gl.Vertex(+xDist, -yDist, -zDist);
+			_gl.Vertex(xDist, yDist, -zDist);
+			// Left face
+			_gl.Color(0.0f, 1.0f, 0.0f, 0.1f);
+			_gl.Vertex(-xDist, yDist, -zDist);
+			_gl.Vertex(-xDist, -yDist, -zDist);
+			_gl.Vertex(-xDist, -yDist, zDist);
+			_gl.Vertex(-xDist, yDist, zDist);
+			// Right face
+			_gl.Color(0.0f, 0.0f, 1.0f, 0.1f);
+			_gl.Vertex(xDist, yDist, -zDist);
+			_gl.Vertex(xDist, -yDist, -zDist);
+			_gl.Vertex(xDist, -yDist, zDist);
+			_gl.Vertex(xDist, yDist, zDist);
+			// Bottom face
+			_gl.Color(0.0f, 1.0f, 1.0f, 0.1f); // cyan
+			_gl.Vertex(-xDist, -yDist, -zDist);
+			_gl.Vertex(-xDist, -yDist, zDist);
+			_gl.Vertex(xDist, -yDist, zDist);
+			_gl.Vertex(xDist, -yDist, -zDist);
+			// Top face
+			//_gl.Color(1.0f, 1.0f, 0.0f, 0.1f); // yellow
+			//_gl.Vertex(-xDist, yDist, -zDist);
+			//_gl.Vertex(-xDist, yDist, zDist);
+			//_gl.Vertex(xDist, yDist, zDist);
+			//_gl.Vertex(xDist, yDist, -zDist);
+			// Front face
+			//_gl.Color(1.0f, 0.0f, 1.0f, 0.1f); // magenta
+			//_gl.Vertex(-xDist, yDist, zDist);
+			//_gl.Vertex(-xDist, -yDist, zDist);
+			//_gl.Vertex(+xDist, -yDist, zDist);
+			//_gl.Vertex(xDist, yDist, zDist);
+
+			_gl.End();
 		}
 
 		public Vector MapLeapCoordinateToWorldSpace(Vector pos)

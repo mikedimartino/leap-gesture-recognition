@@ -37,6 +37,9 @@ namespace LeapGestureRecognition
 			//DataContext = new MainViewModel(new Controller(), new CustomLeapListener());
 			//_vm = (MainViewModel)this.DataContext;
 			Closing += _vm.OnClosing;
+			// Handle mouse wheel event on OpenGl window to zoom
+			openGLControl.MouseWheel += _vm.OnMouseWheel;
+			//openGLControl.MouseDown += _vm.OnMouseDown;
 			Height = 600; //SystemParameters.FullPrimaryScreenHeight;
 			Width = 800; //SystemParameters.FullPrimaryScreenWidth;
 		}

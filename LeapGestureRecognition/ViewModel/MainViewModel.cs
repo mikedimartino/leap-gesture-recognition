@@ -9,6 +9,7 @@ using Leap;
 using LeapGestureRecognition.Util;
 using System.ComponentModel;
 using LeapGestureRecognition.Model;
+using System.Windows.Input;
 
 namespace LeapGestureRecognition.ViewModel
 {
@@ -21,9 +22,22 @@ namespace LeapGestureRecognition.ViewModel
 			_grApp = new GRApp(gl, controller, listener);
 		}
 
-		public void OnClosing(object sender, CancelEventArgs cancelEventArgs)
+		public void OnClosing(object sender, CancelEventArgs e)
 		{
 			_grApp.OnClosing();
+		}
+
+		public void OnMouseWheel(object sender, MouseWheelEventArgs e)
+		{
+			_grApp.Zoom(e.Delta);
+		}
+
+		public void OnMouseDown(object sender, MouseButtonEventArgs e)
+		{
+			if (e.ChangedButton == MouseButton.Middle)
+			{
+				// TODO: Start moving the camera according to mouse movement.
+			}
 		}
 
 		public void DrawScene()

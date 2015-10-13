@@ -48,6 +48,9 @@ namespace LeapGestureRecognition.Model
 		{
 			//  Set the clear color.
 			_gl.ClearColor(0, 0, 0, 0);
+			// For making InteractionBox walls transparent
+			_gl.Enable(OpenGL.GL_BLEND);
+			_gl.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		public void HandleResize(double width, double height)
@@ -62,6 +65,11 @@ namespace LeapGestureRecognition.Model
 			_controller.RemoveListener(_listener);
 			_controller.Dispose();
 			_listener.Dispose();
+		}
+
+		public void Zoom(int delta)
+		{
+			_camera.Zoom(delta);
 		}
 		#endregion
 
