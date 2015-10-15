@@ -9,9 +9,9 @@ namespace LeapGestureRecognition.Util
 {
 	public static class Constants
 	{
-		public static double FingerTipRadius = 13;
-		public static double PalmSphereRadius = 20;
-		public static double WristSphereRadius = 20;
+		public static double FingerTipRadius = 3;
+		public static double PalmSphereRadius = 8;
+		public static double WristSphereRadius = 8;
 
 		public static Color DefaultColor = Colors.White;
 

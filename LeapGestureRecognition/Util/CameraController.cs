@@ -16,7 +16,7 @@ namespace LeapGestureRecognition.Util
 		public static float FOVY = 60.0f;
 		public static double NearClipPlaneDist = 0.01;
 		public static double FarClipPlaneDist = 10000;
-		public static Vector EyeDefault = new Vector(0.0f, 1054.91f, 2813.11f);
+		public static Vector EyeDefault = new Vector(0, 124, 332);
 		public static Vector AtDefault = new Vector(0, 0, 0);
 		public static Vector UpDefault = new Vector(0, 1, 0);
 		public static int ZoomScale = 50;

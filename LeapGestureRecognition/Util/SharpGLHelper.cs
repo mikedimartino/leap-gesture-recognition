@@ -151,7 +151,7 @@ namespace LeapGestureRecognition.Util
 			tempZ += iBox.Depth;
 			Vector oppositeCorner = new Vector(tempX, tempY, tempZ);
 
-			int scaleFactor = 10;
+			int scaleFactor = 1;
 			float xDist = scaleFactor * (iBox.Width / 2.0f);
 			float yDist = scaleFactor * (iBox.Height / 2.0f);
 			float zDist = scaleFactor * (iBox.Depth / 2.0f);
@@ -202,7 +202,7 @@ namespace LeapGestureRecognition.Util
 		public Vector MapLeapCoordinateToWorldSpace(Vector pos)
 		{
 			InteractionBox interactionBox = GRApp.CurrentFrame.InteractionBox;
-			pos = interactionBox.NormalizePoint(pos);
+			pos = interactionBox.NormalizePoint(pos, false);
 			pos.x = (2 * pos.x) - 1;
 			pos.y = (2 * pos.y) - 1;
 			pos.z = (2 * pos.z) - 1;
