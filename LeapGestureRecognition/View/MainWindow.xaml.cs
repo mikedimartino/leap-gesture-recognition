@@ -39,6 +39,10 @@ namespace LeapGestureRecognition
 			Closing += _vm.OnClosing;
 			// Handle mouse wheel event on OpenGl window to zoom
 			openGLControl.MouseWheel += _vm.OnMouseWheel;
+			KeyDown += _vm.OnKeyDown;
+			KeyUp += _vm.OnKeyUp;
+			//openGLControl.MouseMove += _vm.OnMouseMove;
+			//MouseUp += _vm.OnMouseUp;
 			//openGLControl.MouseDown += _vm.OnMouseDown;
 			Height = 600; //SystemParameters.FullPrimaryScreenHeight;
 			Width = 800; //SystemParameters.FullPrimaryScreenWidth;

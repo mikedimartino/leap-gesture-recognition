@@ -1,5 +1,5 @@
 ﻿using Leap;
-using LeapGestureRecognition.Model;
+using LeapGestureRecognition.ViewModel;
 using SharpGL;
 using System;
 using System.Collections.Generic;
@@ -25,7 +25,8 @@ namespace LeapGestureRecognition.Util
 
 		public void DrawFrame(Frame frame)
 		{
-			DrawInteractionBox(frame.InteractionBox);
+			//DrawInteractionBox(frame.InteractionBox);
+			DrawAxes();
 
 			foreach (Hand hand in frame.Hands)
 			{
@@ -57,6 +58,21 @@ namespace LeapGestureRecognition.Util
 					}
 				}
 			}
+		}
+
+		public void DrawAxes()
+		{
+			int axisLength = 300;
+			double axisRadius = 2;
+			Vector origin = new Vector(0,0,0);
+			Vector xAxis = new Vector(1,0,0);
+			Vector yAxis = new Vector(0,1,0);
+			Vector zAxis = new Vector(0,0,1);
+
+			// +X = red, +Y = green, +Z = blue
+			DrawCylinder(axisRadius, origin, xAxis * axisLength, Colors.Red);
+			DrawCylinder(axisRadius, origin, yAxis * axisLength, Colors.Green);
+			DrawCylinder(axisRadius, origin, zAxis * axisLength, Colors.Blue);
 		}
 
 		public void DrawCylinder(double radius, Vector basePosition, Vector topPosition, Color color)
@@ -201,7 +217,7 @@ namespace LeapGestureRecognition.Util
 
 		public Vector MapLeapCoordinateToWorldSpace(Vector pos)
 		{
-			InteractionBox interactionBox = GRApp.CurrentFrame.InteractionBox;
+			InteractionBox interactionBox = MainViewModel.CurrentFrame.InteractionBox;
 			pos = interactionBox.NormalizePoint(pos, false);
 			pos.x = (2 * pos.x) - 1;
 			pos.y = (2 * pos.y) - 1;
