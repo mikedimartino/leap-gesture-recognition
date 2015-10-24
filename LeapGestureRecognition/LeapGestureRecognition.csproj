@@ -77,7 +77,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Util\CameraController.cs" />
+    <Compile Include="Model\CustomMenuItem.cs" />
+    <Compile Include="Model\Camera.cs" />
     <Compile Include="Util\Constants.cs" />
     <Compile Include="Util\CustomLeapListener.cs" />
     <Compile Include="Util\SharpGLHelper.cs" />
@@ -120,9 +121,7 @@
     </None>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Model\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy /yr "$(LEAP_SDK)\lib\x64\Leap.dll" "$(TargetDir)"

@@ -16,6 +16,7 @@ using SharpGL;
 using LeapGestureRecognition.ViewModel;
 using Leap;
 using LeapGestureRecognition.Util;
+using LeapGestureRecognition.Model;
 
 namespace LeapGestureRecognition
 {
@@ -32,7 +33,7 @@ namespace LeapGestureRecognition
 		public MainWindow()
 		{
 			InitializeComponent();
-			_vm = new MainViewModel(openGLControl.OpenGL, new Controller(), new CustomLeapListener());
+			_vm = new MainViewModel(openGLControl.OpenGL, outputWindowScrollViewer, new Controller(), new CustomLeapListener());
 			DataContext = _vm;
 			//DataContext = new MainViewModel(new Controller(), new CustomLeapListener());
 			//_vm = (MainViewModel)this.DataContext;
@@ -41,11 +42,15 @@ namespace LeapGestureRecognition
 			openGLControl.MouseWheel += _vm.OnMouseWheel;
 			KeyDown += _vm.OnKeyDown;
 			KeyUp += _vm.OnKeyUp;
-			//openGLControl.MouseMove += _vm.OnMouseMove;
-			//MouseUp += _vm.OnMouseUp;
-			//openGLControl.MouseDown += _vm.OnMouseDown;
+			openGLControl.MouseMove += _vm.OnMouseMove;
+			MouseUp += _vm.OnMouseUp;
+			openGLControl.MouseDown += _vm.OnMouseDown;
+			openGLControl.MouseLeave += _vm.OnMouseLeaveOpenGLWindow;
+			openGLControl.MouseEnter += _vm.OnMouseEnterOpenGLWindow;
+			
 			Height = 600; //SystemParameters.FullPrimaryScreenHeight;
 			Width = 800; //SystemParameters.FullPrimaryScreenWidth;
+			
 		}
 
 		/// <summary>
@@ -77,6 +82,18 @@ namespace LeapGestureRecognition
 		{
 			//  TODO: Set the projection matrix here.
 			_vm.HandleResize(Width, Height);
+		}
+
+
+		private void MenuItem_Click(object sender, RoutedEventArgs e)
+		{
+			CustomMenuItem clickedItem = ((MenuItem)e.OriginalSource).Tag as CustomMenuItem;
+			if (clickedItem == null) return;
+			try
+			{
+				clickedItem.Command.Execute(null);
+			}
+			catch {}
 		}
 
 	}

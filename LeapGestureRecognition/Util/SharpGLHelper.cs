@@ -23,11 +23,8 @@ namespace LeapGestureRecognition.Util
 		}
 
 
-		public void DrawFrame(Frame frame)
+		public void DrawFrame(Frame frame, bool showArms)
 		{
-			//DrawInteractionBox(frame.InteractionBox);
-			DrawAxes();
-
 			foreach (Hand hand in frame.Hands)
 			{
 				// Draw wrist position
@@ -56,6 +53,42 @@ namespace LeapGestureRecognition.Util
 						bone = finger.Bone(boneType);
 						DrawCylinder(Constants.FingerTipRadius * 0.7, bone.PrevJoint, bone.NextJoint, Constants.BoneColors[boneType]);
 					}
+				}
+
+				// Draw base of hand (connects the pinky carpal bone to thumb carpal bone)
+				Finger pinky = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_PINKY).FirstOrDefault();
+				Finger thumb = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_THUMB).FirstOrDefault();
+				Vector pinkyBase = pinky.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint;
+				Vector thumbBase = thumb.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint;
+				DrawCylinder(Constants.FingerTipRadius, pinkyBase, thumbBase, Colors.White);
+
+				if (showArms)
+				{
+					// Draw arm
+					// Draw elbow
+					Vector elbowPosition = hand.Arm.ElbowPosition;
+					DrawSphere(elbowPosition, Constants.WristSphereRadius, Colors.White);
+					// Draw center of forearm
+					Vector centerForearmPosition = hand.Arm.Center;
+					DrawSphere(centerForearmPosition, Constants.WristSphereRadius, Colors.White);
+
+					float forearmWidth = pinkyBase.DistanceTo(thumbBase);
+					// Draw two cylinders for arms (Ulna - pinky side, Radius - thumb side)
+					Vector ulnaBase = hand.Arm.WristPosition + ((forearmWidth / 2) * hand.Arm.Basis.xBasis);
+					Vector ulnaTop = hand.Arm.ElbowPosition + ((forearmWidth / 2) * hand.Arm.Basis.xBasis);
+					DrawSphere(ulnaBase, Constants.FingerTipRadius * 1.2, Colors.CadetBlue);
+					DrawSphere(ulnaTop, Constants.FingerTipRadius * 1.2, Colors.CadetBlue);
+					DrawCylinder(Constants.FingerTipRadius, ulnaBase, ulnaTop, Colors.White);
+
+					Vector radiusBase = hand.Arm.WristPosition - ((forearmWidth / 2) * hand.Arm.Basis.xBasis);
+					Vector radiusTop = hand.Arm.ElbowPosition - ((forearmWidth / 2) * hand.Arm.Basis.xBasis);
+					DrawSphere(radiusBase, Constants.FingerTipRadius * 1.2, Colors.CadetBlue);
+					DrawSphere(radiusTop, Constants.FingerTipRadius * 1.2, Colors.CadetBlue);
+					DrawCylinder(Constants.FingerTipRadius, radiusBase, radiusTop, Colors.White);
+
+					// Connect the forearm bones at top and bottom
+					DrawCylinder(Constants.FingerTipRadius, ulnaBase, radiusBase, Colors.White);
+					DrawCylinder(Constants.FingerTipRadius, ulnaTop, radiusTop, Colors.White);
 				}
 			}
 		}

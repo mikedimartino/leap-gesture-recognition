@@ -3,68 +3,48 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="SharpGL WPF Application" Height="600" Width="800" 
         xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF"
-				DataContext="{Binding MainViewModel}"
->
+				DataContext="{Binding MainViewModel}">
+	<Window.Resources>
+		<BooleanToVisibilityConverter x:Key="BoolToVis" />
+	</Window.Resources>
 
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
-			<RowDefinition />
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="100" />
 		</Grid.RowDefinitions>
 
-		<!-- Top toolbar menu-->
-		<StackPanel Background="AliceBlue" Grid.Row="0" Orientation="Horizontal">
-			<StackPanel.Resources>
-				<Style TargetType="TextBlock">
-					<Setter Property="Margin" Value="10,5,0,5" />
+		<Menu Grid.Row="0" Padding="2,4" ItemsSource="{Binding MenuBar}">
+			<Menu.ItemContainerStyle>
+				<Style TargetType="MenuItem">
+					<Setter Property="Command" Value="{Binding Command}" />
+					<Setter Property="CommandParameter" Value="{Binding CommandParameter}" />
+					<Setter Property="Header" Value="{Binding Header}" />
+					<Setter Property="ItemsSource" Value="{Binding Items}"/>
 				</Style>
-			</StackPanel.Resources>
+			</Menu.ItemContainerStyle>
+		</Menu>
+		<TextBlock Grid.Row="0" Text="{Binding SelectedMenuItem}" VerticalAlignment="Center" HorizontalAlignment="Center" />
 
-			<TextBlock>Option 1</TextBlock>
-			<TextBlock>Option 2</TextBlock>
-			<TextBlock>Option 3</TextBlock>
-			<TextBlock>Option 4</TextBlock>
-		</StackPanel>
+		<!-- SharpGL window-->
+		<sharpGL:OpenGLControl 
+				Name="openGLControl" OpenGLDraw="openGLControl_OpenGLDraw" 
+				OpenGLInitialized="openGLControl_OpenGLInitialized" Resized="openGLControl_Resized"
+				DrawFPS="True" RenderContextType="FBO" FrameRate="20" 
+				Grid.Row="1" />
+		
+		<GridSplitter Grid.Row="2" Height="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#444444" />
+		
+		<!-- Output window -->
+		<ScrollViewer Grid.Row="3" Name="outputWindowScrollViewer" Background="#DADADA" VerticalScrollBarVisibility="Visible" 
+									Visibility="{Binding ShowOutputWindow, Converter={StaticResource BoolToVis}}">
+			<TextBox IsReadOnly="True" Text="{Binding OutputWindowContent}" TextWrapping="Wrap" Background="Transparent" VerticalAlignment="Stretch" />
 
-		<!-- Left sidebar, SharpGL window, and output window -->
-		<Grid Grid.Row="1">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="1*" />
-				<ColumnDefinition Width="10*" />
-			</Grid.ColumnDefinitions>
-			<Grid.RowDefinitions>
-				<RowDefinition Height="6*" />
-				<RowDefinition Height="1*" />
-			</Grid.RowDefinitions>
+			
+		</ScrollViewer>
 
-			<!-- Left sidebar -->
-			<StackPanel Background="RosyBrown" Orientation="Vertical" Grid.Column="0" Grid.RowSpan="2" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-				<StackPanel.Resources>
-					<Style TargetType="TextBlock">
-						<Setter Property="Margin" Value="10,5,0,5" />
-					</Style>
-				</StackPanel.Resources>
-
-				<TextBlock>Item 1</TextBlock>
-				<TextBlock>Item 2</TextBlock>
-				<TextBlock>Item 3</TextBlock>
-				<TextBlock>Item 4</TextBlock>
-				<TextBlock>Item 5</TextBlock>
-				<TextBlock>Item 6</TextBlock>
-			</StackPanel>
-
-			<!-- SharpGL window-->
-			<!-- The OpenGL control provides a OpenGL drawing surface. -->
-			<sharpGL:OpenGLControl 
-            Name="openGLControl" OpenGLDraw="openGLControl_OpenGLDraw" 
-            OpenGLInitialized="openGLControl_OpenGLInitialized" Resized="openGLControl_Resized"
-            DrawFPS="True" RenderContextType="FBO" FrameRate="20"
-				Grid.Column="1" Grid.Row="0"/>
-
-			<!-- Output window -->
-			<TextBlock Background="MediumVioletRed" Grid.Column="1" Grid.Row="1">The output window content should be displayed here</TextBlock>
-
-		</Grid>
 
 	</Grid>
 </Window>
