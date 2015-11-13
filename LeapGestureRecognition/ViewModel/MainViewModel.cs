@@ -260,6 +260,9 @@ namespace LeapGestureRecognition.ViewModel
 		{
 			//  Set the clear color.
 			_gl.ClearColor(0, 0, 0, 0);
+
+			_gl.Enable(OpenGL.GL_BLEND);
+			_gl.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		public void HandleResize(double width, double height)

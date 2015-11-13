@@ -27,22 +27,28 @@ namespace LeapGestureRecognition.Util
 		{
 			foreach (Hand hand in frame.Hands)
 			{
+				float opacity = hand.Confidence;
+
 				// Draw wrist position
-				DrawSphere(hand.WristPosition, Constants.WristSphereRadius, Colors.White);
+				DrawSphere(hand.WristPosition, Constants.WristSphereRadius, Colors.White, opacity);
 				// Draw palm position
-				DrawSphere(hand.PalmPosition, Constants.PalmSphereRadius, Colors.White);
+				DrawSphere(hand.PalmPosition, Constants.PalmSphereRadius, Colors.White, opacity);
 				// Connect wrist to palm
 				//DrawCylinder(Constants.WristSphereRadius * 0.75, wristPos, palmPos);
-				
+
 				foreach (Finger finger in hand.Fingers)
 				{
+					// Finger ID = HandID + (0-4) // Where + is concatenation
+					//	0 = Thumb, 1 = Index, ..., 4 = Pinky // Can get this with finger.Id % 10
+					//if (finger.Id % 10 == 4) continue;
+
 					// Draw finger tips
-					DrawSphere(finger.TipPosition, Constants.FingerTipRadius, Colors.White);
+					DrawSphere(finger.TipPosition, Constants.FingerTipRadius, Colors.White, opacity);
 
 					// Draw joints
-					foreach (Finger.FingerJoint jointType in (Finger.FingerJoint[]) Enum.GetValues(typeof(Finger.FingerJoint)))
+					foreach (Finger.FingerJoint jointType in (Finger.FingerJoint[])Enum.GetValues(typeof(Finger.FingerJoint)))
 					{
-						DrawSphere(finger.JointPosition(jointType), Constants.FingerTipRadius, Colors.White);
+						DrawSphere(finger.JointPosition(jointType), Constants.FingerTipRadius, Colors.White, opacity);
 					}
 
 					// Draw bones
@@ -51,7 +57,7 @@ namespace LeapGestureRecognition.Util
 					{
 						//if (boneType == Bone.BoneType.TYPE_METACARPAL) continue;
 						bone = finger.Bone(boneType);
-						DrawCylinder(Constants.FingerTipRadius * 0.7, bone.PrevJoint, bone.NextJoint, Constants.BoneColors[boneType]);
+						DrawCylinder(Constants.FingerTipRadius * 0.7, bone.PrevJoint, bone.NextJoint, Constants.BoneColors[boneType], opacity);
 					}
 				}
 
@@ -60,35 +66,35 @@ namespace LeapGestureRecognition.Util
 				Finger thumb = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_THUMB).FirstOrDefault();
 				Vector pinkyBase = pinky.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint;
 				Vector thumbBase = thumb.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint;
-				DrawCylinder(Constants.FingerTipRadius, pinkyBase, thumbBase, Colors.White);
+				DrawCylinder(Constants.FingerTipRadius, pinkyBase, thumbBase, Colors.White, opacity);
 
 				if (showArms)
 				{
 					// Draw arm
 					// Draw elbow
 					Vector elbowPosition = hand.Arm.ElbowPosition;
-					DrawSphere(elbowPosition, Constants.WristSphereRadius, Colors.White);
+					DrawSphere(elbowPosition, Constants.WristSphereRadius, Colors.White, opacity);
 					// Draw center of forearm
 					Vector centerForearmPosition = hand.Arm.Center;
-					DrawSphere(centerForearmPosition, Constants.WristSphereRadius, Colors.White);
+					DrawSphere(centerForearmPosition, Constants.WristSphereRadius, Colors.White, opacity);
 
 					float forearmWidth = pinkyBase.DistanceTo(thumbBase);
 					// Draw two cylinders for arms (Ulna - pinky side, Radius - thumb side)
 					Vector ulnaBase = hand.Arm.WristPosition + ((forearmWidth / 2) * hand.Arm.Basis.xBasis);
 					Vector ulnaTop = hand.Arm.ElbowPosition + ((forearmWidth / 2) * hand.Arm.Basis.xBasis);
-					DrawSphere(ulnaBase, Constants.FingerTipRadius * 1.2, Colors.CadetBlue);
-					DrawSphere(ulnaTop, Constants.FingerTipRadius * 1.2, Colors.CadetBlue);
-					DrawCylinder(Constants.FingerTipRadius, ulnaBase, ulnaTop, Colors.White);
+					DrawSphere(ulnaBase, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
+					DrawSphere(ulnaTop, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
+					DrawCylinder(Constants.FingerTipRadius, ulnaBase, ulnaTop, Colors.White, opacity);
 
 					Vector radiusBase = hand.Arm.WristPosition - ((forearmWidth / 2) * hand.Arm.Basis.xBasis);
 					Vector radiusTop = hand.Arm.ElbowPosition - ((forearmWidth / 2) * hand.Arm.Basis.xBasis);
-					DrawSphere(radiusBase, Constants.FingerTipRadius * 1.2, Colors.CadetBlue);
-					DrawSphere(radiusTop, Constants.FingerTipRadius * 1.2, Colors.CadetBlue);
-					DrawCylinder(Constants.FingerTipRadius, radiusBase, radiusTop, Colors.White);
+					DrawSphere(radiusBase, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
+					DrawSphere(radiusTop, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
+					DrawCylinder(Constants.FingerTipRadius, radiusBase, radiusTop, Colors.White, opacity);
 
 					// Connect the forearm bones at top and bottom
-					DrawCylinder(Constants.FingerTipRadius, ulnaBase, radiusBase, Colors.White);
-					DrawCylinder(Constants.FingerTipRadius, ulnaTop, radiusTop, Colors.White);
+					DrawCylinder(Constants.FingerTipRadius, ulnaBase, radiusBase, Colors.White, opacity);
+					DrawCylinder(Constants.FingerTipRadius, ulnaTop, radiusTop, Colors.White, opacity);
 				}
 			}
 		}
@@ -103,18 +109,15 @@ namespace LeapGestureRecognition.Util
 			Vector zAxis = new Vector(0,0,1);
 
 			// +X = red, +Y = green, +Z = blue
-			DrawCylinder(axisRadius, origin, xAxis * axisLength, Colors.Red);
-			DrawCylinder(axisRadius, origin, yAxis * axisLength, Colors.Green);
-			DrawCylinder(axisRadius, origin, zAxis * axisLength, Colors.Blue);
+			DrawCylinder(axisRadius, origin, xAxis * axisLength, Colors.Red, 1.0f);
+			DrawCylinder(axisRadius, origin, yAxis * axisLength, Colors.Green, 1.0f);
+			DrawCylinder(axisRadius, origin, zAxis * axisLength, Colors.Blue, 1.0f);
 		}
 
-		public void DrawCylinder(double radius, Vector basePosition, Vector topPosition, Color color)
+		public void DrawCylinder(double radius, Vector basePosition, Vector topPosition, Color color, float opacity)
 		{
 			_gl.LoadIdentity();
-			_gl.Color(color.R, color.G, color.B);
-
-			//basePosition = MapLeapCoordinateToWorldSpace(basePosition);
-			//topPosition = MapLeapCoordinateToWorldSpace(topPosition);
+			_gl.Color(color.R, color.G, color.B, opacity);
 
 			// Rotate to correct orientation (run along vector between basePosition and topBosition)
 			// Code inspired by Toby Smith: http://www.thjsmith.com/40/cylinder-between-two-points-opengl-c
@@ -132,11 +135,10 @@ namespace LeapGestureRecognition.Util
 		}
 
 
-		public void DrawSphere(Vector position, double radius, Color color) // Leap Vector
+		public void DrawSphere(Vector position, double radius, Color color, float opacity) 
 		{
 			_gl.LoadIdentity();
-			_gl.Color(color.R, color.G, color.B);
-
+			_gl.Color(color.R, color.G, color.B, opacity);
 			//position = MapLeapCoordinateToWorldSpace(position);
 			_gl.Translate(position.x, position.y, position.z);
 			
