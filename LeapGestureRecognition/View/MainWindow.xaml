@@ -28,12 +28,31 @@
 		</Menu>
 		<TextBlock Grid.Row="0" Text="{Binding SelectedMenuItem}" VerticalAlignment="Center" HorizontalAlignment="Center" />
 
-		<!-- SharpGL window-->
-		<sharpGL:OpenGLControl 
+		<Grid Grid.Row="1">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="1*" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="9*" />
+			</Grid.ColumnDefinitions>
+
+			<ListBox ItemsSource="{Binding StaticGestures}" Grid.Column="0">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Name}" />
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+
+			<GridSplitter Grid.Column="1" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#444444" />
+
+			<sharpGL:OpenGLControl 
 				Name="openGLControl" OpenGLDraw="openGLControl_OpenGLDraw" 
 				OpenGLInitialized="openGLControl_OpenGLInitialized" Resized="openGLControl_Resized"
 				DrawFPS="True" RenderContextType="FBO" FrameRate="20" 
-				Grid.Row="1" />
+				Grid.Column="2" />
+
+		</Grid>
+		
 		
 		<GridSplitter Grid.Row="2" Height="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#444444" />
 		

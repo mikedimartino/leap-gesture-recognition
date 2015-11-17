@@ -25,6 +25,7 @@ namespace LeapGestureRecognition.ViewModel
 
 		private CustomLeapListener _listener;
 		private SharpGLHelper _glHelper;
+		private GestureProvider _gestureProvider;
 
 		public MainViewModel(OpenGL gl, System.Windows.Controls.ScrollViewer scrollViewer, Controller controller, CustomLeapListener listener)
 		{
@@ -35,7 +36,9 @@ namespace LeapGestureRecognition.ViewModel
 			_glHelper = new SharpGLHelper(_gl);
 			_camera = new Camera(_gl);
 			_scrollViewer = scrollViewer;
+			_gestureProvider = new GestureProvider(Constants.SQLiteFileName);
 
+			loadGestures();
 			initMenuBar();
 		}
 
@@ -57,6 +60,18 @@ namespace LeapGestureRecognition.ViewModel
 				OnPropertyChanged("OutputWindowContent");
 			}
 		}
+
+		private ObservableCollection<SingleHandGestureStatic> _staticGestures = new ObservableCollection<SingleHandGestureStatic>();
+		public ObservableCollection<SingleHandGestureStatic> StaticGestures 
+		{
+			get { return _staticGestures; }
+			set
+			{
+				_staticGestures = value;
+				OnPropertyChanged("StaticGestures");
+			}
+		}
+
 
 		// Options
 		private bool _showAxes = true;
@@ -82,6 +97,13 @@ namespace LeapGestureRecognition.ViewModel
 		{
 			get { return _showArms; }
 			set { _showArms = value; }
+		}
+
+		private bool _showGestureLibrary = true;
+		public bool ShowGestureLibrary
+		{
+			get { return _showGestureLibrary; }
+			set { _showGestureLibrary = value; }
 		}
 		// END Options
 		#endregion
@@ -216,7 +238,24 @@ namespace LeapGestureRecognition.ViewModel
 				case Key.RightCtrl:
 					_camera.Roll = -1;
 					break;
+
+				case Key.A:
+					takeSnapshotOfHands();
+					break;
 			}
+		}
+
+		private SingleHandGestureStatic CurrentGesture = null;
+
+		//int _gestureCount = 1;
+		private void takeSnapshotOfHands()
+		{
+			Hand hand = _controller.Frame().Hands.FirstOrDefault();
+			if (hand == null) return;
+			
+			//CurrentGesture = new SingleHandGestureStatic(hand, "test gesture " + _gestureCount++);
+			//_gestureProvider.SaveGesture(CurrentGesture);
+			//_gestureProvider.TestJson(hand);
 		}
 
 		public void OnKeyUp(object sender, KeyEventArgs e)
@@ -247,7 +286,9 @@ namespace LeapGestureRecognition.ViewModel
 			if (ShowAxes) _glHelper.DrawAxes();
 
 			CurrentFrame = _controller.Frame();
-			_glHelper.DrawFrame(CurrentFrame, ShowArms);
+			//_glHelper.DrawFrame(CurrentFrame, ShowArms);
+
+			if (CurrentGesture != null) _glHelper.DrawHand(CurrentGesture);
 		}
 
 		public void WriteToOutputWindow(string message)
@@ -308,6 +349,17 @@ namespace LeapGestureRecognition.ViewModel
 			MenuBar.Add(resetCamera);
 			#endregion
 
+			#region SHOW GESTURE LIBRARY
+			CustomMenuItem showGestureLibrary = new CustomMenuItem("Show Gesture Library");
+			showGestureLibrary.Command = new CustomCommand(() => ShowGestureLibrary = !ShowGestureLibrary);
+			MenuBar.Add(resetCamera);
+			#endregion
+
+		}
+
+		private void loadGestures()
+		{
+			StaticGestures = _gestureProvider.LoadAllGestures();
 		}
 		#endregion
 

@@ -22,5 +22,7 @@ namespace LeapGestureRecognition.Util
 			{ Bone.BoneType.TYPE_METACARPAL, Colors.Green },
 			{ Bone.BoneType.TYPE_PROXIMAL, Colors.Yellow },
 		};
+
+		public static string SQLiteFileName = "gesture_store.sqlite";
 	}
 }

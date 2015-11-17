@@ -1,4 +1,5 @@
 ﻿using Leap;
+using LeapGestureRecognition.Model;
 using LeapGestureRecognition.ViewModel;
 using SharpGL;
 using System;
@@ -135,7 +136,7 @@ namespace LeapGestureRecognition.Util
 		}
 
 
-		public void DrawSphere(Vector position, double radius, Color color, float opacity) 
+		public void DrawSphere(Vector position, double radius, Color color, float opacity = 1) 
 		{
 			_gl.LoadIdentity();
 			_gl.Color(color.R, color.G, color.B, opacity);
@@ -188,78 +189,16 @@ namespace LeapGestureRecognition.Util
 			_rotation += 3.0f;
 		}
 
-		public void DrawInteractionBox(InteractionBox iBox)
+		public void DrawHand(SingleHandGestureStatic hand) //TODO: Implement!
 		{
-			_gl.LoadIdentity();
-
-			float tempX = iBox.Center.x - (iBox.Width / 2.0f);
-			float tempY = iBox.Center.y - (iBox.Height / 2.0f);
-			float tempZ = iBox.Center.z - (iBox.Depth / 2.0f);
-			Vector corner = new Vector(tempX, tempY, tempZ);
-
-			tempX += iBox.Width;
-			tempY += iBox.Height;
-			tempZ += iBox.Depth;
-			Vector oppositeCorner = new Vector(tempX, tempY, tempZ);
-
-			int scaleFactor = 1;
-			float xDist = scaleFactor * (iBox.Width / 2.0f);
-			float yDist = scaleFactor * (iBox.Height / 2.0f);
-			float zDist = scaleFactor * (iBox.Depth / 2.0f);
-			
-
-			_gl.Begin(OpenGL.GL_QUADS);
-			//_gl.Vertex(xDist, yDist, -zDist);
-			// Back face
-			_gl.Color(1.0f, 0.0f, 0.0f, 0.1f);
-			_gl.Vertex(-xDist, yDist, -zDist);
-			_gl.Vertex(-xDist, -yDist, -zDist);
-			_gl.Vertex(+xDist, -yDist, -zDist);
-			_gl.Vertex(xDist, yDist, -zDist);
-			// Left face
-			_gl.Color(0.0f, 1.0f, 0.0f, 0.1f);
-			_gl.Vertex(-xDist, yDist, -zDist);
-			_gl.Vertex(-xDist, -yDist, -zDist);
-			_gl.Vertex(-xDist, -yDist, zDist);
-			_gl.Vertex(-xDist, yDist, zDist);
-			// Right face
-			_gl.Color(0.0f, 0.0f, 1.0f, 0.1f);
-			_gl.Vertex(xDist, yDist, -zDist);
-			_gl.Vertex(xDist, -yDist, -zDist);
-			_gl.Vertex(xDist, -yDist, zDist);
-			_gl.Vertex(xDist, yDist, zDist);
-			// Bottom face
-			_gl.Color(0.0f, 1.0f, 1.0f, 0.1f); // cyan
-			_gl.Vertex(-xDist, -yDist, -zDist);
-			_gl.Vertex(-xDist, -yDist, zDist);
-			_gl.Vertex(xDist, -yDist, zDist);
-			_gl.Vertex(xDist, -yDist, -zDist);
-			// Top face
-			//_gl.Color(1.0f, 1.0f, 0.0f, 0.1f); // yellow
-			//_gl.Vertex(-xDist, yDist, -zDist);
-			//_gl.Vertex(-xDist, yDist, zDist);
-			//_gl.Vertex(xDist, yDist, zDist);
-			//_gl.Vertex(xDist, yDist, -zDist);
-			// Front face
-			//_gl.Color(1.0f, 0.0f, 1.0f, 0.1f); // magenta
-			//_gl.Vertex(-xDist, yDist, zDist);
-			//_gl.Vertex(-xDist, -yDist, zDist);
-			//_gl.Vertex(+xDist, -yDist, zDist);
-			//_gl.Vertex(xDist, yDist, zDist);
-
-			_gl.End();
-		}
-
-		public Vector MapLeapCoordinateToWorldSpace(Vector pos)
-		{
-			InteractionBox interactionBox = MainViewModel.CurrentFrame.InteractionBox;
-			pos = interactionBox.NormalizePoint(pos, false);
-			pos.x = (2 * pos.x) - 1;
-			pos.y = (2 * pos.y) - 1;
-			pos.z = (2 * pos.z) - 1;
-
-			int scaleFactor = 500;
-			return scaleFactor * pos;
+			//DrawSphere(hand.Center, Constants.PalmSphereRadius, Colors.Red);
+			//foreach (FingerJointPositions finger in hand.Fingers.Values)
+			//{
+			//	DrawSphere(hand.PalmNormal - finger.McpPos, Constants.FingerTipRadius, Colors.White);
+			//	DrawSphere(hand.PalmNormal - finger.PipPos, Constants.FingerTipRadius, Colors.White);
+			//	DrawSphere(hand.PalmNormal - finger.DipPos, Constants.FingerTipRadius, Colors.White);
+			//	DrawSphere(hand.PalmNormal - finger.TipPos, Constants.FingerTipRadius, Colors.White);
+			//} 
 		}
 
 	}
