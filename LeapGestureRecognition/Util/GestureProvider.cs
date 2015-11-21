@@ -66,6 +66,12 @@ namespace LeapGestureRecognition.Util
 			}
 		}
 
+		public void SaveGesture(string name, SingleHandGestureStatic gesture)
+		{
+			gesture.Name = name;
+			SaveGesture(gesture);
+		}
+
 		public SingleHandGestureStatic LoadGesture(string name)
 		{
 			string json;

@@ -115,7 +115,7 @@ namespace LeapGestureRecognition.Util
 			DrawCylinder(axisRadius, origin, zAxis * axisLength, Colors.Blue, 1.0f);
 		}
 
-		public void DrawCylinder(double radius, Vector basePosition, Vector topPosition, Color color, float opacity)
+		public void DrawCylinder(double radius, Vector basePosition, Vector topPosition, Color color, float opacity = 1)
 		{
 			_gl.LoadIdentity();
 			_gl.Color(color.R, color.G, color.B, opacity);
@@ -135,16 +135,25 @@ namespace LeapGestureRecognition.Util
 			_gl.Cylinder(cylQuadric, radius, radius, height, 10, 10);
 		}
 
+		public void DrawCylinder(double radius, LGR_Vec3 basePosition, LGR_Vec3 topPosition, Color color, float opacity = 1)
+		{
+			DrawCylinder(radius, basePosition.ToLeapVector(), topPosition.ToLeapVector(), color, opacity);
+		}
+
 
 		public void DrawSphere(Vector position, double radius, Color color, float opacity = 1) 
 		{
 			_gl.LoadIdentity();
 			_gl.Color(color.R, color.G, color.B, opacity);
-			//position = MapLeapCoordinateToWorldSpace(position);
 			_gl.Translate(position.x, position.y, position.z);
 			
 			IntPtr sphereQuadric = _gl.NewQuadric(); //TODO: Define these somewhere else so new ones aren't initialized every time
 			_gl.Sphere(sphereQuadric, radius, 25, 25);
+		}
+
+		public void DrawSphere(LGR_Vec3 position, double radius, Color color, float opacity = 1)
+		{
+			DrawSphere(position.ToLeapVector(), radius, color, opacity);
 		}
 
 		// Temp, just for drawing pyramid
@@ -189,8 +198,17 @@ namespace LeapGestureRecognition.Util
 			_rotation += 3.0f;
 		}
 
-		public void DrawHand(SingleHandGestureStatic hand) //TODO: Implement!
+		public void DrawGesture(SingleHandGestureStatic gesture) //TODO: Implement!
 		{
+			DrawSphere(gesture.Center, Constants.PalmSphereRadius, Colors.Red);
+			foreach (var position in gesture.AllFingerJointsForDrawing)
+			{
+				DrawSphere(position, Constants.FingerTipRadius, Colors.White);
+			} 
+				
+				
+				
+				
 			//DrawSphere(hand.Center, Constants.PalmSphereRadius, Colors.Red);
 			//foreach (FingerJointPositions finger in hand.Fingers.Values)
 			//{

@@ -44,20 +44,43 @@ namespace LeapGestureRecognition.Model
 		[DataMember]
 		public Dictionary<Finger.FingerType, Dictionary<Finger.FingerJoint, LGR_Vec3>> FingerJointPositions;
 
+		private List<LGR_Vec3> _AllFingerJointsForDrawing;
+		public List<LGR_Vec3> AllFingerJointsForDrawing
+		{
+			get
+			{
+				if (_AllFingerJointsForDrawing != null) return _AllFingerJointsForDrawing;
 
+				_AllFingerJointsForDrawing = new List<LGR_Vec3>();
+				foreach (var finger in FingerJointPositions.Values)
+				{
+					foreach (var jointPos in finger.Values)
+					{
+						// I'm storing the position relative to the palm normal. 
+						// Need to adjust for drawing.
+						var adjustedJointPos = jointPos - PalmNormal;
+						_AllFingerJointsForDrawing.Add(adjustedJointPos);
+					}
+				}
+				return _AllFingerJointsForDrawing;
+			}
+		}
+
+		#region Private Methods
 		private Dictionary<Finger.FingerType, Dictionary<Finger.FingerJoint, LGR_Vec3>> getFingerJointPositions(Hand hand)
 		{
-			Dictionary<Finger.FingerType, Dictionary<Finger.FingerJoint, LGR_Vec3>> fjp = new Dictionary<Finger.FingerType, Dictionary<Finger.FingerJoint, LGR_Vec3>>();
-			foreach (Finger finger in hand.Fingers)
+			var fjp = new Dictionary<Finger.FingerType, Dictionary<Finger.FingerJoint, LGR_Vec3>>();
+			foreach (var finger in hand.Fingers)
 			{
 				fjp.Add(finger.Type, new Dictionary<Finger.FingerJoint, LGR_Vec3>());
-				foreach (Finger.FingerJoint jointType in (Finger.FingerJoint[])Enum.GetValues(typeof(Finger.FingerJoint)))
+				foreach (var jointType in (Finger.FingerJoint[])Enum.GetValues(typeof(Finger.FingerJoint)))
 				{
 					fjp[finger.Type].Add(jointType, new LGR_Vec3(finger.JointPosition(jointType)));
 				}
 			}
 			return fjp;
 		}
+		#endregion
 
 	}
 }

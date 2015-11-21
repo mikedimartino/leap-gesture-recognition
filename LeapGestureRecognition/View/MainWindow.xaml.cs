@@ -83,18 +83,32 @@ namespace LeapGestureRecognition
 			//  TODO: Set the projection matrix here.
 			_vm.HandleResize(Width, Height);
 		}
+		
 
-
-		private void MenuItem_Click(object sender, RoutedEventArgs e)
+		private void ViewGesture(object sender, RoutedEventArgs e)
 		{
-			CustomMenuItem clickedItem = ((MenuItem)e.OriginalSource).Tag as CustomMenuItem;
-			if (clickedItem == null) return;
-			try
-			{
-				clickedItem.Command.Execute(null);
-			}
-			catch {}
+			SingleHandGestureStatic gesture = (SingleHandGestureStatic) (e.Source as FrameworkElement).Tag;
+			_vm.DisplayGesture(gesture);
 		}
 
+		private void GestureMouseDown(object sender, MouseButtonEventArgs e)
+		{
+			if (e.ClickCount >= 2) // Double click
+			{
+				SingleHandGestureStatic gesture = (SingleHandGestureStatic)(e.Source as FrameworkElement).Tag;
+				_vm.DisplayGesture(gesture);
+			}
+		}
+
+		private void DeleteGesture(object sender, RoutedEventArgs e)
+		{
+			SingleHandGestureStatic gesture = (SingleHandGestureStatic)(e.Source as FrameworkElement).Tag;
+			_vm.DeleteGesture(gesture);
+		}
+
+		private void ListBox_MouseDown(object sender, MouseButtonEventArgs e)
+		{
+			
+		}
 	}
 }
