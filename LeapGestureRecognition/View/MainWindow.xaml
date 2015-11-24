@@ -16,7 +16,7 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="100" />
 		</Grid.RowDefinitions>
-
+		
 		<Menu Grid.Row="0" Padding="2,4" ItemsSource="{Binding MenuBar}">
 			<Menu.ItemContainerStyle>
 				<Style TargetType="MenuItem">
@@ -36,7 +36,7 @@
 				<ColumnDefinition Width="9*" />
 			</Grid.ColumnDefinitions>
  
-			<ListBox ItemsSource="{Binding StaticGestures}" Grid.Column="0" HorizontalContentAlignment="Stretch" Background="Orange" MouseDown="ListBox_MouseDown">
+			<ListBox ItemsSource="{Binding StaticGestures}" Grid.Column="0" HorizontalContentAlignment="Stretch">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
 						<Grid MouseDown="GestureMouseDown">
@@ -44,8 +44,8 @@
 								<TextBlock.ContextMenu>
 									<ContextMenu>
 										<MenuItem Header="View" Click="ViewGesture" Tag="{Binding}" />
-										<MenuItem Header="Delete" Click="DeleteGesture" Tag="{Binding}" />
-										<MenuItem Header="Rename" />
+										<MenuItem Header="Delete" Click="DeleteGesture" Tag="{Binding Name}" />
+										<MenuItem Header="Rename" Click="RenameGesture" Tag="{Binding Name}" />
 									</ContextMenu>
 								</TextBlock.ContextMenu>
 							</TextBlock>

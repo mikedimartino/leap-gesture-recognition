@@ -50,8 +50,9 @@
       <HintPath>..\packages\GlmNet.0.5.1.0\lib\net40\GlmNet.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="LeapCSharp.NET4.0">
-      <HintPath>..\..\..\Leap_Motion_SDK\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x64\LeapCSharp.NET4.0.dll</HintPath>
+    <Reference Include="LeapCSharp.NET4.0, Version=2.3.1.0, Culture=neutral, PublicKeyToken=6e1b1368e71eba9b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\DLLs\LeapCSharp.NET4.0.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
@@ -106,6 +107,10 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="Xceed.Wpf.Toolkit, Version=2.5.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\DLLs\Xceed.Wpf.Toolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -116,12 +121,16 @@
     <Compile Include="Model\CustomMenuItem.cs" />
     <Compile Include="Model\Camera.cs" />
     <Compile Include="Model\LGR_Classes.cs" />
+    <Compile Include="Model\LGR_Configuration.cs" />
+    <Compile Include="Model\OptionsDialogChangeset.cs" />
     <Compile Include="Model\SingleHandGestureStatic.cs" />
     <Compile Include="Util\Constants.cs" />
     <Compile Include="Util\CustomLeapListener.cs" />
-    <Compile Include="Util\GestureProvider.cs" />
+    <Compile Include="Util\HelperMethods.cs" />
+    <Compile Include="Util\SQLiteProvider.cs" />
     <Compile Include="Util\SharpGLHelper.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
+    <Compile Include="ViewModel\OptionsViewModel.cs" />
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
@@ -129,12 +138,26 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="View\OptionsDialog.xaml.cs">
+      <DependentUpon>OptionsDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\RenameGestureDialog.xaml.cs">
+      <DependentUpon>RenameGestureDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\SaveGestureDialog.xaml.cs">
       <DependentUpon>SaveGestureDialog.xaml</DependentUpon>
     </Compile>
     <Page Include="View\MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\OptionsDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\RenameGestureDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="View\SaveGestureDialog.xaml">
       <SubType>Designer</SubType>

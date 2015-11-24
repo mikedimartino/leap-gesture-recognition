@@ -19,12 +19,9 @@ namespace LeapGestureRecognition.View
 	/// </summary>
 	public partial class SaveGestureDialog : Window
 	{
-		private MainViewModel _mvm;
-
-		public SaveGestureDialog(MainViewModel mvm, string errorMessage = "")
+		public SaveGestureDialog(string errorMessage = "")
 		{
 			InitializeComponent();
-			_mvm = mvm;
 			errorMessageTB.Text = errorMessage;
 		}
 

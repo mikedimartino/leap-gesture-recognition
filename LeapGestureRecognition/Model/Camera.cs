@@ -29,8 +29,8 @@ namespace LeapGestureRecognition.Util
 		public static float FarClipPlaneDist = 10000;
 		public static vec4 RightDefault = new vec4(1, 0, 0, 0);
 		public static vec4 UpDefault = new vec4(0, 1, 0, 0);
-		public static vec4 AtDefault = new vec4(0, 0, 1, 0);
-		public static vec4 EyeDefault = new vec4(0, 0, 825.6f, 1);//new vec4(0, 202, 825.6f, 1);
+		public static vec4 AtDefault = new vec4(0, 0, 0, 0);
+		public static vec4 EyeDefault = new vec4(0, 300, 825.6f, 1);//new vec4(0, 202, 825.6f, 1);
 		public static int ZoomStep = 50;
 
 		public Camera(OpenGL gl)

@@ -26,7 +26,8 @@ namespace LeapGestureRecognition.ViewModel
 
 		private CustomLeapListener _listener;
 		private SharpGLHelper _glHelper;
-		private GestureProvider _gestureProvider;
+		private SQLiteProvider _sqliteProvider;
+		LGR_Configuration _config;
 
 
 		public MainViewModel(OpenGL gl, System.Windows.Controls.ScrollViewer scrollViewer, Controller controller, CustomLeapListener listener)
@@ -35,10 +36,11 @@ namespace LeapGestureRecognition.ViewModel
 			_controller = controller;
 			_listener = listener;
 			_controller.AddListener(_listener);
-			_glHelper = new SharpGLHelper(_gl);
 			_camera = new Camera(_gl);
 			_scrollViewer = scrollViewer;
-			_gestureProvider = new GestureProvider(Constants.SQLiteFileName);
+			_sqliteProvider = new SQLiteProvider(Constants.SQLiteFileName);
+			_config = new LGR_Configuration(_sqliteProvider);
+			_glHelper = new SharpGLHelper(_gl, _config.BoneColors);
 
 			updateGestureLibrary();
 			initMenuBar();
@@ -106,11 +108,16 @@ namespace LeapGestureRecognition.ViewModel
 
 
 		#region Options
-		private bool _showAxes = true;
+		//private bool _showAxes = true;
+		//public bool ShowAxes
+		//{
+		//	get { return _showAxes; }
+		//	set { _showAxes = value; }
+		//}
+
 		public bool ShowAxes
 		{
-			get { return _showAxes; }
-			set { _showAxes = value; }
+			get { return _config.BoolOptions[Constants.BoolOptionsNames.ShowAxes]; }
 		}
 
 		private bool _showOutputWindow = true;
@@ -124,11 +131,16 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		private bool _showArms = true;
+		//private bool _showArms = true;
+		//public bool ShowArms
+		//{
+		//	get { return _showArms; }
+		//	set { _showArms = value; }
+		//}
+
 		public bool ShowArms
 		{
-			get { return _showArms; }
-			set { _showArms = value; }
+			get { return _config.BoolOptions[Constants.BoolOptionsNames.ShowArms]; }
 		}
 
 		private bool _showGestureLibrary = true;
@@ -218,7 +230,6 @@ namespace LeapGestureRecognition.ViewModel
 		{
 			if (e.ChangedButton == MouseButton.Middle)
 			{
-				WriteLineToOutputWindow("You clicked the middle mouse button.");
 				UIElement openGLWindow = e.Source as UIElement;
 				initMiddleClickPosition = e.GetPosition(openGLWindow);
 			}
@@ -280,7 +291,6 @@ namespace LeapGestureRecognition.ViewModel
 
 		private SingleHandGestureStatic SelectedGesture = null;
 
-		//int _gestureCount = 1;
 		private void takeSnapshotOfHands()
 		{
 			Hand hand = _controller.Frame().Hands.FirstOrDefault();
@@ -288,26 +298,7 @@ namespace LeapGestureRecognition.ViewModel
 
 			SelectedGesture = new SingleHandGestureStatic(hand);
 			Mode = LGR_Mode.Playback;
-
-			SaveGestureDialog saveNewGestureDialog = new SaveGestureDialog(this);
-			while (saveNewGestureDialog.ShowDialog() == true)
-			{
-				string name = saveNewGestureDialog.EnteredName;
-				if (_gestureProvider.GestureExists(name))
-				{
-					string errorMsg = String.Format("Error: A gesture named '{0}' already exists.", name);
-					WriteLineToOutputWindow(errorMsg);
-					saveNewGestureDialog = new SaveGestureDialog(this, errorMsg);
-				}
-				else
-				{
-					_gestureProvider.SaveGesture(name, SelectedGesture);
-					StaticGestures.Add(SelectedGesture);
-					WriteLineToOutputWindow(String.Format("Successfully saved gesture '{0}'.", name));
-					break;
-				}
-			}
-
+			DisplaySaveGestureDialog(SelectedGesture);
 			Mode = LGR_Mode.Default;
 		}
 
@@ -343,16 +334,11 @@ namespace LeapGestureRecognition.ViewModel
 			switch (Mode)
 			{
 				case LGR_Mode.Playback:
-					_glHelper.DrawGesture(SelectedGesture);
+					_glHelper.DrawHand(SelectedGesture, ShowArms);
 					break;
 				default:
 					_glHelper.DrawFrame(CurrentFrame, ShowArms);
 					break;
-			}
-
-			if (SelectedGesture != null && Mode == LGR_Mode.Playback)
-			{
-				_glHelper.DrawGesture(SelectedGesture);
 			}
 		}
 
@@ -362,13 +348,101 @@ namespace LeapGestureRecognition.ViewModel
 			SelectedGesture = gesture;
 		}
 
-		public void DeleteGesture(SingleHandGestureStatic gesture)
+		public void DeleteGesture(string name)
 		{
-			_gestureProvider.DeleteGesture(gesture.Name);
+			_sqliteProvider.DeleteGesture(name);
 			updateGestureLibrary();
 			updateGestureLibraryMenu();
 		}
 
+		#region Dialog Windows
+		public void DisplaySaveGestureDialog(SingleHandGestureStatic gesture)
+		{
+			SaveGestureDialog saveNewGestureDialog = new SaveGestureDialog();
+			while (saveNewGestureDialog.ShowDialog() == true)
+			{
+				string name = saveNewGestureDialog.EnteredName;
+				if (string.IsNullOrWhiteSpace(name))
+				{
+					string errorMsg = String.Format("Error: Name cannot be whitespace.", name);
+					WriteLineToOutputWindow(errorMsg);
+					saveNewGestureDialog = new SaveGestureDialog(errorMsg);
+					continue;
+				}
+				if (_sqliteProvider.GestureExists(name))
+				{
+					string errorMsg = String.Format("Error: A gesture named '{0}' already exists.", name);
+					WriteLineToOutputWindow(errorMsg);
+					saveNewGestureDialog = new SaveGestureDialog(errorMsg);
+				}
+				else
+				{
+					_sqliteProvider.SaveGesture(name, gesture);
+					StaticGestures.Add(gesture);
+					WriteLineToOutputWindow(String.Format("Successfully saved gesture '{0}'.", name));
+					break;
+				}
+			}
+		}
+
+		public void DisplayRenameGestureDialog(string oldName)
+		{
+			RenameGestureDialog renameGestureDialog = new RenameGestureDialog(oldName);
+			while (renameGestureDialog.ShowDialog() == true)
+			{
+				string newName = renameGestureDialog.EnteredName;
+				if (newName == oldName) return;
+
+				if (string.IsNullOrWhiteSpace(newName))
+				{
+					string errorMsg = String.Format("Error: Name cannot be whitespace.", newName);
+					WriteLineToOutputWindow(errorMsg);
+					renameGestureDialog = new RenameGestureDialog(oldName, errorMsg);
+					continue;
+				}
+
+				if (_sqliteProvider.GestureExists(newName))
+				{
+					string errorMsg = String.Format("Error: A gesture named '{0}' already exists.", newName);
+					WriteLineToOutputWindow(errorMsg);
+					renameGestureDialog = new RenameGestureDialog(oldName, errorMsg);
+				}
+				else
+				{
+					_sqliteProvider.RenameGesture(oldName, newName);
+					WriteLineToOutputWindow(String.Format("Successfully renamed '{0}' to '{1}'.", oldName, newName));
+					updateGestureLibrary();
+					//updateGestureLibraryMenu(); // Handled in StaticGestures setter
+					break;
+				}
+			}
+		}
+
+		public void DisplayOptionsDialog()
+		{
+			OptionsDialog optionsDialog = new OptionsDialog(_config);
+			if (optionsDialog.ShowDialog() == true)
+			{
+				// General Options
+				foreach (var boolOption in optionsDialog.Changeset.BoolOptionsChangeset)
+				{
+					_sqliteProvider.UpdateBoolOption(boolOption.Key, boolOption.Value);
+					_config.BoolOptions[boolOption.Key] = boolOption.Value;
+				}
+				// Bone Colors
+				foreach (var boneColor in optionsDialog.Changeset.BoneColorsChangeset)
+				{
+					_sqliteProvider.UpdateBoneColor(boneColor.Key, boneColor.Value);
+					_config.BoneColors[boneColor.Key] = boneColor.Value;
+				}
+			}
+			
+				
+			
+		}
+		#endregion
+
+		#region Output Window
 		public void WriteLineToOutputWindow(string message)
 		{
 			WriteToOutputWindow(message + "\n");
@@ -379,6 +453,7 @@ namespace LeapGestureRecognition.ViewModel
 			// TODO: Might want to restrict the size of log
 			OutputWindowContent += "> " + message;
 		}
+		#endregion
 
 		public void InitOpenGL(OpenGL openGL)
 		{
@@ -406,12 +481,12 @@ namespace LeapGestureRecognition.ViewModel
 		public bool SaveNewGesture(string name, SingleHandGestureStatic gesture, out string errorMessage)
 		{
 			errorMessage = "";
-			if (_gestureProvider.GestureExists(name))
+			if (_sqliteProvider.GestureExists(name))
 			{
 				errorMessage = String.Format("A gesture named '{0}' already exists.", name);
 				return false;
 			}
-			_gestureProvider.SaveGesture(gesture);
+			_sqliteProvider.SaveGesture(gesture);
 			updateGestureLibrary();
 			updateGestureLibraryMenu();
 			return true;
@@ -424,27 +499,27 @@ namespace LeapGestureRecognition.ViewModel
 			MenuBar = new ObservableCollection<CustomMenuItem>();
 
 			#region OPTIONS
-			CustomMenuItem options = new CustomMenuItem("Options");
+			//CustomMenuItem options = new CustomMenuItem("Options");
 
-			CustomMenuItem showAxes = new CustomMenuItem("Show Axes");
-			showAxes.IsCheckable = true;
-			showAxes.IsChecked = ShowAxes;
-			showAxes.Command = new CustomCommand(a => ShowAxes = !ShowAxes);
-			options.Items.Add(showAxes);
+			//CustomMenuItem showAxes = new CustomMenuItem("Show Axes");
+			//showAxes.IsCheckable = true;
+			//showAxes.IsChecked = ShowAxes;
+			//showAxes.Command = new CustomCommand(a => ShowAxes = !ShowAxes);
+			//options.Items.Add(showAxes);
 
-			//CustomMenuItem showOutputWindow = new CustomMenuItem("Show Output Window");
-			//showOutputWindow.IsCheckable = true;
-			//showOutputWindow.IsChecked = ShowOutputWindow;
-			//showOutputWindow.Command = new CustomCommand(() => ShowOutputWindow = !ShowOutputWindow);
-			//options.Items.Add(showOutputWindow);
+			////CustomMenuItem showOutputWindow = new CustomMenuItem("Show Output Window");
+			////showOutputWindow.IsCheckable = true;
+			////showOutputWindow.IsChecked = ShowOutputWindow;
+			////showOutputWindow.Command = new CustomCommand(() => ShowOutputWindow = !ShowOutputWindow);
+			////options.Items.Add(showOutputWindow);
 
-			CustomMenuItem showArms = new CustomMenuItem("Show Arms");
-			showArms.IsCheckable = true;
-			showArms.IsChecked = ShowAxes;
-			showArms.Command = new CustomCommand(a => ShowArms = !ShowArms);
-			options.Items.Add(showArms);
+			//CustomMenuItem showArms = new CustomMenuItem("Show Arms");
+			//showArms.IsCheckable = true;
+			//showArms.IsChecked = ShowAxes;
+			//showArms.Command = new CustomCommand(a => ShowArms = !ShowArms);
+			//options.Items.Add(showArms);
 			
-			MenuBar.Add(options);
+			//MenuBar.Add(options);
 			#endregion
 
 			#region RESET CAMERA
@@ -452,6 +527,21 @@ namespace LeapGestureRecognition.ViewModel
 			resetCamera.Command = new CustomCommand(a => _camera.Reset());
 			MenuBar.Add(resetCamera);
 			#endregion
+
+			#region DEFAULT MODE
+			// Might want to rename to "Live Mode"
+			CustomMenuItem defaultMode = new CustomMenuItem("Default Mode");
+			defaultMode.Command = new CustomCommand(a => Mode = LGR_Mode.Default);
+			MenuBar.Add(defaultMode);
+			#endregion
+
+			#region OPTIONS 2
+			CustomMenuItem options = new CustomMenuItem("Options");
+			options.Command = new CustomCommand(a => DisplayOptionsDialog());
+			MenuBar.Add(options);
+			#endregion
+
+			
 
 			#region SHOW GESTURE LIBRARY
 			CustomMenuItem showGestureLibrary = new CustomMenuItem("Show Gesture Library");
@@ -463,10 +553,11 @@ namespace LeapGestureRecognition.ViewModel
 
 		private void updateGestureLibrary()
 		{
-			StaticGestures = _gestureProvider.LoadAllGestures();
+			StaticGestures = _sqliteProvider.GetAllGestures();
 		}
 		#endregion
 
+		#region PropertyChanged
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		protected void OnPropertyChanged(string name)
@@ -477,6 +568,8 @@ namespace LeapGestureRecognition.ViewModel
 				handler(this, new PropertyChangedEventArgs(name));
 			}
 		}
+		#endregion
+
 	}
 
 }

@@ -20,9 +20,16 @@ namespace LeapGestureRecognition.Model
 			Pitch = hand.Direction.Pitch;
 			Yaw = hand.Direction.Yaw;
 			Roll = hand.Direction.Roll;
-			Center = new LGR_Vec3(hand.PalmPosition);
+			PalmPos = new LGR_Vec3(hand.PalmPosition);
 			PalmNormal = new LGR_Vec3(hand.PalmNormal);
 			FingerJointPositions = getFingerJointPositions(hand);
+			WristPos = new LGR_Vec3(hand.WristPosition);
+			ElbowPos = new LGR_Vec3(hand.Arm.ElbowPosition);
+			ForearmCenter = new LGR_Vec3(hand.Arm.Center);
+			ArmX = new LGR_Vec3(hand.Arm.Basis.xBasis);
+			ArmY = new LGR_Vec3(hand.Arm.Basis.yBasis);
+			ArmZ = new LGR_Vec3(hand.Arm.Basis.zBasis);
+			setFingerBasePositions(hand);
 		}
 
 		[DataMember]
@@ -38,11 +45,39 @@ namespace LeapGestureRecognition.Model
 		[DataMember]
 		public float Roll { get; set; }
 		[DataMember]
-		public LGR_Vec3 Center { get; set; }
+		public LGR_Vec3 PalmPos { get; set; }
 		[DataMember]
 		public LGR_Vec3 PalmNormal { get; set; }
 		[DataMember]
 		public Dictionary<Finger.FingerType, Dictionary<Finger.FingerJoint, LGR_Vec3>> FingerJointPositions;
+		[DataMember]
+		public LGR_Vec3 WristPos { get; set; }
+		[DataMember]
+		public LGR_Vec3 ElbowPos { get; set; }
+		[DataMember]
+		public LGR_Vec3 IndexBasePos { get; set; }
+		[DataMember]
+		public LGR_Vec3 MiddleBasePos { get; set; }
+		[DataMember]
+		public LGR_Vec3 RingBasePos { get; set; }
+		[DataMember]
+		public LGR_Vec3 PinkyBasePos { get; set; }
+		[DataMember]
+		public LGR_Vec3 ForearmCenter { get; set; }
+		// Arm x, y, and z basis vectors
+		[DataMember]
+		public LGR_Vec3 ArmX { get; set; }
+		[DataMember]
+		public LGR_Vec3 ArmY { get; set; }
+		[DataMember]
+		public LGR_Vec3 ArmZ { get; set; }
+
+
+		public LGR_Vec3 ThumbBasePos
+		{
+			// Because of 0 length metacarpal
+			get { return FingerJointPositions[Finger.FingerType.TYPE_THUMB][Finger.FingerJoint.JOINT_MCP]; }
+		}
 
 		private List<LGR_Vec3> _AllFingerJointsForDrawing;
 		public List<LGR_Vec3> AllFingerJointsForDrawing
@@ -79,6 +114,19 @@ namespace LeapGestureRecognition.Model
 				}
 			}
 			return fjp;
+		}
+
+		private void setFingerBasePositions(Hand hand)
+		{
+			Finger index = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_INDEX).FirstOrDefault();
+			Finger middle = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_MIDDLE).FirstOrDefault();
+			Finger ring = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_RING).FirstOrDefault();
+			Finger pinky = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_PINKY).FirstOrDefault();
+
+			IndexBasePos = new LGR_Vec3(index.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint);
+			MiddleBasePos = new LGR_Vec3(middle.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint);
+			RingBasePos = new LGR_Vec3(ring.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint);
+			PinkyBasePos = new LGR_Vec3(pinky.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint);
 		}
 		#endregion
 

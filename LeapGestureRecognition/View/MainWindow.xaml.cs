@@ -102,13 +102,15 @@ namespace LeapGestureRecognition
 
 		private void DeleteGesture(object sender, RoutedEventArgs e)
 		{
-			SingleHandGestureStatic gesture = (SingleHandGestureStatic)(e.Source as FrameworkElement).Tag;
-			_vm.DeleteGesture(gesture);
+			string gestureName = (string)(e.Source as FrameworkElement).Tag;
+			_vm.DeleteGesture(gestureName);
 		}
 
-		private void ListBox_MouseDown(object sender, MouseButtonEventArgs e)
+		private void RenameGesture(object sender, RoutedEventArgs e)
 		{
-			
+			string gestureName = (string)(e.Source as FrameworkElement).Tag;
+			_vm.DisplayRenameGestureDialog(gestureName);
 		}
+
 	}
 }

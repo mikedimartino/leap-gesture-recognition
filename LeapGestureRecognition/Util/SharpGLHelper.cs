@@ -14,13 +14,15 @@ namespace LeapGestureRecognition.Util
 	{
 		private OpenGL _gl;
 		private IntPtr _quadric;
+		private Dictionary<string, Color> _boneColors;
 
 		// TODO: Define quadrics for every sphere / cylinder so that new ones don't have to be initialized every time.
 
-		public SharpGLHelper(OpenGL gl)
+		public SharpGLHelper(OpenGL gl, Dictionary<string, Color> boneColors)
 		{
 			_gl = gl;
 			_quadric = _gl.NewQuadric();
+			_boneColors = boneColors;
 		}
 
 
@@ -29,74 +31,7 @@ namespace LeapGestureRecognition.Util
 			foreach (Hand hand in frame.Hands)
 			{
 				float opacity = hand.Confidence;
-
-				// Draw wrist position
-				DrawSphere(hand.WristPosition, Constants.WristSphereRadius, Colors.White, opacity);
-				// Draw palm position
-				DrawSphere(hand.PalmPosition, Constants.PalmSphereRadius, Colors.White, opacity);
-				// Connect wrist to palm
-				//DrawCylinder(Constants.WristSphereRadius * 0.75, wristPos, palmPos);
-
-				foreach (Finger finger in hand.Fingers)
-				{
-					// Finger ID = HandID + (0-4) // Where + is concatenation
-					//	0 = Thumb, 1 = Index, ..., 4 = Pinky // Can get this with finger.Id % 10
-					//if (finger.Id % 10 == 4) continue;
-
-					// Draw finger tips
-					DrawSphere(finger.TipPosition, Constants.FingerTipRadius, Colors.White, opacity);
-
-					// Draw joints
-					foreach (Finger.FingerJoint jointType in (Finger.FingerJoint[])Enum.GetValues(typeof(Finger.FingerJoint)))
-					{
-						DrawSphere(finger.JointPosition(jointType), Constants.FingerTipRadius, Colors.White, opacity);
-					}
-
-					// Draw bones
-					Bone bone;
-					foreach (Bone.BoneType boneType in (Bone.BoneType[])Enum.GetValues(typeof(Bone.BoneType)))
-					{
-						//if (boneType == Bone.BoneType.TYPE_METACARPAL) continue;
-						bone = finger.Bone(boneType);
-						DrawCylinder(Constants.FingerTipRadius * 0.7, bone.PrevJoint, bone.NextJoint, Constants.BoneColors[boneType], opacity);
-					}
-				}
-
-				// Draw base of hand (connects the pinky carpal bone to thumb carpal bone)
-				Finger pinky = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_PINKY).FirstOrDefault();
-				Finger thumb = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_THUMB).FirstOrDefault();
-				Vector pinkyBase = pinky.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint;
-				Vector thumbBase = thumb.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint;
-				DrawCylinder(Constants.FingerTipRadius, pinkyBase, thumbBase, Colors.White, opacity);
-
-				if (showArms)
-				{
-					// Draw arm
-					// Draw elbow
-					Vector elbowPosition = hand.Arm.ElbowPosition;
-					DrawSphere(elbowPosition, Constants.WristSphereRadius, Colors.White, opacity);
-					// Draw center of forearm
-					Vector centerForearmPosition = hand.Arm.Center;
-					DrawSphere(centerForearmPosition, Constants.WristSphereRadius, Colors.White, opacity);
-
-					float forearmWidth = pinkyBase.DistanceTo(thumbBase);
-					// Draw two cylinders for arms (Ulna - pinky side, Radius - thumb side)
-					Vector ulnaBase = hand.Arm.WristPosition + ((forearmWidth / 2) * hand.Arm.Basis.xBasis);
-					Vector ulnaTop = hand.Arm.ElbowPosition + ((forearmWidth / 2) * hand.Arm.Basis.xBasis);
-					DrawSphere(ulnaBase, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
-					DrawSphere(ulnaTop, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
-					DrawCylinder(Constants.FingerTipRadius, ulnaBase, ulnaTop, Colors.White, opacity);
-
-					Vector radiusBase = hand.Arm.WristPosition - ((forearmWidth / 2) * hand.Arm.Basis.xBasis);
-					Vector radiusTop = hand.Arm.ElbowPosition - ((forearmWidth / 2) * hand.Arm.Basis.xBasis);
-					DrawSphere(radiusBase, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
-					DrawSphere(radiusTop, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
-					DrawCylinder(Constants.FingerTipRadius, radiusBase, radiusTop, Colors.White, opacity);
-
-					// Connect the forearm bones at top and bottom
-					DrawCylinder(Constants.FingerTipRadius, ulnaBase, radiusBase, Colors.White, opacity);
-					DrawCylinder(Constants.FingerTipRadius, ulnaTop, radiusTop, Colors.White, opacity);
-				}
+				DrawHand(new SingleHandGestureStatic(hand), showArms, opacity);
 			}
 		}
 
@@ -104,10 +39,10 @@ namespace LeapGestureRecognition.Util
 		{
 			int axisLength = 300;
 			double axisRadius = 2;
-			Vector origin = new Vector(0,0,0);
-			Vector xAxis = new Vector(1,0,0);
-			Vector yAxis = new Vector(0,1,0);
-			Vector zAxis = new Vector(0,0,1);
+			LGR_Vec3 origin = new LGR_Vec3(0, 0, 0);
+			LGR_Vec3 xAxis = new LGR_Vec3(1, 0, 0);
+			LGR_Vec3 yAxis = new LGR_Vec3(0, 1, 0);
+			LGR_Vec3 zAxis = new LGR_Vec3(0, 0, 1);
 
 			// +X = red, +Y = green, +Z = blue
 			DrawCylinder(axisRadius, origin, xAxis * axisLength, Colors.Red, 1.0f);
@@ -115,7 +50,7 @@ namespace LeapGestureRecognition.Util
 			DrawCylinder(axisRadius, origin, zAxis * axisLength, Colors.Blue, 1.0f);
 		}
 
-		public void DrawCylinder(double radius, Vector basePosition, Vector topPosition, Color color, float opacity = 1)
+		public void DrawCylinder(double radius, Vector basePosition, Vector topPosition, Color color, float opacity = 1) // Can get rid of this eventually
 		{
 			_gl.LoadIdentity();
 			_gl.Color(color.R, color.G, color.B, opacity);
@@ -198,25 +133,80 @@ namespace LeapGestureRecognition.Util
 			_rotation += 3.0f;
 		}
 
-		public void DrawGesture(SingleHandGestureStatic gesture) //TODO: Implement!
+
+		// Diagram of hand: https://blog.leapmotion.com/wp-content/uploads/2014/05/boneapi1.png
+		public void DrawHand(SingleHandGestureStatic hand, bool showArms, float opacity = 1)
 		{
-			DrawSphere(gesture.Center, Constants.PalmSphereRadius, Colors.Red);
-			foreach (var position in gesture.AllFingerJointsForDrawing)
+			// Draw wrist position
+			DrawSphere(hand.WristPos, Constants.WristSphereRadius, _boneColors[Constants.BoneNames.Wrist], opacity);
+			// Draw palm position
+			DrawSphere(hand.PalmPos, Constants.PalmSphereRadius, _boneColors[Constants.BoneNames.Palm], opacity);
+
+			foreach (var fjp in hand.FingerJointPositions)
 			{
-				DrawSphere(position, Constants.FingerTipRadius, Colors.White);
-			} 
-				
-				
-				
-				
-			//DrawSphere(hand.Center, Constants.PalmSphereRadius, Colors.Red);
-			//foreach (FingerJointPositions finger in hand.Fingers.Values)
-			//{
-			//	DrawSphere(hand.PalmNormal - finger.McpPos, Constants.FingerTipRadius, Colors.White);
-			//	DrawSphere(hand.PalmNormal - finger.PipPos, Constants.FingerTipRadius, Colors.White);
-			//	DrawSphere(hand.PalmNormal - finger.DipPos, Constants.FingerTipRadius, Colors.White);
-			//	DrawSphere(hand.PalmNormal - finger.TipPos, Constants.FingerTipRadius, Colors.White);
-			//} 
+				var finger = fjp.Value;
+				var fingerType = fjp.Key;
+
+				LGR_Vec3 mcp = finger[Finger.FingerJoint.JOINT_MCP];
+				LGR_Vec3 pip = finger[Finger.FingerJoint.JOINT_PIP];
+				LGR_Vec3 dip = finger[Finger.FingerJoint.JOINT_DIP];
+				LGR_Vec3 tip = finger[Finger.FingerJoint.JOINT_TIP];
+
+				DrawSphere(mcp, Constants.FingerTipRadius, Colors.White, opacity);
+				DrawSphere(pip, Constants.FingerTipRadius, Colors.White, opacity);
+				DrawSphere(dip, Constants.FingerTipRadius, Colors.White, opacity);
+				DrawSphere(tip, Constants.FingerTipRadius, Colors.White, opacity);
+
+				// Draw finger bones
+				string boneColorKey = HelperMethods.GetBoneColorKey(fingerType, Bone.BoneType.TYPE_DISTAL);
+				DrawCylinder(Constants.FingerTipRadius, tip, dip, _boneColors[boneColorKey], opacity);
+				boneColorKey = HelperMethods.GetBoneColorKey(fingerType, Bone.BoneType.TYPE_INTERMEDIATE);
+				DrawCylinder(Constants.FingerTipRadius, dip, pip, _boneColors[boneColorKey], opacity);
+				boneColorKey = HelperMethods.GetBoneColorKey(fingerType, Bone.BoneType.TYPE_PROXIMAL);
+				DrawCylinder(Constants.FingerTipRadius, pip, mcp, _boneColors[boneColorKey], opacity);
+			}
+
+			// Draw hand bones
+			LGR_Vec3 indexMCP = hand.FingerJointPositions[Finger.FingerType.TYPE_INDEX][Finger.FingerJoint.JOINT_MCP];
+			LGR_Vec3 middleMCP = hand.FingerJointPositions[Finger.FingerType.TYPE_MIDDLE][Finger.FingerJoint.JOINT_MCP];
+			LGR_Vec3 ringMCP = hand.FingerJointPositions[Finger.FingerType.TYPE_RING][Finger.FingerJoint.JOINT_MCP];
+			LGR_Vec3 pinkyMCP = hand.FingerJointPositions[Finger.FingerType.TYPE_PINKY][Finger.FingerJoint.JOINT_MCP];
+
+			DrawCylinder(Constants.FingerTipRadius, hand.IndexBasePos, indexMCP, _boneColors[Constants.BoneNames.Index_Metacarpal], opacity);
+			DrawCylinder(Constants.FingerTipRadius, hand.MiddleBasePos, middleMCP, _boneColors[Constants.BoneNames.Middle_Metacarpal], opacity);
+			DrawCylinder(Constants.FingerTipRadius, hand.RingBasePos, ringMCP, _boneColors[Constants.BoneNames.Ring_Metacarpal], opacity);
+			DrawCylinder(Constants.FingerTipRadius, hand.PinkyBasePos, pinkyMCP, _boneColors[Constants.BoneNames.Pinky_Metacarpal], opacity);
+
+			// Draw base of hand
+			DrawCylinder(Constants.FingerTipRadius, hand.PinkyBasePos, hand.ThumbBasePos, _boneColors[Constants.BoneNames.BaseOfHand], opacity);
+
+			if (showArms)
+			{
+				// Draw elbow
+				DrawSphere(hand.ElbowPos, Constants.WristSphereRadius, _boneColors[Constants.BoneNames.Elbow], opacity);
+				// Draw center of forearm
+				DrawSphere(hand.ForearmCenter, Constants.WristSphereRadius, _boneColors[Constants.BoneNames.ForearmCenter], opacity);
+
+				float forearmWidth = hand.PinkyBasePos.DistanceTo(hand.ThumbBasePos);
+
+				// Draw two cylinders for arms (Ulna - pinky side, Radius - thumb side)
+				LGR_Vec3 ulnaBase = hand.WristPos + ((forearmWidth / 2) * hand.ArmX);
+				LGR_Vec3 ulnaTop = hand.ElbowPos + ((forearmWidth / 2) * hand.ArmX);
+				DrawSphere(ulnaBase, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
+				DrawSphere(ulnaTop, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
+				DrawCylinder(Constants.FingerTipRadius, ulnaBase, ulnaTop, _boneColors[Constants.BoneNames.Arm], opacity);
+
+				LGR_Vec3 radiusBase = hand.WristPos - ((forearmWidth / 2) * hand.ArmX);
+				LGR_Vec3 radiusTop = hand.ElbowPos - ((forearmWidth / 2) * hand.ArmX);
+				DrawSphere(radiusBase, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
+				DrawSphere(radiusTop, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
+				DrawCylinder(Constants.FingerTipRadius, radiusBase, radiusTop, _boneColors[Constants.BoneNames.Arm], opacity);
+
+				// Connect the forearm bones at top and bottom
+				DrawCylinder(Constants.FingerTipRadius, ulnaBase, radiusBase, _boneColors[Constants.BoneNames.Arm], opacity);
+				DrawCylinder(Constants.FingerTipRadius, ulnaTop, radiusTop, _boneColors[Constants.BoneNames.Arm], opacity);
+			}
+
 		}
 
 	}
