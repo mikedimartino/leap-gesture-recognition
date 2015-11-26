@@ -6,6 +6,9 @@
 				Width="500" Height="500"
         Title="Options" WindowStartupLocation="CenterScreen"
 				Background="#FFD1D1E0">
+	<Window.Resources>
+		<BooleanToVisibilityConverter x:Key="BoolToVis" />
+	</Window.Resources>
 
 	<Grid Margin="10">
 		<Grid.RowDefinitions>
@@ -23,8 +26,9 @@
 					<Setter Property="Padding" Value="3 2 8 2" />
 				</Style>
 			</ListBox.ItemContainerStyle>
-			<ListBoxItem Content="General" Selected="ListBoxItem_Selected" Tag="General" />
+			<ListBoxItem x:Name="generalListBoxItem" Content="General" Selected="ListBoxItem_Selected" Tag="General" />
 			<ListBoxItem Content="Bone Colors" Selected="ListBoxItem_Selected" Tag="BoneColors" />
+			<ListBoxItem Content="Users" Selected="ListBoxItem_Selected" Tag="Users" />
 		</ListBox>
 
 		<Border Grid.Column="1">
@@ -39,8 +43,9 @@
 								<DataTemplate>
 									<Border BorderThickness="0 0 0 1" BorderBrush="#ABADB3" Background="#FFFFFF">
 										<CheckBox Content="{Binding Key}" IsChecked="{Binding Value, Mode=OneWay}" 
-													Checked="BoolOption_CheckBox_Checked" Unchecked="BoolOption_CheckBox_Unchecked" 
-													Tag="{Binding Key}" />
+															Margin="3 3 0 3"
+															Checked="BoolOption_CheckBox_Checked" Unchecked="BoolOption_CheckBox_Unchecked" 
+															Tag="{Binding Key}" />
 									</Border>
 								</DataTemplate>
 							</ItemsControl.ItemTemplate>
@@ -72,6 +77,75 @@
 					</StackPanel>
 				</ScrollViewer>
 				<!-- End Bone Colors -->
+
+				<!-- Users -->
+				<ScrollViewer x:Name="UsersOptions" Visibility="Hidden">
+					<StackPanel Orientation="Vertical">
+						<TextBlock FontSize="20" FontWeight="Bold" Margin="10 0 0 7">Active User</TextBlock>
+						<ItemsControl x:Name="userRows" Margin="10 0" BorderThickness="1" BorderBrush="#ABADB3">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<Border BorderThickness="0 0 0 1" BorderBrush="#ABADB3" Background="#FFFFFF">
+										<StackPanel Orientation="Vertical">
+											<!-- User Row -->
+											<Grid Margin="5 3 0 3">
+												<Grid.ColumnDefinitions>
+													<ColumnDefinition Width="Auto" />
+													<ColumnDefinition Width="*" />
+													<ColumnDefinition Width="Auto" />
+													<ColumnDefinition Width="Auto" />
+												</Grid.ColumnDefinitions>
+												<RadioButton Grid.Column="0" IsChecked="{Binding IsActive}" GroupName="Users" Click="User_RadioButton_Click" Tag="{Binding}" VerticalAlignment="Center" Margin="0 0 5 0" />
+												<TextBlock Grid.Column="1" Text="{Binding Name}" Visibility="{Binding HideEditInfo, Converter={StaticResource BoolToVis}}" VerticalAlignment="Center" />
+												<TextBox Grid.Column="1" Text="{Binding Name}" Visibility="{Binding ShowEditInfo, Converter={StaticResource BoolToVis}}" Tag="{Binding}" LostFocus="UserName_TextBox_LostFocus" VerticalAlignment="Center" />
+												<Button Grid.Column="2" MinWidth="45"  Content="Edit" Click="Edit_Button_Click" Tag="{Binding}" Margin="5 0 0 0" />
+												<Button Grid.Column="3" MinWidth="45" Margin="5 0" Content="Delete" Click="Delete_Button_Click" Tag="{Binding}" />
+											</Grid>
+											<!-- Expandable Edit Info -->
+											<Grid Margin="5 3 0 3" Visibility="{Binding ShowEditInfo, Converter={StaticResource BoolToVis}}">
+												<StackPanel Orientation="Vertical" Margin="5 0 0 0">
+													<TextBlock FontWeight="Bold">Hand Measurements</TextBlock>
+													<TextBlock FontSize="10" FontWeight="Bold" Margin="0 0 0 5">(Distance from hand center to finger tip in mm)</TextBlock>
+													<Grid>
+														<Grid.RowDefinitions>
+															<RowDefinition />
+															<RowDefinition />
+															<RowDefinition />
+															<RowDefinition />
+															<RowDefinition />
+														</Grid.RowDefinitions>
+														<Grid.ColumnDefinitions>
+															<ColumnDefinition Width="Auto" />
+															<ColumnDefinition Width="Auto" />
+														</Grid.ColumnDefinitions>
+														<TextBlock Grid.Row="0" Grid.Column="0" Margin="10 0">Pinky: </TextBlock>
+														<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding PinkyLength}" />
+														<TextBlock Grid.Row="1" Grid.Column="0" Margin="10 0">Ring: </TextBlock>
+														<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding RingLength}" />
+														<TextBlock Grid.Row="2" Grid.Column="0" Margin="10 0">Middle: </TextBlock>
+														<TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding MiddleLength}" />
+														<TextBlock Grid.Row="3" Grid.Column="0" Margin="10 0">Index: </TextBlock>
+														<TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding IndexLength}" />
+														<TextBlock Grid.Row="4" Grid.Column="0" Margin="10 0">Thumb: </TextBlock>
+														<TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ThumbLength}" />
+													</Grid>
+													
+													<Button Click="Remeasure_Hands_Button_Click" Tag="{Binding}" Margin="0 10" Width="130" HorizontalAlignment="Left">
+														Re-measure Hands
+													</Button>
+
+												</StackPanel>
+											</Grid>
+										</StackPanel>
+									</Border>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+						
+						<Button Width="100" Margin="10" HorizontalAlignment="Left" Click="NewUser_Button_Click">New User</Button>
+					</StackPanel>
+				</ScrollViewer>
+				<!-- End Users -->
 
 			</Grid>
 		</Border>

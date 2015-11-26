@@ -93,8 +93,9 @@ namespace LeapGestureRecognition.Model
 					{
 						// I'm storing the position relative to the palm normal. 
 						// Need to adjust for drawing.
-						var adjustedJointPos = jointPos - PalmNormal;
-						_AllFingerJointsForDrawing.Add(adjustedJointPos);
+						//var adjustedJointPos = jointPos - PalmNormal;
+						//_AllFingerJointsForDrawing.Add(adjustedJointPos);
+						_AllFingerJointsForDrawing.Add(jointPos);
 					}
 				}
 				return _AllFingerJointsForDrawing;

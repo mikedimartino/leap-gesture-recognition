@@ -122,8 +122,11 @@
     <Compile Include="Model\Camera.cs" />
     <Compile Include="Model\LGR_Classes.cs" />
     <Compile Include="Model\LGR_Configuration.cs" />
+    <Compile Include="Model\LGR_HandMeasurements.cs" />
     <Compile Include="Model\OptionsDialogChangeset.cs" />
     <Compile Include="Model\SingleHandGestureStatic.cs" />
+    <Compile Include="Model\StaticGestureInstance.cs" />
+    <Compile Include="Model\LGR_User.cs" />
     <Compile Include="Util\Constants.cs" />
     <Compile Include="Util\CustomLeapListener.cs" />
     <Compile Include="Util\HelperMethods.cs" />
@@ -138,6 +141,9 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="View\MeasureHandDialog.xaml.cs">
+      <DependentUpon>MeasureHandDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\OptionsDialog.xaml.cs">
       <DependentUpon>OptionsDialog.xaml</DependentUpon>
     </Compile>
@@ -148,6 +154,10 @@
       <DependentUpon>SaveGestureDialog.xaml</DependentUpon>
     </Compile>
     <Page Include="View\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\MeasureHandDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

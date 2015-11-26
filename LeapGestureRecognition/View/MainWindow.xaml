@@ -27,7 +27,10 @@
 				</Style>
 			</Menu.ItemContainerStyle>
 		</Menu>
-		<TextBlock Grid.Row="0" Text="{Binding SelectedMenuItem}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+		<TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10 0">
+			<Run Text="Active user: " />
+			<Run Text="{Binding ActiveUser.Name}" />
+		</TextBlock>
 
 		<Grid Grid.Row="1">
 			<Grid.ColumnDefinitions>
@@ -35,8 +38,9 @@
 				<ColumnDefinition Width="Auto" />
 				<ColumnDefinition Width="9*" />
 			</Grid.ColumnDefinitions>
- 
+
 			<ListBox ItemsSource="{Binding StaticGestures}" Grid.Column="0" HorizontalContentAlignment="Stretch">
+							 <!--Visibility="{Binding ShowGestureLibrary, Converter={StaticResource BoolToVis}}">--> 
 				<ListBox.ItemTemplate>
 					<DataTemplate>
 						<Grid MouseDown="GestureMouseDown">
@@ -68,11 +72,8 @@
 		<GridSplitter Grid.Row="2" Height="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#444444" />
 		
 		<!-- Output window -->
-		<ScrollViewer Grid.Row="3" Name="outputWindowScrollViewer" Background="#DADADA" VerticalScrollBarVisibility="Visible" 
-									Visibility="{Binding ShowOutputWindow, Converter={StaticResource BoolToVis}}">
+		<ScrollViewer Grid.Row="3" Name="outputWindowScrollViewer" Background="#DADADA" VerticalScrollBarVisibility="Visible">
 			<TextBox IsReadOnly="True" Text="{Binding OutputWindowContent}" TextWrapping="Wrap" Background="Transparent" VerticalAlignment="Stretch" />
-
-			
 		</ScrollViewer>
 
 

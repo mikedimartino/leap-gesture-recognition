@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Globalization;
+using System.Windows;
+using System.Windows.Media;
 
 namespace LeapGestureRecognition.Util
 {
@@ -28,5 +30,6 @@ namespace LeapGestureRecognition.Util
 			boneName = Char.ToUpper(boneName[0]) + boneName.Substring(1);
 			return boneName;
 		}
+
 	}
 }

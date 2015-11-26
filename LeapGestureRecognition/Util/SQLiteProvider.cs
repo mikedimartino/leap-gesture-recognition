@@ -72,6 +72,29 @@ namespace LeapGestureRecognition.Util
 						command.ExecuteNonQuery();
 					}
 				}
+
+				// Create StringOptions table
+				sql = "CREATE TABLE StringOptions (name TEXT, value TEXT, pinky REAL, ring REAL, middle REAL, index REAL, thumb REAL)";
+				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+				{
+					command.ExecuteNonQuery();
+				}
+				// Fill StringOptions table with default values
+				foreach (var stringOption in Constants.DefaultStringOptions)
+				{
+					sql = String.Format("INSERT INTO StringOptions (name, value) VALUES ('{0}', '{1}')", stringOption.Key, stringOption.Value);
+					using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+					{
+						command.ExecuteNonQuery();
+					}
+				}
+
+				// Create Users table
+				sql = "CREATE TABLE Users (name TEXT(50), is_active INTEGER(1), pinky REAL, ring REAL, middle REAL, index REAL, thumb REAL)";
+				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+				{
+					command.ExecuteNonQuery();
+				}
 			}
 		}
 
@@ -85,6 +108,30 @@ namespace LeapGestureRecognition.Util
 				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
 				{
 					return command.ExecuteNonQuery();
+				}
+			}
+		}
+
+		private void executeBatchNonQuery(List<string> queries)
+		{
+			foreach (string sql in queries)
+			{
+				executeNonQuery(sql);
+			}
+		}
+
+		private string singleValueQuery(string sql)
+		{
+			using (var connection = new SQLiteConnection(_connString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+				{
+					using (SQLiteDataReader reader = command.ExecuteReader())
+					{
+						reader.Read();
+						return reader.GetString(0);
+					}
 				}
 			}
 		}
@@ -244,6 +291,103 @@ namespace LeapGestureRecognition.Util
 		public void UpdateBoolOption(string name, bool value)
 		{
 			string sql = String.Format("UPDATE BoolOptions SET value='{0}' WHERE name='{1}'", value ? 1 : 0, name);
+			executeNonQuery(sql);
+		}
+		#endregion
+
+		#region Users
+		public LGR_User GetActiveUser()
+		{
+			//string sql = String.Format("SELECT value FROM StringOptions WHERE name='{0}'", Constants.StringOptionsNames.ActiveUser);
+			//string activeUserName = singleValueQuery(sql);
+			string sql = "SELECT name, pinky_length, ring_length, middle_length, index_length, thumb_length, id FROM Users WHERE is_active=1";
+			using (var connection = new SQLiteConnection(_connString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+				{
+					using (SQLiteDataReader reader = command.ExecuteReader())
+					{
+						reader.Read();
+						return new LGR_User()
+						{
+							Name = reader.GetString(0),
+							IsActive = true,
+							PinkyLength = reader.GetFloat(1),
+							RingLength = reader.GetFloat(2),
+							MiddleLength = reader.GetFloat(3),
+							IndexLength = reader.GetFloat(4),
+							ThumbLength = reader.GetFloat(5),
+							Id = reader.GetInt32(6)
+						};
+					}
+				}
+			}
+		}
+
+		public void SetActiveUser(int id)
+		{
+			List<string> queries = new List<string>()
+			{
+				"UPDATE Users SET is_active=0",
+				String.Format("UPDATE Users SET is_active=1 WHERE id='{0}'", id)
+			};
+			executeBatchNonQuery(queries);
+		}
+
+		public void UpdateUser(LGR_User user)
+		{
+			string sql = String.Format("UPDATE Users SET name='{0}', is_active='{1}', pinky_length='{2}', " + 
+				"ring_length='{3}', middle_length='{4}', index_length='{5}', thumb_length='{6}' WHERE id='{7}'",
+				user.Name, user.IsActive ? 1 : 0, user.PinkyLength, user.RingLength, user.MiddleLength,
+				user.IndexLength, user.ThumbLength, user.Id);
+
+			executeNonQuery(sql);
+		}
+
+		public void SaveNewUser(LGR_User user)
+		{
+			string sql = String.Format("INSERT INTO Users (name, is_active, pinky_length, ring_length, middle_length, index_length, thumb_length) " +
+				"VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')", user.Name, user.IsActive ? 1 : 0,
+				user.PinkyLength, user.RingLength, user.MiddleLength, user.IndexLength, user.ThumbLength);
+
+			executeNonQuery(sql);
+		}
+
+		public List<LGR_User> GetAllUsers()
+		{
+			List<LGR_User> users = new List<LGR_User>();
+			string sql = "SELECT name, is_active, pinky_length, ring_length, middle_length, index_length, thumb_length, id FROM Users";
+			using (var connection = new SQLiteConnection(_connString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+				{
+					using (SQLiteDataReader reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							users.Add(new LGR_User()
+							{
+								Name = reader.GetString(0),
+								IsActive = reader.GetInt32(1) == 1,
+								PinkyLength = reader.GetFloat(2),
+								RingLength = reader.GetFloat(3),
+								MiddleLength = reader.GetFloat(4),
+								IndexLength = reader.GetFloat(5),
+								ThumbLength = reader.GetFloat(6),
+								Id = reader.GetInt32(7)
+							});
+						}
+					}
+				}
+			}
+			return users;
+		}
+
+		public void DeleteUser(int id) // Might want to return a bool to indicate success or failure
+		{
+			string sql = String.Format("DELETE FROM Users WHERE id='{0}'", id);
 			executeNonQuery(sql);
 		}
 		#endregion

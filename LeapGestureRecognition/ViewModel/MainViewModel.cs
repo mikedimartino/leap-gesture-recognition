@@ -74,6 +74,16 @@ namespace LeapGestureRecognition.ViewModel
 			set { _Mode = value; } // May want to add OnPropertyChanged()
 		}
 
+		public LGR_Configuration Config
+		{
+			get { return _config; }
+			set
+			{
+				_config = value;
+				//OnPropertyChanged("Config");
+			}
+		}
+
 		private ObservableCollection<SingleHandGestureStatic> _staticGestures = new ObservableCollection<SingleHandGestureStatic>();
 		public ObservableCollection<SingleHandGestureStatic> StaticGestures 
 		{
@@ -106,54 +116,36 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
+		public LGR_User ActiveUser { get { return _config.ActiveUser; } }
+
 
 		#region Options
-		//private bool _showAxes = true;
-		//public bool ShowAxes
-		//{
-		//	get { return _showAxes; }
-		//	set { _showAxes = value; }
-		//}
-
 		public bool ShowAxes
 		{
 			get { return _config.BoolOptions[Constants.BoolOptionsNames.ShowAxes]; }
 		}
-
-		private bool _showOutputWindow = true;
-		public bool ShowOutputWindow
-		{
-			get { return _showOutputWindow; }
-			set 
-			{
-				_showOutputWindow = value;
-				OnPropertyChanged("ShowOutputWindow");
-			}
-		}
-
-		//private bool _showArms = true;
-		//public bool ShowArms
-		//{
-		//	get { return _showArms; }
-		//	set { _showArms = value; }
-		//}
 
 		public bool ShowArms
 		{
 			get { return _config.BoolOptions[Constants.BoolOptionsNames.ShowArms]; }
 		}
 
-		private bool _showGestureLibrary = true;
+		public bool ShowOutputWindow
+		{
+			get { return _config.BoolOptions[Constants.BoolOptionsNames.ShowOutputWindow]; }
+		}
+
 		public bool ShowGestureLibrary
 		{
-			get { return _showGestureLibrary; }
-			set { _showGestureLibrary = value; }
+			get { return _config.BoolOptions[Constants.BoolOptionsNames.ShowGestureLibrary]; }
 		}
-#endregion
+		#endregion
 
 		#endregion
 
 		#region Public Methods
+
+		#region Event Handling Methods
 		public void OnClosing(object sender, CancelEventArgs e)
 		{
 			_controller.RemoveListener(_listener);
@@ -289,19 +281,6 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		private SingleHandGestureStatic SelectedGesture = null;
-
-		private void takeSnapshotOfHands()
-		{
-			Hand hand = _controller.Frame().Hands.FirstOrDefault();
-			if (hand == null) return;
-
-			SelectedGesture = new SingleHandGestureStatic(hand);
-			Mode = LGR_Mode.Playback;
-			DisplaySaveGestureDialog(SelectedGesture);
-			Mode = LGR_Mode.Default;
-		}
-
 		public void OnKeyUp(object sender, KeyEventArgs e)
 		{
 			switch (e.Key)
@@ -319,6 +298,36 @@ namespace LeapGestureRecognition.ViewModel
 					_camera.Roll = 0;
 					break;
 			}
+		}
+		#endregion
+
+		private SingleHandGestureStatic SelectedGesture = null;
+
+		private void takeSnapshotOfHands()
+		{
+			Hand hand = _controller.Frame().Hands.FirstOrDefault();
+			if (hand == null) return;
+
+			SelectedGesture = new SingleHandGestureStatic(hand);
+			Mode = LGR_Mode.Playback;
+			DisplaySaveGestureDialog(SelectedGesture);
+			Mode = LGR_Mode.Default;
+		}
+
+		// Measures hand on screen
+		public LGR_HandMeasurements MeasureHand()
+		{
+			Hand hand = _controller.Frame().Hands.FirstOrDefault();
+			if (hand == null) return null;
+
+			SingleHandGestureStatic handGesture = new SingleHandGestureStatic(hand);
+			LGR_HandMeasurements measurements = new LGR_HandMeasurements();
+			measurements.PinkyLength = handGesture.PalmPos.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_PINKY][Finger.FingerJoint.JOINT_TIP]);
+			measurements.RingLength = handGesture.PalmPos.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_RING][Finger.FingerJoint.JOINT_TIP]);
+			measurements.MiddleLength = handGesture.PalmPos.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_MIDDLE][Finger.FingerJoint.JOINT_TIP]);
+			measurements.IndexLength = handGesture.PalmPos.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_INDEX][Finger.FingerJoint.JOINT_TIP]);
+			measurements.ThumbLength = handGesture.PalmPos.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_THUMB][Finger.FingerJoint.JOINT_TIP]);
+			return measurements;
 		}
 
 		public void DrawScene()
@@ -353,6 +362,11 @@ namespace LeapGestureRecognition.ViewModel
 			_sqliteProvider.DeleteGesture(name);
 			updateGestureLibrary();
 			updateGestureLibraryMenu();
+		}
+
+		public void DeleteUser(LGR_User user)
+		{
+			_sqliteProvider.DeleteUser(user.Id);
 		}
 
 		#region Dialog Windows
@@ -420,7 +434,7 @@ namespace LeapGestureRecognition.ViewModel
 
 		public void DisplayOptionsDialog()
 		{
-			OptionsDialog optionsDialog = new OptionsDialog(_config);
+			OptionsDialog optionsDialog = new OptionsDialog(this);
 			if (optionsDialog.ShowDialog() == true)
 			{
 				// General Options
@@ -435,10 +449,30 @@ namespace LeapGestureRecognition.ViewModel
 					_sqliteProvider.UpdateBoneColor(boneColor.Key, boneColor.Value);
 					_config.BoneColors[boneColor.Key] = boneColor.Value;
 				}
+				// Users
+				LGR_User newActiveUser = optionsDialog.Changeset.ActiveUser;
+				if (newActiveUser != null && newActiveUser.Id != _config.ActiveUser.Id)
+				{
+					_sqliteProvider.SetActiveUser(newActiveUser.Id);
+					_config.ActiveUser = newActiveUser;
+					OnPropertyChanged("ActiveUser");
+				}
+				foreach (var newUser in optionsDialog.Changeset.ModifiedUsers)
+				{
+					_sqliteProvider.SaveNewUser(newUser);
+				}
+				foreach (var modifiedUser in optionsDialog.Changeset.ModifiedUsers)
+				{
+					_sqliteProvider.UpdateUser(modifiedUser);
+				}
+				foreach (int userId in optionsDialog.Changeset.DeletedUserIds)
+				{
+					_sqliteProvider.DeleteUser(userId);
+				}
+
+				_config.AllUsers = _sqliteProvider.GetAllUsers(); // Just to make sure it's up to date  
 			}
-			
-				
-			
+			//OnPropertyChanged(""); // Refresh all bindings (needed for ShowGestureLibrary and ShowOutputWindow).
 		}
 		#endregion
 
@@ -535,18 +569,10 @@ namespace LeapGestureRecognition.ViewModel
 			MenuBar.Add(defaultMode);
 			#endregion
 
-			#region OPTIONS 2
+			#region OPTIONS
 			CustomMenuItem options = new CustomMenuItem("Options");
 			options.Command = new CustomCommand(a => DisplayOptionsDialog());
 			MenuBar.Add(options);
-			#endregion
-
-			
-
-			#region SHOW GESTURE LIBRARY
-			CustomMenuItem showGestureLibrary = new CustomMenuItem("Show Gesture Library");
-			showGestureLibrary.Command = new CustomCommand(a => ShowGestureLibrary = !ShowGestureLibrary);
-			MenuBar.Add(resetCamera);
 			#endregion
 
 		}
