@@ -120,7 +120,7 @@ namespace LeapGestureRecognition.Util
 			}
 		}
 
-		private string singleValueQuery(string sql)
+		private string singleStringValueQuery(string sql)
 		{
 			using (var connection = new SQLiteConnection(_connString))
 			{
@@ -131,6 +131,22 @@ namespace LeapGestureRecognition.Util
 					{
 						reader.Read();
 						return reader.GetString(0);
+					}
+				}
+			}
+		}
+
+		private int singleIntValueQuery(string sql)
+		{
+			using (var connection = new SQLiteConnection(_connString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+				{
+					using (SQLiteDataReader reader = command.ExecuteReader())
+					{
+						reader.Read();
+						return reader.GetInt32(0);
 					}
 				}
 			}
@@ -234,7 +250,7 @@ namespace LeapGestureRecognition.Util
 		#endregion
 
 		#region Bone Colors
-		public Dictionary<string, Color> GetBoneColors()
+		public Dictionary<string, Color> GetBoneColors() 
 		{
 			Dictionary<string, Color> boneColors = new Dictionary<string, Color>();
 			string sql = "SELECT bone, color FROM BoneColors";
@@ -345,13 +361,14 @@ namespace LeapGestureRecognition.Util
 			executeNonQuery(sql);
 		}
 
-		public void SaveNewUser(LGR_User user)
+		public void SaveNewUser(LGR_User user) // Return the id of the user
 		{
 			string sql = String.Format("INSERT INTO Users (name, is_active, pinky_length, ring_length, middle_length, index_length, thumb_length) " +
 				"VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')", user.Name, user.IsActive ? 1 : 0,
 				user.PinkyLength, user.RingLength, user.MiddleLength, user.IndexLength, user.ThumbLength);
 
 			executeNonQuery(sql);
+			// Set the id of user:
 		}
 
 		public List<LGR_User> GetAllUsers()
@@ -388,6 +405,38 @@ namespace LeapGestureRecognition.Util
 		public void DeleteUser(int id) // Might want to return a bool to indicate success or failure
 		{
 			string sql = String.Format("DELETE FROM Users WHERE id='{0}'", id);
+			executeNonQuery(sql);
+		}
+		#endregion
+
+		#region GestureInstances
+		public List<LGR_SingleHandStaticGesture> GetGestureInstances(int avgId)
+		{
+			List<LGR_SingleHandStaticGesture> gestureInstances = new List<LGR_SingleHandStaticGesture>();
+			string sql = String.Format("SELECT id, gesture_data FROM GestureInstances WHERE averaged_gesture_id='{0}'", avgId);
+			using (var connection = new SQLiteConnection(_connString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+				{
+					using (SQLiteDataReader reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							LGR_SingleHandStaticGesture instance = JsonConvert.DeserializeObject<LGR_SingleHandStaticGesture>(reader.GetString(1));
+							instance.Id = reader.GetInt32(0);
+							instance.AveragedGestureId = avgId; // Not sure if needed
+						}
+					}
+				}
+			}
+			return gestureInstances;
+		}
+
+		public void SaveNewGestureInstance(LGR_SingleHandStaticGesture gestureInstance, int avgId) // Whenever this is called it will be a new instance.
+		{
+			string serializedGestureInstance = JsonConvert.SerializeObject(gestureInstance);
+			string sql = String.Format("INSERT INTO GestureInstances (averaged_gesture_id, gesture_data) VALUES ('{0}', '{1}')", avgId, serializedGestureInstance);
 			executeNonQuery(sql);
 		}
 		#endregion

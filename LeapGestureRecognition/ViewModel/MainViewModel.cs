@@ -308,6 +308,10 @@ namespace LeapGestureRecognition.ViewModel
 			Hand hand = _controller.Frame().Hands.FirstOrDefault();
 			if (hand == null) return;
 
+			//LGR_SingleHandStaticGesture test = new LGR_SingleHandStaticGesture(hand);
+			//int avgId = 1;
+			//_sqliteProvider.SaveNewGestureInstance(test, avgId);
+
 			SelectedGesture = new SingleHandGestureStatic(hand);
 			Mode = LGR_Mode.Playback;
 			DisplaySaveGestureDialog(SelectedGesture);
@@ -320,14 +324,17 @@ namespace LeapGestureRecognition.ViewModel
 			Hand hand = _controller.Frame().Hands.FirstOrDefault();
 			if (hand == null) return null;
 
-			SingleHandGestureStatic handGesture = new SingleHandGestureStatic(hand);
-			LGR_HandMeasurements measurements = new LGR_HandMeasurements();
-			measurements.PinkyLength = handGesture.PalmPos.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_PINKY][Finger.FingerJoint.JOINT_TIP]);
-			measurements.RingLength = handGesture.PalmPos.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_RING][Finger.FingerJoint.JOINT_TIP]);
-			measurements.MiddleLength = handGesture.PalmPos.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_MIDDLE][Finger.FingerJoint.JOINT_TIP]);
-			measurements.IndexLength = handGesture.PalmPos.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_INDEX][Finger.FingerJoint.JOINT_TIP]);
-			measurements.ThumbLength = handGesture.PalmPos.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_THUMB][Finger.FingerJoint.JOINT_TIP]);
-			return measurements;
+			return new SingleHandGestureStatic(hand).GetMeasurements();
+
+
+			//SingleHandGestureStatic handGesture = new SingleHandGestureStatic(hand);
+			//LGR_HandMeasurements measurements = new LGR_HandMeasurements();
+			//measurements.PinkyLength = handGesture.PalmCenter.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_PINKY][Finger.FingerJoint.JOINT_TIP]);
+			//measurements.RingLength = handGesture.PalmCenter.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_RING][Finger.FingerJoint.JOINT_TIP]);
+			//measurements.MiddleLength = handGesture.PalmCenter.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_MIDDLE][Finger.FingerJoint.JOINT_TIP]);
+			//measurements.IndexLength = handGesture.PalmCenter.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_INDEX][Finger.FingerJoint.JOINT_TIP]);
+			//measurements.ThumbLength = handGesture.PalmCenter.DistanceTo(handGesture.FingerJointPositions[Finger.FingerType.TYPE_THUMB][Finger.FingerJoint.JOINT_TIP]);
+			//return measurements;
 		}
 
 		public void DrawScene()
@@ -457,7 +464,7 @@ namespace LeapGestureRecognition.ViewModel
 					_config.ActiveUser = newActiveUser;
 					OnPropertyChanged("ActiveUser");
 				}
-				foreach (var newUser in optionsDialog.Changeset.ModifiedUsers)
+				foreach (var newUser in optionsDialog.Changeset.NewUsers)
 				{
 					_sqliteProvider.SaveNewUser(newUser);
 				}

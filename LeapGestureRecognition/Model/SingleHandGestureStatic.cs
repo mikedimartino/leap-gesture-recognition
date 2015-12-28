@@ -20,7 +20,7 @@ namespace LeapGestureRecognition.Model
 			Pitch = hand.Direction.Pitch;
 			Yaw = hand.Direction.Yaw;
 			Roll = hand.Direction.Roll;
-			PalmPos = new LGR_Vec3(hand.PalmPosition);
+			PalmCenter = new LGR_Vec3(hand.PalmPosition);
 			PalmNormal = new LGR_Vec3(hand.PalmNormal);
 			FingerJointPositions = getFingerJointPositions(hand);
 			WristPos = new LGR_Vec3(hand.WristPosition);
@@ -30,6 +30,9 @@ namespace LeapGestureRecognition.Model
 			ArmY = new LGR_Vec3(hand.Arm.Basis.yBasis);
 			ArmZ = new LGR_Vec3(hand.Arm.Basis.zBasis);
 			setFingerBasePositions(hand);
+
+			HandOrientation = getHandOrientation(hand);
+			RecognizableInstance = new StaticGestureInstance(this);
 		}
 
 		[DataMember]
@@ -45,7 +48,7 @@ namespace LeapGestureRecognition.Model
 		[DataMember]
 		public float Roll { get; set; }
 		[DataMember]
-		public LGR_Vec3 PalmPos { get; set; }
+		public LGR_Vec3 PalmCenter { get; set; }
 		[DataMember]
 		public LGR_Vec3 PalmNormal { get; set; }
 		[DataMember]
@@ -71,6 +74,10 @@ namespace LeapGestureRecognition.Model
 		public LGR_Vec3 ArmY { get; set; }
 		[DataMember]
 		public LGR_Vec3 ArmZ { get; set; }
+
+		public Matrix HandOrientation { get; set; }
+
+		public StaticGestureInstance RecognizableInstance { get; set; }
 
 
 		public LGR_Vec3 ThumbBasePos
@@ -129,7 +136,40 @@ namespace LeapGestureRecognition.Model
 			RingBasePos = new LGR_Vec3(ring.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint);
 			PinkyBasePos = new LGR_Vec3(pinky.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint);
 		}
+
+		private Matrix getHandOrientation(Hand hand) // Might want to move this somewhere else
+		{
+			Vector yBasis = hand.PalmNormal; // Might want to flip the sign of this
+			Vector zBasis = hand.Direction;
+			Vector xBasis = yBasis.Cross(zBasis);
+			Vector origin = hand.PalmPosition;
+			return new Matrix(xBasis, yBasis, zBasis, origin);
+		}
 		#endregion
 
+		#region Public Methods
+		public LGR_HandMeasurements GetMeasurements()
+		{
+			return new LGR_HandMeasurements()
+			{
+				PinkyLength = GetFingerLength(Finger.FingerType.TYPE_PINKY),
+				RingLength = GetFingerLength(Finger.FingerType.TYPE_RING),
+				MiddleLength = GetFingerLength(Finger.FingerType.TYPE_MIDDLE),
+				IndexLength = GetFingerLength(Finger.FingerType.TYPE_INDEX),
+				ThumbLength = GetFingerLength(Finger.FingerType.TYPE_THUMB)
+			};
+		}
+
+		public float GetFingerLength(Finger.FingerType fingerType) 
+		{
+			// Finger length = dist(PalmCenter, MCP) + dist(MCP, PIP) + dist(PIP, DIP) + dist(DIP, TIP)
+			var joints = FingerJointPositions[fingerType];
+			float length = PalmCenter.DistanceTo(joints[Finger.FingerJoint.JOINT_MCP]);
+			length += joints[Finger.FingerJoint.JOINT_MCP].DistanceTo(joints[Finger.FingerJoint.JOINT_PIP]);
+			length += joints[Finger.FingerJoint.JOINT_PIP].DistanceTo(joints[Finger.FingerJoint.JOINT_DIP]);
+			length += joints[Finger.FingerJoint.JOINT_DIP].DistanceTo(joints[Finger.FingerJoint.JOINT_TIP]);
+			return length;
+		}
+		#endregion
 	}
 }

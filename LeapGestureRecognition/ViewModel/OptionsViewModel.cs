@@ -74,6 +74,8 @@ namespace LeapGestureRecognition.ViewModel
 		{
 			// Might want to add some logic for when active user is deleted // Maybe disable delete?
 			Users.Remove(user);
+			Changeset.NewUsers.Remove(user);
+			Changeset.ModifiedUsers.Remove(user);
 			Changeset.DeletedUserIds.Add(user.Id);
 		}
 

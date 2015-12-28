@@ -123,6 +123,7 @@
     <Compile Include="Model\LGR_Classes.cs" />
     <Compile Include="Model\LGR_Configuration.cs" />
     <Compile Include="Model\LGR_HandMeasurements.cs" />
+    <Compile Include="Model\LGR_SingleHandStaticGesture.cs" />
     <Compile Include="Model\OptionsDialogChangeset.cs" />
     <Compile Include="Model\SingleHandGestureStatic.cs" />
     <Compile Include="Model\StaticGestureInstance.cs" />

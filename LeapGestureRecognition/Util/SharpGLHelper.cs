@@ -140,7 +140,7 @@ namespace LeapGestureRecognition.Util
 			// Draw wrist position
 			DrawSphere(hand.WristPos, Constants.WristSphereRadius, _boneColors[Constants.BoneNames.Wrist], opacity);
 			// Draw palm position
-			DrawSphere(hand.PalmPos, Constants.PalmSphereRadius, _boneColors[Constants.BoneNames.Palm], opacity);
+			DrawSphere(hand.PalmCenter, Constants.PalmSphereRadius, _boneColors[Constants.BoneNames.Palm], opacity);
 
 			foreach (var fjp in hand.FingerJointPositions)
 			{
