@@ -18,15 +18,13 @@ namespace LeapGestureRecognition.ViewModel
 		{
 			_mvm = mvm;
 			Config = _mvm.Config;
-			Changeset = new OptionsDialogChangeset();
-
-			Users = new ObservableCollection<LGR_User>(_mvm.Config.AllUsers.Select(user => new LGR_User(user)));
-			//Users = new ObservableCollection<LGR_User>(_mvm.Config.AllUsers); // Copy (not reference).
+			Changeset = new OptionsChangeset();
+			Users = new ObservableCollection<LGR_User>(_mvm.Config.AllUsers.Select(user => new LGR_User(user))); // Need to make copy, not reference.
 		}
 
 		#region Public Properties
 		public LGR_Configuration Config { get; set; }
-		public OptionsDialogChangeset Changeset { get; set; }
+		public OptionsChangeset Changeset { get; set; }
 
 		private ObservableCollection<LGR_User> _Users;
 		public ObservableCollection<LGR_User> Users // A copy (not reference) of _mvm's Config.AllUsers

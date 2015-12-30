@@ -22,7 +22,6 @@ namespace LeapGestureRecognition.View
 	public partial class OptionsDialog : Window
 	{
 		private OptionsViewModel _vm;
-		private MainViewModel _mvm;
 
 		public OptionsDialog(MainViewModel mvm)
 		{
@@ -56,7 +55,7 @@ namespace LeapGestureRecognition.View
 			}
 		}
 
-		public OptionsDialogChangeset Changeset
+		public OptionsChangeset Changeset
 		{
 			get { return _vm.Changeset; }
 		}

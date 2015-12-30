@@ -91,7 +91,9 @@
     </Reference>
     <Reference Include="System.Design" />
     <Reference Include="System.Device" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.2.0.0\lib\net40\System.Windows.Interactivity.dll</HintPath>
       <Private>True</Private>
@@ -117,24 +119,32 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Model\CustomCommand.cs" />
-    <Compile Include="Model\CustomMenuItem.cs" />
-    <Compile Include="Model\Camera.cs" />
-    <Compile Include="Model\LGR_Classes.cs" />
-    <Compile Include="Model\LGR_Configuration.cs" />
-    <Compile Include="Model\LGR_HandMeasurements.cs" />
-    <Compile Include="Model\LGR_SingleHandStaticGesture.cs" />
-    <Compile Include="Model\OptionsDialogChangeset.cs" />
-    <Compile Include="Model\SingleHandGestureStatic.cs" />
-    <Compile Include="Model\StaticGestureInstance.cs" />
-    <Compile Include="Model\LGR_User.cs" />
+    <Compile Include="Model\Class\CustomCommand.cs" />
+    <Compile Include="Model\Class\CustomMenuItem.cs" />
+    <Compile Include="Model\Class\Camera.cs" />
+    <Compile Include="Model\Class\EditGestureChangeset.cs" />
+    <Compile Include="Model\Class\LGR_StaticGesture.cs" />
+    <Compile Include="Model\Class\LGR_Timer.cs" />
+    <Compile Include="Model\Enum\GestureType.cs" />
+    <Compile Include="Model\Enum\LGR_Mode.cs" />
+    <Compile Include="Model\Interface\IGesture.cs" />
+    <Compile Include="Model\Class\LGR_Vec3.cs" />
+    <Compile Include="Model\Class\LGR_Configuration.cs" />
+    <Compile Include="Model\Class\LGR_HandMeasurements.cs" />
+    <Compile Include="Model\Class\LGR_SingleHandStaticGesture.cs" />
+    <Compile Include="Model\Class\OptionsChangeset.cs" />
+    <Compile Include="Model\Class\LGR_User.cs" />
     <Compile Include="Util\Constants.cs" />
     <Compile Include="Util\CustomLeapListener.cs" />
     <Compile Include="Util\HelperMethods.cs" />
     <Compile Include="Util\SQLiteProvider.cs" />
     <Compile Include="Util\SharpGLHelper.cs" />
+    <Compile Include="ViewModel\EditGestureViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\OptionsViewModel.cs" />
+    <Compile Include="View\EditGesture.xaml.cs">
+      <DependentUpon>EditGesture.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
@@ -154,6 +164,10 @@
     <Compile Include="View\SaveGestureDialog.xaml.cs">
       <DependentUpon>SaveGestureDialog.xaml</DependentUpon>
     </Compile>
+    <Page Include="View\EditGesture.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

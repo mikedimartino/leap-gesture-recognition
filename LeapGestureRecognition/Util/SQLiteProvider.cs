@@ -22,10 +22,6 @@ namespace LeapGestureRecognition.Util
 			  initDB(fileName);
 		}
 
-		#region Public Properties
-		public ObservableCollection<SingleHandGestureStatic> StaticSingleHandGestures { get; set; }
-		#endregion
-
 		#region Private Methods
 		private void initDB(string fileName)
 		{
@@ -157,97 +153,7 @@ namespace LeapGestureRecognition.Util
 
 		#region Public Methods
 
-		#region Gestures
-		public void SaveGesture(SingleHandGestureStatic gesture) // Might want to create separate methods for create and update.
-		{
-			string json = JsonConvert.SerializeObject(gesture);
-			string sql;
-			if (!GestureExists(gesture.Name))
-			{
-				sql = String.Format("INSERT INTO Gestures (name, json) VALUES ('{0}', '{1}')", gesture.Name, json);
-			}
-			else
-			{
-				sql = String.Format("UPDATE Gestures SET json='{0}' WHERE name='{1}'", json, gesture.Name);
-			}
-			executeNonQuery(sql);
-		}
 
-		public void SaveGesture(string name, SingleHandGestureStatic gesture)
-		{
-			gesture.Name = name;
-			SaveGesture(gesture);
-		}
-
-		public SingleHandGestureStatic GetGesture(string name)
-		{
-			string json;
-			string sql = String.Format("SELECT json FROM Gestures WHERE name='{0}' LIMIT 1", name);
-			using (var connection = new SQLiteConnection(_connString))
-			{
-				connection.Open();
-				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-				{
-					using (SQLiteDataReader reader = command.ExecuteReader())
-					{
-						if (!reader.Read()) throw new Exception(String.Format("Gesture '{0}' does not exist.", name));
-						json = reader.GetString(0);
-					}
-				}
-			}
-			return JsonConvert.DeserializeObject<SingleHandGestureStatic>(json);
-		}
-
-		public void DeleteGesture(string name) // Might want to return a bool to indicate success or failure
-		{
-			string sql = String.Format("DELETE FROM Gestures WHERE name='{0}'", name);
-			executeNonQuery(sql);
-		}
-
-		// Does not check to see if newName already exists in DB.
-		public void RenameGesture(string oldName, string newName) // Might want to return a bool to indicate success or failure
-		{
-			// Need to actually load the gesture and rename the object, and then store again with updated JSON. 
-			SingleHandGestureStatic gesture = GetGesture(oldName);
-			gesture.Name = newName;
-			string newJson = JsonConvert.SerializeObject(gesture);
-			string sql = String.Format("UPDATE Gestures SET name='{0}', json='{1}' WHERE name='{2}'", newName, newJson, oldName);
-			executeNonQuery(sql);
-		}
-
-		public bool GestureExists(string name)
-		{
-			using (var connection = new SQLiteConnection(_connString))
-			{
-				connection.Open();
-				string sql = String.Format("SELECT COUNT(1) FROM Gestures WHERE name='{0}'", name);
-				SQLiteCommand command = new SQLiteCommand(sql, connection);
-				return (int)(long)command.ExecuteScalar() > 0;
-			}
-		}
-
-		public ObservableCollection<SingleHandGestureStatic> GetAllGestures()
-		{
-			ObservableCollection<SingleHandGestureStatic> gestures = new ObservableCollection<SingleHandGestureStatic>();
-			string sql = "SELECT json FROM Gestures";
-			using (var connection = new SQLiteConnection(_connString))
-			{
-				connection.Open();
-				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-				{
-					using (SQLiteDataReader reader = command.ExecuteReader())
-					{
-						while (reader.Read())
-						{
-							string json = reader.GetString(0);
-							gestures.Add(JsonConvert.DeserializeObject<SingleHandGestureStatic>(json));
-						}
-					}
-				}
-			}
-			return gestures;
-		}
-		#endregion
 
 		#region Bone Colors
 		public Dictionary<string, Color> GetBoneColors() 
@@ -409,11 +315,129 @@ namespace LeapGestureRecognition.Util
 		}
 		#endregion
 
-		#region GestureInstances
-		public List<LGR_SingleHandStaticGesture> GetGestureInstances(int avgId)
+		#region Gestures
+		public int SaveGesture(LGR_StaticGesture gesture) // Returns id of gesture
 		{
-			List<LGR_SingleHandStaticGesture> gestureInstances = new List<LGR_SingleHandStaticGesture>();
-			string sql = String.Format("SELECT id, gesture_data FROM GestureInstances WHERE averaged_gesture_id='{0}'", avgId);
+			string sql;
+			if (!GestureExists(gesture.Id))
+			{
+				sql = String.Format("INSERT INTO Gestures (name, json) VALUES ('{0}', '{1}')", gesture.Name, "");
+				executeNonQuery(sql); // Need to set (auto-incremented) id before serializing.
+				gesture.Id = singleIntValueQuery("SELECT last_insert_rowid()");
+			}
+			string json = JsonConvert.SerializeObject(gesture);
+			sql = String.Format("UPDATE Gestures SET json='{0}', name='{1}' WHERE id='{2}'", json, gesture.Name, gesture.Id);
+			executeNonQuery(sql);
+			return gesture.Id;
+		}
+
+		public void SaveGesture(string name, LGR_StaticGesture gesture)
+		{
+			gesture.Name = name;
+			SaveGesture(gesture);
+		}
+
+		public LGR_StaticGesture GetGesture(string name)
+		{
+			string json;
+			string sql = String.Format("SELECT json FROM Gestures WHERE name='{0}' LIMIT 1", name);
+			using (var connection = new SQLiteConnection(_connString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+				{
+					using (SQLiteDataReader reader = command.ExecuteReader())
+					{
+						if (!reader.Read()) throw new Exception(String.Format("Gesture '{0}' does not exist.", name));
+						json = reader.GetString(0);
+					}
+				}
+			}
+			return JsonConvert.DeserializeObject<LGR_StaticGesture>(json);
+		}
+
+		public LGR_StaticGesture GetGesture(int id)
+		{
+			string json;
+			string sql = String.Format("SELECT json FROM Gestures WHERE id='{0}' LIMIT 1", id);
+			using (var connection = new SQLiteConnection(_connString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+				{
+					using (SQLiteDataReader reader = command.ExecuteReader())
+					{
+						if (!reader.Read()) throw new Exception(String.Format("Gesture id '{0}' does not exist.", id));
+						json = reader.GetString(0);
+					}
+				}
+			}
+			return JsonConvert.DeserializeObject<LGR_StaticGesture>(json);
+		}
+
+		public void DeleteGesture(string name)
+		{
+			string sql = String.Format("DELETE FROM Gestures WHERE name='{0}'", name);
+			executeNonQuery(sql);
+		}
+
+		public void DeleteGesture(int id)
+		{
+			List<string> queries = new List<string>()
+			{
+				String.Format("DELETE FROM Gestures WHERE id='{0}'", id),
+				String.Format("DELETE FROM GestureInstances WHERE class_id='{0}'", id)
+			};
+			executeBatchNonQuery(queries);
+		}
+
+		// Does not check to see if newName already exists in DB.
+		public void RenameGesture(string oldName, string newName) // Might want to return a bool to indicate success or failure
+		{
+			// Need to actually load the gesture and rename the object, and then store again with updated JSON. 
+			LGR_StaticGesture gesture = GetGesture(oldName);
+			gesture.Name = newName;
+			string newJson = JsonConvert.SerializeObject(gesture);
+			string sql = String.Format("UPDATE Gestures SET name='{0}', json='{1}' WHERE name='{2}'", newName, newJson, oldName);
+			executeNonQuery(sql);
+		}
+
+		public void RenameGesture(int id, string newName) // Might want to return a bool to indicate success or failure
+		{
+			// Need to actually load the gesture and rename the object, and then store again with updated JSON. 
+			LGR_StaticGesture gesture = GetGesture(id);
+			gesture.Name = newName;
+			string newJson = JsonConvert.SerializeObject(gesture);
+			string sql = String.Format("UPDATE Gestures SET name='{0}', json='{1}' WHERE id='{2}'", newName, newJson, id);
+			executeNonQuery(sql);
+		}
+
+		public bool GestureExists(string name)
+		{
+			using (var connection = new SQLiteConnection(_connString))
+			{
+				connection.Open();
+				string sql = String.Format("SELECT COUNT(1) FROM Gestures WHERE name='{0}'", name);
+				SQLiteCommand command = new SQLiteCommand(sql, connection);
+				return (int)(long)command.ExecuteScalar() > 0;
+			}
+		}
+
+		public bool GestureExists(int id)
+		{
+			using (var connection = new SQLiteConnection(_connString))
+			{
+				connection.Open();
+				string sql = String.Format("SELECT COUNT(1) FROM Gestures WHERE id='{0}'", id);
+				SQLiteCommand command = new SQLiteCommand(sql, connection);
+				return (int)(long)command.ExecuteScalar() > 0;
+			}
+		}
+
+		public ObservableCollection<LGR_StaticGesture> GetAllGestures()
+		{
+			ObservableCollection<LGR_StaticGesture> gestures = new ObservableCollection<LGR_StaticGesture>();
+			string sql = "SELECT id,name,json FROM Gestures";
 			using (var connection = new SQLiteConnection(_connString))
 			{
 				connection.Open();
@@ -423,9 +447,48 @@ namespace LeapGestureRecognition.Util
 					{
 						while (reader.Read())
 						{
-							LGR_SingleHandStaticGesture instance = JsonConvert.DeserializeObject<LGR_SingleHandStaticGesture>(reader.GetString(1));
+							int id = reader.GetInt32(0);
+							string name = reader.GetString(1);
+							string json = reader.GetString(2);
+							var gest = JsonConvert.DeserializeObject<LGR_StaticGesture>(json) ?? new LGR_StaticGesture();
+							gest.Id = id;
+							gest.Name = name;
+							// This code above can be simplified later. Adding this logic for when manually adding entries in DB with empty json.
+							gestures.Add(gest);
+						}
+					}
+				}
+			}
+			return gestures;
+		}
+
+		public string GetGestureName(int id)
+		{
+			string sql = String.Format("SELECT name FROM Gestures WHERE id='{0}'", id);
+			return singleStringValueQuery(sql);
+		}
+		#endregion
+
+		#region GestureInstances
+		public ObservableCollection<LGR_StaticGesture> GetGestureInstances(int classId)
+		{
+			ObservableCollection<LGR_StaticGesture> gestureInstances = new ObservableCollection<LGR_StaticGesture>();
+			string sql = String.Format("SELECT id, class_id, json FROM GestureInstances WHERE class_id='{0}'", classId);
+			using (var connection = new SQLiteConnection(_connString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+				{
+					using (SQLiteDataReader reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							LGR_StaticGesture instance = JsonConvert.DeserializeObject<LGR_StaticGesture>(reader.GetString(2));
 							instance.Id = reader.GetInt32(0);
-							instance.AveragedGestureId = avgId; // Not sure if needed
+							instance.ClassId = reader.GetInt32(1);
+							//instance.InstanceName = (instance.Id == -1 || instance.ClassId == -1) ? "new instance" : String.Format("class {0} inst {1}", instance.ClassId, instance.Id);
+							instance.InstanceName = String.Format("class {0} inst {1}", instance.ClassId, instance.Id);
+							gestureInstances.Add(instance);
 						}
 					}
 				}
@@ -433,10 +496,16 @@ namespace LeapGestureRecognition.Util
 			return gestureInstances;
 		}
 
-		public void SaveNewGestureInstance(LGR_SingleHandStaticGesture gestureInstance, int avgId) // Whenever this is called it will be a new instance.
+		public void SaveNewGestureInstance(LGR_StaticGesture gestureInstance) // Whenever this is called it will be a new instance.
 		{
 			string serializedGestureInstance = JsonConvert.SerializeObject(gestureInstance);
-			string sql = String.Format("INSERT INTO GestureInstances (averaged_gesture_id, gesture_data) VALUES ('{0}', '{1}')", avgId, serializedGestureInstance);
+			string sql = String.Format("INSERT INTO GestureInstances (class_id, json) VALUES ('{0}', '{1}')", gestureInstance.ClassId, serializedGestureInstance);
+			executeNonQuery(sql);
+		}
+
+		public void DeleteGestureInstance(int id)
+		{
+			string sql = String.Format("DELETE FROM GestureInstances WHERE id='{0}'", id);
 			executeNonQuery(sql);
 		}
 		#endregion

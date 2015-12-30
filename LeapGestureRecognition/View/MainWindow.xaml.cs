@@ -33,7 +33,7 @@ namespace LeapGestureRecognition
 		public MainWindow()
 		{
 			InitializeComponent();
-			_vm = new MainViewModel(openGLControl.OpenGL, outputWindowScrollViewer, new Controller(), new CustomLeapListener());
+			_vm = new MainViewModel(openGLControl.OpenGL, outputWindowScrollViewer, editGestureControl, new Controller(), new CustomLeapListener());
 			DataContext = _vm;
 			//DataContext = new MainViewModel(new Controller(), new CustomLeapListener());
 			//_vm = (MainViewModel)this.DataContext;
@@ -50,7 +50,6 @@ namespace LeapGestureRecognition
 			
 			Height = 600; //SystemParameters.FullPrimaryScreenHeight;
 			Width = 800; //SystemParameters.FullPrimaryScreenWidth;
-			
 		}
 
 		/// <summary>
@@ -87,7 +86,7 @@ namespace LeapGestureRecognition
 
 		private void ViewGesture(object sender, RoutedEventArgs e)
 		{
-			SingleHandGestureStatic gesture = (SingleHandGestureStatic) (e.Source as FrameworkElement).Tag;
+			LGR_StaticGesture gesture = (LGR_StaticGesture)(e.Source as FrameworkElement).Tag;
 			_vm.DisplayGesture(gesture);
 		}
 
@@ -95,21 +94,29 @@ namespace LeapGestureRecognition
 		{
 			if (e.ClickCount >= 2) // Double click
 			{
-				SingleHandGestureStatic gesture = (SingleHandGestureStatic)(e.Source as FrameworkElement).Tag;
-				_vm.DisplayGesture(gesture);
+				LGR_StaticGesture gesture = (LGR_StaticGesture)(e.Source as FrameworkElement).Tag;
+				//_vm.DisplayGesture(gesture);
+				_vm.EditGesture(gesture);
 			}
 		}
 
 		private void DeleteGesture(object sender, RoutedEventArgs e)
 		{
-			string gestureName = (string)(e.Source as FrameworkElement).Tag;
-			_vm.DeleteGesture(gestureName);
+			LGR_StaticGesture gesture = (LGR_StaticGesture)(e.Source as FrameworkElement).Tag;
+			_vm.DeleteGesture(gesture);
 		}
 
 		private void RenameGesture(object sender, RoutedEventArgs e)
 		{
 			string gestureName = (string)(e.Source as FrameworkElement).Tag;
 			_vm.DisplayRenameGestureDialog(gestureName);
+		}
+
+		private void EditGesture(object sender, RoutedEventArgs e)
+		{
+			LGR_StaticGesture gesture = (LGR_StaticGesture)(e.Source as FrameworkElement).Tag;
+			//_vm.DisplayEditGestureView(gesture.Id);
+			_vm.EditGesture(gesture);
 		}
 
 	}
