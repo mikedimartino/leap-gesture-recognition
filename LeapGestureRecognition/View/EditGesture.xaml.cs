@@ -24,7 +24,7 @@ namespace LGR_Controls
 	public partial class EditGesture : UserControl
 	{
 		private MainViewModel _mvm;
-		private EditGestureViewModel _vm;
+		private EditGestureViewModel _vm; // Might be able to not use this and just use mvm instead
 
 		public EditGesture() 
 		{
@@ -48,7 +48,7 @@ namespace LGR_Controls
 		}
 		public void SetMvm(MainViewModel mvm) // Make property instead?
 		{
-			this._mvm = mvm;
+			_mvm = mvm;
 		}
 
 		private void Save_Button_Click(object sender, RoutedEventArgs e)
@@ -86,13 +86,13 @@ namespace LGR_Controls
 
 		private void DeleteInstance(object sender, RoutedEventArgs e)
 		{
-			LGR_StaticGesture gesture = (LGR_StaticGesture)(e.Source as FrameworkElement).Tag;
+			var gesture = (LGR_StaticGesture)(e.Source as FrameworkElement).Tag;
 			_vm.DeleteInstance(gesture);
 		}
 
 		private void ViewInstance(object sender, RoutedEventArgs e)
 		{
-			LGR_StaticGesture instance = (LGR_StaticGesture)(e.Source as FrameworkElement).Tag;
+			var instance = (LGR_StaticGesture)(e.Source as FrameworkElement).Tag;
 			_vm.ViewInstance(instance);
 		}
 		
@@ -100,7 +100,7 @@ namespace LGR_Controls
 		{
 			if (e.ClickCount >= 2) // Double click
 			{
-				LGR_StaticGesture instance = (LGR_StaticGesture)(sender as FrameworkElement).Tag;
+				var instance = (LGR_StaticGesture)(sender as FrameworkElement).Tag;
 				_vm.ViewInstance(instance);
 			}
 		}

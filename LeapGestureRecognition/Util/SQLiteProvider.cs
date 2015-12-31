@@ -510,6 +510,50 @@ namespace LeapGestureRecognition.Util
 		}
 		#endregion
 
+
+		#region StaticGestureInstances
+		public ObservableCollection<StaticGestureInstanceWrapper> GetStaticGestureInstances(int classId)
+		{
+			var gestureInstances = new ObservableCollection<StaticGestureInstanceWrapper>();
+			string sql = String.Format("SELECT id, class_id, json FROM StaticGestureInstances WHERE class_id='{0}'", classId);
+			using (var connection = new SQLiteConnection(_connString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+				{
+					using (SQLiteDataReader reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							StaticGestureInstanceWrapper instance = new StaticGestureInstanceWrapper()
+							{
+								Id = reader.GetInt32(0),
+								ClassId = reader.GetInt32(1),
+								Gesture = JsonConvert.DeserializeObject<LGR_StaticGesture>(reader.GetString(2)),
+							};
+							instance.InstanceName = String.Format("class {0} inst {1}", instance.ClassId, instance.Id);
+							gestureInstances.Add(instance);
+						}
+					}
+				}
+			}
+			return gestureInstances;
+		}
+
+		public void SaveNewStaticGestureInstance(int classId, LGR_StaticGesture instance) // Whenever this is called it will be a new instance.
+		{
+			string serializedInstance = JsonConvert.SerializeObject(instance);
+			string sql = String.Format("INSERT INTO StaticGestureInstances (class_id, json) VALUES ('{0}', '{1}')", classId, serializedInstance);
+			executeNonQuery(sql);
+		}
+
+		public void DeleteStaticGestureInstance(int id)
+		{
+			string sql = String.Format("DELETE FROM StaticGestureInstances WHERE id='{0}'", id);
+			executeNonQuery(sql);
+		}
+		#endregion
+
 		#endregion
 
 	}

@@ -24,6 +24,7 @@ namespace LeapGestureRecognition.ViewModel
 		private static OpenGL _gl;
 		private static Controller _controller;
 		private System.Windows.Controls.ScrollViewer _scrollViewer;
+		private GestureLibrary _gestureLibraryControl;
 		private EditGesture _editGestureControl;
 
 		private static Camera _camera;
@@ -34,7 +35,7 @@ namespace LeapGestureRecognition.ViewModel
 		LGR_Configuration _config;
 
 
-		public MainViewModel(OpenGL gl, System.Windows.Controls.ScrollViewer scrollViewer, EditGesture editGestureControl, Controller controller, CustomLeapListener listener)
+		public MainViewModel(OpenGL gl, System.Windows.Controls.ScrollViewer scrollViewer, GestureLibrary gestureLibraryControl, EditGesture editGestureControl, Controller controller, CustomLeapListener listener)
 		{
 			_gl = gl;
 			_controller = controller;
@@ -42,6 +43,8 @@ namespace LeapGestureRecognition.ViewModel
 			_controller.AddListener(_listener);
 			_camera = new Camera(_gl);
 			_scrollViewer = scrollViewer;
+			_gestureLibraryControl = gestureLibraryControl;
+			_gestureLibraryControl.SetMvm(this);
 			_editGestureControl = editGestureControl;
 			_editGestureControl.SetMvm(this);
 			_sqliteProvider = new SQLiteProvider(Constants.SQLiteFileName);

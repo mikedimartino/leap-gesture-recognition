@@ -11,7 +11,7 @@
 		<BooleanToVisibilityConverter x:Key="BoolToVis" />
 	</Window.Resources>
 
-	<Grid>
+	<Grid Background="#DADADA">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
@@ -47,61 +47,9 @@
 						<RowDefinition />
 					</Grid.RowDefinitions>
 
-					<!--<StackPanel Grid.Row="0" Orientation="Vertical" Margin="10">
-						<TextBlock FontSize="13" FontWeight="Bold" >Gesture Library</TextBlock>
-						<ListBox ItemsSource="{Binding StaticGestures}" Grid.Column="0" HorizontalContentAlignment="Stretch">
-							<ListBox.ItemTemplate>
-								<DataTemplate>
-									<Grid MouseDown="GestureMouseDown">
-										<TextBlock Text="{Binding Name}" Tag="{Binding}">
-											<TextBlock.ContextMenu>
-												<ContextMenu>
-													<MenuItem Header="View" Click="ViewGesture" Tag="{Binding}" />
-													<MenuItem Header="Edit" Click="EditGesture" Tag="{Binding}" />
-													<MenuItem Header="Delete" Click="DeleteGesture" Tag="{Binding Id}" />
-													--><!--<MenuItem Header="Rename" Click="RenameGesture" Tag="{Binding Id}" />--><!--
-												</ContextMenu>
-											</TextBlock.ContextMenu>
-										</TextBlock>
-									</Grid>
-								</DataTemplate>
-							</ListBox.ItemTemplate>
-						</ListBox>
-					</StackPanel>-->
-
-					<Grid Grid.Row="0" Margin="10">
-						<Grid.RowDefinitions>
-							<RowDefinition Height="Auto" />
-							<RowDefinition Height="*" />
-						</Grid.RowDefinitions>
-						
-						<TextBlock Grid.Row="0" FontSize="13" FontWeight="Bold" >Gesture Library</TextBlock>
-						<ListBox Grid.Row="1" ItemsSource="{Binding StaticGestures}" Grid.Column="0" HorizontalContentAlignment="Stretch">
-							<ListBox.ItemTemplate>
-								<DataTemplate>
-									<Grid MouseDown="GestureMouseDown">
-										<TextBlock Text="{Binding Name}" Tag="{Binding}">
-											<TextBlock.ContextMenu>
-												<ContextMenu>
-													<MenuItem Header="View" Click="ViewGesture" Tag="{Binding}" />
-													<MenuItem Header="Edit" Click="EditGesture" Tag="{Binding}" />
-													<MenuItem Header="Delete" Click="DeleteGesture" Tag="{Binding}" />
-													<!--<MenuItem Header="Rename" Click="RenameGesture" Tag="{Binding Id}" />-->
-												</ContextMenu>
-											</TextBlock.ContextMenu>
-										</TextBlock>
-									</Grid>
-								</DataTemplate>
-							</ListBox.ItemTemplate>
-						</ListBox>
-					</Grid>
+					<lgrContrls:GestureLibrary Grid.Row="0" x:Name="gestureLibraryControl" />
 
 					<GridSplitter Grid.Row="1" Height="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#444444" />
-
-					<!--<StackPanel Grid.Row="2" Orientation="Vertical" Margin="10">
-						<TextBlock FontSize="13" FontWeight="Bold">Edit Gesture</TextBlock>
-						<TextBlock>No gesture selected</TextBlock>
-					</StackPanel>-->
 
 					<lgrContrls:EditGesture Grid.Row="2" x:Name="editGestureControl" Visibility="{Binding CurrentlyEditingGesture, Converter={StaticResource BoolToVis}}" />
 

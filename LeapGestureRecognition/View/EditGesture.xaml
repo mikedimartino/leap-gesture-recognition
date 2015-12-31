@@ -5,10 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-	<Grid Background="Wheat">
+	<Grid Background="#DADADA">
 		<Border Margin="10" BorderBrush="Black" BorderThickness="1">
 			<Grid Margin="10">
 				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
 					<RowDefinition Height="Auto"/>
 					<RowDefinition Height="Auto"/>
 					<RowDefinition Height="Auto"/>
@@ -17,13 +18,15 @@
 					<RowDefinition Height="Auto"/>
 				</Grid.RowDefinitions>
 
-				<TextBlock Grid.Row="0" FontSize="13" FontWeight="Bold">Edit Gesture</TextBlock>
+				<TextBlock Grid.Row="0" FontSize="15" FontWeight="Bold" Margin="0 0 0 8">Edit Gesture</TextBlock>
+
+				<TextBlock Grid.Row="1" FontWeight="Bold">Name</TextBlock>
 				
-				<TextBox Grid.Row="1" Margin="0 8" Text="{Binding Name}" />
+				<TextBox Grid.Row="2" Margin="0 0 0 8" Text="{Binding Name}" />
 
-				<TextBlock Grid.Row="2" FontWeight="Bold">Instances</TextBlock>
+				<TextBlock Grid.Row="3" FontWeight="Bold">Instances</TextBlock>
 
-				<ListBox Grid.Row="3" ItemsSource="{Binding Instances}" Grid.Column="0" HorizontalContentAlignment="Stretch">
+				<ListBox Grid.Row="4" ItemsSource="{Binding Instances}" Grid.Column="0" HorizontalContentAlignment="Stretch">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
 							<Grid MouseDown="InstanceMouseDown" HorizontalAlignment="Stretch" Tag="{Binding}">
@@ -41,9 +44,9 @@
 					</ListBox.ItemTemplate>
 				</ListBox>
 
-				<Button Grid.Row="4" Click="RecordNewInstance_Button_Click" Tag="{Binding}" Margin="50 5 50 15">Record New Instance</Button>
+				<Button Grid.Row="5" Click="RecordNewInstance_Button_Click" Tag="{Binding}" Margin="50 5 50 15">Record New Instance</Button>
 
-				<WrapPanel Grid.Row="5" HorizontalAlignment="Center">
+				<WrapPanel Grid.Row="6" HorizontalAlignment="Center">
 					<Button IsDefault="True" Click="Save_Button_Click" Tag="{Binding}" MinWidth="60" Margin="0,0,10,0">Save</Button>
 					<Button IsCancel="True" Click="Cancel_Button_Click" MinWidth="60">Cancel</Button>
 				</WrapPanel>

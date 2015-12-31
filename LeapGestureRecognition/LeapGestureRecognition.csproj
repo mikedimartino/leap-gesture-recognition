@@ -119,12 +119,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\Class\BayesGestureClassWrapper.cs" />
     <Compile Include="Model\Class\CustomCommand.cs" />
     <Compile Include="Model\Class\CustomMenuItem.cs" />
     <Compile Include="Model\Class\Camera.cs" />
     <Compile Include="Model\Class\EditGestureChangeset.cs" />
     <Compile Include="Model\Class\LGR_StaticGesture.cs" />
     <Compile Include="Model\Class\LGR_Timer.cs" />
+    <Compile Include="Model\Class\StaticGestureInstanceWrapper.cs" />
     <Compile Include="Model\Enum\GestureType.cs" />
     <Compile Include="Model\Enum\LGR_Mode.cs" />
     <Compile Include="Model\Interface\IGesture.cs" />
@@ -144,6 +146,9 @@
     <Compile Include="ViewModel\OptionsViewModel.cs" />
     <Compile Include="View\EditGesture.xaml.cs">
       <DependentUpon>EditGesture.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\GestureLibrary.xaml.cs">
+      <DependentUpon>GestureLibrary.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -165,6 +170,10 @@
       <DependentUpon>SaveGestureDialog.xaml</DependentUpon>
     </Compile>
     <Page Include="View\EditGesture.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\GestureLibrary.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
