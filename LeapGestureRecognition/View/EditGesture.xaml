@@ -30,14 +30,13 @@
 					<ListBox.ItemTemplate>
 						<DataTemplate>
 							<Grid MouseDown="InstanceMouseDown" HorizontalAlignment="Stretch" Tag="{Binding}">
-								<TextBlock Tag="{Binding}">
+								<TextBlock Text="{Binding InstanceName}" Tag="{Binding}">
 									<TextBlock.ContextMenu>
 										<ContextMenu>
 											<MenuItem Header="View" Click="ViewInstance" Tag="{Binding}" />
 											<MenuItem Header="Delete" Click="DeleteInstance" Tag="{Binding}" />
 										</ContextMenu>
 									</TextBlock.ContextMenu>
-									<TextBlock Text="{Binding InstanceName}" />
 								</TextBlock>
 							</Grid>
 						</DataTemplate>

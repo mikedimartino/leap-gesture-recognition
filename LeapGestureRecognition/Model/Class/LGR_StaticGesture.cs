@@ -15,35 +15,20 @@ namespace LeapGestureRecognition.Model
 	{
 		public LGR_StaticGesture()
 		{
-			Name = "New Static Gesture";
-			Id = -1;
-			ClassId = -1;
 			Hands = new List<LGR_SingleHandStaticGesture>();
-			InstanceName = "new instance";
 		}
 
-		public LGR_StaticGesture(Frame frame, int id = -1, string name = "New Static Gesture")
+		public LGR_StaticGesture(Frame frame)
 		{
-			Name = name;
-			Id = id;
 			Hands = new List<LGR_SingleHandStaticGesture>();
 			foreach (Hand hand in frame.Hands)
 			{
 				Hands.Add(new LGR_SingleHandStaticGesture(hand));
 			}
-			InstanceName = "new instance";
 		}
 
 		[DataMember]
-		public string Name { get; set; }
-		[DataMember]
-		public int Id { get; set; }
-		[DataMember]
 		public List<LGR_SingleHandStaticGesture> Hands { get; set; }
-
-		public int ClassId { get; set; }
-
-		public string InstanceName { get; set; }
 
 		public LGR_StaticGesture DeepCopy()
 		{

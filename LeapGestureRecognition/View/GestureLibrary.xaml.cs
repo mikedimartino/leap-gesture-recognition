@@ -1,4 +1,5 @@
 ﻿using LeapGestureRecognition.Model;
+using LeapGestureRecognition.Util;
 using LeapGestureRecognition.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -41,27 +42,27 @@ namespace LGR_Controls
 
 		private void ViewGesture(object sender, RoutedEventArgs e)
 		{
-			var gesture = (LGR_StaticGesture)(e.Source as FrameworkElement).Tag;
-			_mvm.DisplayGesture(gesture);
+			var gesture = (BayesStaticGestureWrapper)(e.Source as FrameworkElement).Tag;
+			_mvm.DisplayGesture(gesture.SampleInstance);
 		}
 
 		private void EditGesture(object sender, RoutedEventArgs e)
 		{
-			var gesture = (LGR_StaticGesture)(e.Source as FrameworkElement).Tag;
+			var gesture = (BayesStaticGestureWrapper)(e.Source as FrameworkElement).Tag;
 			_mvm.EditGesture(gesture);
 		}
 
 		private void DeleteGesture(object sender, RoutedEventArgs e)
 		{
-			var gesture = (LGR_StaticGesture)(e.Source as FrameworkElement).Tag;
-			_mvm.DeleteGesture(gesture);
+			var gesture = (BayesStaticGestureWrapper)(e.Source as FrameworkElement).Tag;
+			_mvm.SQLiteProvider.DeleteBayesStaticGesture(gesture.Id);
 		}
 
 		private void GestureMouseDown(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ClickCount >= 2) // Double click
 			{
-				var gesture = (LGR_StaticGesture)(sender as FrameworkElement).Tag;
+				var gesture = (BayesStaticGestureWrapper)(sender as FrameworkElement).Tag;
 				_mvm.EditGesture(gesture);
 			}
 		}

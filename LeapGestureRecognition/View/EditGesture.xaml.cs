@@ -86,13 +86,13 @@ namespace LGR_Controls
 
 		private void DeleteInstance(object sender, RoutedEventArgs e)
 		{
-			var gesture = (LGR_StaticGesture)(e.Source as FrameworkElement).Tag;
+			var gesture = (StaticGestureInstanceWrapper)(e.Source as FrameworkElement).Tag;
 			_vm.DeleteInstance(gesture);
 		}
 
 		private void ViewInstance(object sender, RoutedEventArgs e)
 		{
-			var instance = (LGR_StaticGesture)(e.Source as FrameworkElement).Tag;
+			var instance = (StaticGestureInstanceWrapper)(e.Source as FrameworkElement).Tag;
 			_vm.ViewInstance(instance);
 		}
 		
@@ -100,7 +100,7 @@ namespace LGR_Controls
 		{
 			if (e.ClickCount >= 2) // Double click
 			{
-				var instance = (LGR_StaticGesture)(sender as FrameworkElement).Tag;
+				var instance = (StaticGestureInstanceWrapper)(sender as FrameworkElement).Tag;
 				_vm.ViewInstance(instance);
 			}
 		}

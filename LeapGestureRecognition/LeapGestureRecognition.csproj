@@ -119,13 +119,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Model\Class\BayesGestureClassWrapper.cs" />
+    <Compile Include="Model\Class\BayesStaticGesture.cs" />
+    <Compile Include="Model\Class\BayesStaticGestureWrapper.cs" />
     <Compile Include="Model\Class\CustomCommand.cs" />
     <Compile Include="Model\Class\CustomMenuItem.cs" />
     <Compile Include="Model\Class\Camera.cs" />
     <Compile Include="Model\Class\EditGestureChangeset.cs" />
     <Compile Include="Model\Class\LGR_StaticGesture.cs" />
-    <Compile Include="Model\Class\LGR_Timer.cs" />
     <Compile Include="Model\Class\StaticGestureInstanceWrapper.cs" />
     <Compile Include="Model\Enum\GestureType.cs" />
     <Compile Include="Model\Enum\LGR_Mode.cs" />

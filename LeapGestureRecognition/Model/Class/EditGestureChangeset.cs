@@ -10,13 +10,13 @@ namespace LeapGestureRecognition.Model
 	{
 		public string NewName;
 		public List<int> DeletedGestureInstances;
-		public List<LGR_StaticGesture> NewGestureInstances;
+		public List<StaticGestureInstanceWrapper> NewGestureInstances;
 
 		public EditGestureChangeset()
 		{
 			NewName = null;
 			DeletedGestureInstances = new List<int>();
-			NewGestureInstances = new List<LGR_StaticGesture>();
+			NewGestureInstances = new List<StaticGestureInstanceWrapper>();
 		}
 		
 	}

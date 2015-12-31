@@ -119,15 +119,15 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		private ObservableCollection<LGR_StaticGesture> _staticGestures = new ObservableCollection<LGR_StaticGesture>();
-		public ObservableCollection<LGR_StaticGesture> StaticGestures
+		private ObservableCollection<BayesStaticGestureWrapper> _StaticGestures = new ObservableCollection<BayesStaticGestureWrapper>();
+		public ObservableCollection<BayesStaticGestureWrapper> StaticGestures
 		{
-			get { return _staticGestures; }
+			get { return _StaticGestures; }
 			set
 			{
-				_staticGestures = value;
-				OnPropertyChanged("StaticGestures");
+				_StaticGestures = value;
 				UpdateGestureLibraryMenu(); // Should move this... will continuously clear GestureLibraryMenuItems unnecessarily 
+				OnPropertyChanged("StaticGestures");
 			}
 		}
 
@@ -163,16 +163,6 @@ namespace LeapGestureRecognition.ViewModel
 		public bool ShowArms
 		{
 			get { return _config.BoolOptions[Constants.BoolOptionsNames.ShowArms]; }
-		}
-
-		public bool ShowOutputWindow
-		{
-			get { return _config.BoolOptions[Constants.BoolOptionsNames.ShowOutputWindow]; }
-		}
-
-		public bool ShowGestureLibrary
-		{
-			get { return _config.BoolOptions[Constants.BoolOptionsNames.ShowGestureLibrary]; }
 		}
 		#endregion
 
@@ -358,9 +348,9 @@ namespace LeapGestureRecognition.ViewModel
 			else
 			{
 				var editGestureVM = (EditGestureViewModel)(sender as DispatcherTimer).Tag;
-				var newInstance = new LGR_StaticGesture(_controller.Frame(), name: editGestureVM.Name);
+				var newInstance = new LGR_StaticGesture(_controller.Frame());
 				// Update instances in VM
-				editGestureVM.AddInstance(newInstance);
+				editGestureVM.AddInstance(new StaticGestureInstanceWrapper(newInstance));
 				((DispatcherTimer)sender).Stop();
 				WriteLineToOutputWindow("Snapshot recorded");
 				DisplayGesture(newInstance);
@@ -376,38 +366,6 @@ namespace LeapGestureRecognition.ViewModel
 			return new LGR_SingleHandStaticGesture(hand).GetMeasurements();
 		}
 
-		#region Measure Hand
-		//private int measureHandTimerCount = -1;
-		//private int measureHandDelaySeconds = 5;
-		//public LGR_HandMeasurements MeasureHand()
-		//{
-		//	Mode = LGR_Mode.Default;
-		//	measureHandTimerCount = measureHandDelaySeconds;
-		//	WriteLineToOutputWindow("Measuring hand in " + measureHandTimerCount);
-
-		//	DispatcherTimer measureHandTimer = new DispatcherTimer();
-		//	measureHandTimer.Tick += measureHandTimer_Tick;
-		//	measureHandTimer.Interval = new TimeSpan(0, 0, 1);
-		//	measureHandTimer.Start();
-		//}
-
-		//private void measureHandTimer_Tick(object sender, EventArgs e)
-		//{
-		//	if (--measureHandTimerCount > 0)
-		//	{
-		//		WriteLineToOutputWindow("Measuring hand in " + measureHandTimerCount);
-		//	}
-		//	else
-		//	{
-		//		// Update instances in VM
-		//		Hand hand = _controller.Frame().Hands.FirstOrDefault();
-		//		if (hand == null) return null;
-		//		return new LGR_SingleHandStaticGesture(hand).GetMeasurements();
-		//		((DispatcherTimer)sender).Stop();
-		//		WriteLineToOutputWindow("Hand measured.");
-		//	}
-		//}
-		#endregion
 
 		public void DrawScene()
 		{
@@ -436,89 +394,68 @@ namespace LeapGestureRecognition.ViewModel
 			SelectedGesture = gesture;
 		}
 
-		public void DeleteGesture(LGR_StaticGesture gesture)
-		{
-			_sqliteProvider.DeleteGesture(gesture.Id);
-			UpdateGestureLibrary();
-			UpdateGestureLibraryMenu();
-		}
-
-		public void DeleteUser(LGR_User user)
-		{
-			_sqliteProvider.DeleteUser(user.Id);
-		}
-
-		public string GetGestureName(int id) // The id of the gesture class (id in Gestures table, not GestureInstances).
-		{
-			return _sqliteProvider.GetGestureName(id);
-		}
-
-		public ObservableCollection<LGR_StaticGesture> GetGestureInstances(int classId)
-		{
-			return _sqliteProvider.GetGestureInstances(classId);
-		}
 
 		#region Dialog Windows
 		public void DisplaySaveGestureDialog(LGR_StaticGesture gesture)
 		{
-			SaveGestureDialog saveNewGestureDialog = new SaveGestureDialog();
-			while (saveNewGestureDialog.ShowDialog() == true)
-			{
-				string name = saveNewGestureDialog.EnteredName;
-				if (string.IsNullOrWhiteSpace(name))
-				{
-					string errorMsg = String.Format("Error: Name cannot be whitespace.", name);
-					WriteLineToOutputWindow(errorMsg);
-					saveNewGestureDialog = new SaveGestureDialog(errorMsg);
-					continue;
-				}
-				if (_sqliteProvider.GestureExists(name))
-				{
-					string errorMsg = String.Format("Error: A gesture named '{0}' already exists.", name);
-					WriteLineToOutputWindow(errorMsg);
-					saveNewGestureDialog = new SaveGestureDialog(errorMsg);
-				}
-				else
-				{
-					_sqliteProvider.SaveGesture(name, gesture);
-					StaticGestures.Add(gesture);
-					WriteLineToOutputWindow(String.Format("Successfully saved gesture '{0}'.", name));
-					break;
-				}
-			}
+			//SaveGestureDialog saveNewGestureDialog = new SaveGestureDialog();
+			//while (saveNewGestureDialog.ShowDialog() == true)
+			//{
+			//	string name = saveNewGestureDialog.EnteredName;
+			//	if (string.IsNullOrWhiteSpace(name))
+			//	{
+			//		string errorMsg = String.Format("Error: Name cannot be whitespace.", name);
+			//		WriteLineToOutputWindow(errorMsg);
+			//		saveNewGestureDialog = new SaveGestureDialog(errorMsg);
+			//		continue;
+			//	}
+			//	if (_sqliteProvider.GestureExists(name))
+			//	{
+			//		string errorMsg = String.Format("Error: A gesture named '{0}' already exists.", name);
+			//		WriteLineToOutputWindow(errorMsg);
+			//		saveNewGestureDialog = new SaveGestureDialog(errorMsg);
+			//	}
+			//	else
+			//	{
+			//		_sqliteProvider.SaveGesture(name, gesture);
+			//		StaticGestures.Add(gesture);
+			//		WriteLineToOutputWindow(String.Format("Successfully saved gesture '{0}'.", name));
+			//		break;
+			//	}
+			//}
 		}
 
 		public void DisplayRenameGestureDialog(string oldName)
 		{
-			RenameGestureDialog renameGestureDialog = new RenameGestureDialog(oldName);
-			while (renameGestureDialog.ShowDialog() == true)
-			{
-				string newName = renameGestureDialog.EnteredName;
-				if (newName == oldName) return;
+			//RenameGestureDialog renameGestureDialog = new RenameGestureDialog(oldName);
+			//while (renameGestureDialog.ShowDialog() == true)
+			//{
+			//	string newName = renameGestureDialog.EnteredName;
+			//	if (newName == oldName) return;
 
-				if (string.IsNullOrWhiteSpace(newName))
-				{
-					string errorMsg = String.Format("Error: Name cannot be whitespace.", newName);
-					WriteLineToOutputWindow(errorMsg);
-					renameGestureDialog = new RenameGestureDialog(oldName, errorMsg);
-					continue;
-				}
+			//	if (string.IsNullOrWhiteSpace(newName))
+			//	{
+			//		string errorMsg = String.Format("Error: Name cannot be whitespace.", newName);
+			//		WriteLineToOutputWindow(errorMsg);
+			//		renameGestureDialog = new RenameGestureDialog(oldName, errorMsg);
+			//		continue;
+			//	}
 
-				if (_sqliteProvider.GestureExists(newName))
-				{
-					string errorMsg = String.Format("Error: A gesture named '{0}' already exists.", newName);
-					WriteLineToOutputWindow(errorMsg);
-					renameGestureDialog = new RenameGestureDialog(oldName, errorMsg);
-				}
-				else
-				{
-					_sqliteProvider.RenameGesture(oldName, newName);
-					WriteLineToOutputWindow(String.Format("Successfully renamed '{0}' to '{1}'.", oldName, newName));
-					UpdateGestureLibrary();
-					//updateGestureLibraryMenu(); // Handled in StaticGestures setter
-					break;
-				}
-			}
+			//	if (_sqliteProvider.GestureExists(newName))
+			//	{
+			//		string errorMsg = String.Format("Error: A gesture named '{0}' already exists.", newName);
+			//		WriteLineToOutputWindow(errorMsg);
+			//		renameGestureDialog = new RenameGestureDialog(oldName, errorMsg);
+			//	}
+			//	else
+			//	{
+			//		_sqliteProvider.RenameGesture(oldName, newName);
+			//		WriteLineToOutputWindow(String.Format("Successfully renamed '{0}' to '{1}'.", oldName, newName));
+			//		UpdateGestureLibrary();
+			//		//updateGestureLibraryMenu(); // Handled in StaticGestures setter
+			//		break;
+			//	}
+			//}
 		}
 
 		public void DisplayOptionsDialog()
@@ -561,21 +498,21 @@ namespace LeapGestureRecognition.ViewModel
 
 				_config.AllUsers = _sqliteProvider.GetAllUsers(); // Just to make sure it's up to date  
 			}
-			//OnPropertyChanged(""); // Refresh all bindings (needed for ShowGestureLibrary and ShowOutputWindow).
 		}
 
 		public void NewStaticGesture()
 		{
 			Mode = LGR_Mode.Default;
-			EditGesture(new LGR_StaticGesture(), newGesture: true);
+			EditGesture(new BayesStaticGestureWrapper(), newGesture: true);
 		}
 
-		public void EditGesture(LGR_StaticGesture gesture, bool newGesture = false)
+		public void EditGesture(BayesStaticGestureWrapper gesture, bool newGesture = false)
 		{
-			_editGestureControl.VM = new EditGestureViewModel(gesture, this);
+			_editGestureControl.VM = new EditGestureViewModel(this, gesture, newGesture);
 			_editGestureControl.Visibility = Visibility.Visible;
-			if(!newGesture) DisplayGesture(gesture);
+			if (!newGesture) DisplayGesture(gesture.SampleInstance);
 		}
+
 		#endregion
 
 		#region Output Window
@@ -607,58 +544,12 @@ namespace LeapGestureRecognition.ViewModel
 			_camera.UpdateView();
 		}
 
-		public bool SaveGesture(LGR_StaticGesture gesture)
-		{
-			_sqliteProvider.SaveGesture(gesture);
-			UpdateGestureLibrary();
-			UpdateGestureLibraryMenu();
-			return true;
-		}
-
-		public bool SaveNewGesture(string name, LGR_StaticGesture gesture)
-		{
-			_sqliteProvider.SaveGesture(gesture);
-			UpdateGestureLibrary();
-			UpdateGestureLibraryMenu();
-			return true;
-		}
-
-		public void RecordNewInstance(LGR_StaticGesture gesture)
-		{
-			// Record new instance
-
-			// Update averaged gesture
-		}
 		#endregion
 
 		#region Private Methods
 		private void initMenuBar()
 		{
 			MenuBar = new ObservableCollection<CustomMenuItem>();
-
-			#region OPTIONS
-			//CustomMenuItem options = new CustomMenuItem("Options");
-
-			//CustomMenuItem showAxes = new CustomMenuItem("Show Axes");
-			//showAxes.IsCheckable = true;
-			//showAxes.IsChecked = ShowAxes;
-			//showAxes.Command = new CustomCommand(a => ShowAxes = !ShowAxes);
-			//options.Items.Add(showAxes);
-
-			////CustomMenuItem showOutputWindow = new CustomMenuItem("Show Output Window");
-			////showOutputWindow.IsCheckable = true;
-			////showOutputWindow.IsChecked = ShowOutputWindow;
-			////showOutputWindow.Command = new CustomCommand(() => ShowOutputWindow = !ShowOutputWindow);
-			////options.Items.Add(showOutputWindow);
-
-			//CustomMenuItem showArms = new CustomMenuItem("Show Arms");
-			//showArms.IsCheckable = true;
-			//showArms.IsChecked = ShowAxes;
-			//showArms.Command = new CustomCommand(a => ShowArms = !ShowArms);
-			//options.Items.Add(showArms);
-			
-			//MenuBar.Add(options);
-			#endregion
 
 			#region RESET CAMERA
 			CustomMenuItem resetCamera = new CustomMenuItem("Reset Camera");
@@ -688,7 +579,7 @@ namespace LeapGestureRecognition.ViewModel
 
 		public void UpdateGestureLibrary()
 		{
-			StaticGestures = _sqliteProvider.GetAllGestures();
+			StaticGestures = _sqliteProvider.GetAllBayesStaticGestures();
 		}
 		#endregion
 

@@ -13,62 +13,78 @@ namespace LeapGestureRecognition.ViewModel
 	{
 		private int _gestureId;
 		private MainViewModel _mvm;
+		SQLiteProvider _provider;
+		bool _newGesture;
 
-		public EditGestureViewModel(int gestureId, MainViewModel mvm)
-		{
-			_gestureId = gestureId;
-			_mvm = mvm;
-			Name = (gestureId == -1) ? "New Gesture" : _mvm.GetGestureName(gestureId);
-			Instances = _mvm.GetGestureInstances(gestureId);
-			Changeset = new EditGestureChangeset();
-		}
-
-		public EditGestureViewModel(LGR_StaticGesture gesture, MainViewModel mvm)
+		// NOTE: A new EditGestureViewModel is instantiated on every call to EditGesture()
+		public EditGestureViewModel(MainViewModel mvm, BayesStaticGestureWrapper gesture = null, bool newGesture = false)
 		{
 			_mvm = mvm;
-			Id = gesture.Id;
-			Name = gesture.Name;
-			Instances = _mvm.GetGestureInstances(gesture.Id);
+			_newGesture = newGesture;
+			_provider = _mvm.SQLiteProvider;
+
+			if (newGesture)
+			{
+				Name = "New Gesture";
+				Instances = new ObservableCollection<StaticGestureInstanceWrapper>();
+			}
+			else
+			{
+				Name = gesture.Name;
+				Instances = _provider.GetStaticGestureInstances(gesture.Id);
+			}
+			
 			Changeset = new EditGestureChangeset();
 		}
 
 		#region Public Properties
 		public int Id { get; set; }
 		public string Name { get; set; }
-		public ObservableCollection<LGR_StaticGesture> Instances { get; set; }
+		public ObservableCollection<StaticGestureInstanceWrapper> Instances { get; set; }
 		public EditGestureChangeset Changeset { get; set; }
 		#endregion
 
 		#region Public Methods
 		public void SaveGesture()
 		{
-			SQLiteProvider provider = _mvm.SQLiteProvider;
-			// Save first instance as the gesture (later I will deal with mean/median)
-			var editedGesture = Instances.FirstOrDefault();
-			if(editedGesture != null) {
-				editedGesture.Id = Id; // Not sure if needed
-				editedGesture.ClassId = Id; // Not sure if needed
-			}
-			Id = provider.SaveGesture(editedGesture);
-			foreach (var instanceId in Changeset.DeletedGestureInstances)
+			if (_newGesture)
 			{
-				provider.DeleteGestureInstance(instanceId);
+				Id = _provider.SaveNewBayesStaticGesture(Name, null); // Need to get id
+			}
+
+			var editedGesture = new BayesStaticGesture(Instances);
+			var sampleInstance = (Instances.Any()) ? Instances.FirstOrDefault().Gesture : null;
+
+			var gestureWrapper = new BayesStaticGestureWrapper()
+			{
+				Id = this.Id,
+				Name = this.Name,
+				Gesture = editedGesture,
+				SampleInstance = sampleInstance
+			};
+
+			_provider.SaveBayesStaticGesture(gestureWrapper);
+
+			// Update the StaticGestureInstances table
+			foreach (int instanceId in Changeset.DeletedGestureInstances)
+			{
+				_provider.DeleteStaticGestureInstance(instanceId);
 			}
 			foreach (var instance in Changeset.NewGestureInstances)
 			{
-				instance.ClassId = Id;
-				provider.SaveNewGestureInstance(instance);
+				_provider.SaveNewStaticGestureInstance(Id, instance.Gesture);
 			}
+
 			_mvm.UpdateGestureLibrary();
 		}
 
-		public void AddInstance(LGR_StaticGesture instance)
+		public void AddInstance(StaticGestureInstanceWrapper instance)
 		{
 			Instances.Add(instance);
 			Changeset.NewGestureInstances.Add(instance);
 		}
 
-		public void DeleteInstance(LGR_StaticGesture instance)
+		public void DeleteInstance(StaticGestureInstanceWrapper instance)
 		{
 			Instances.Remove(instance);
 			if (Changeset.NewGestureInstances.Contains(instance))
@@ -81,9 +97,9 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		public void ViewInstance(LGR_StaticGesture instance)
+		public void ViewInstance(StaticGestureInstanceWrapper instance)
 		{
-			_mvm.DisplayGesture(instance);
+			_mvm.DisplayGesture(instance.Gesture);
 		}
 		#endregion
 
