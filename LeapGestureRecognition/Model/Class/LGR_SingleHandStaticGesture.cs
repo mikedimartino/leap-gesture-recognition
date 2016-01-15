@@ -22,12 +22,15 @@ namespace LeapGestureRecognition.Model
 			PalmPosition = new LGR_Vec3(hand.PalmPosition); // Do not HandTransform.TransformPoint()
 			PalmNormal = new LGR_Vec3(hand.PalmNormal);
 			HandDirection = new LGR_Vec3(hand.Direction);
-			Yaw = hand.Direction.Yaw;
-			Pitch = hand.Direction.Pitch;
-			Roll = hand.Direction.Roll;
 			ArmX = new LGR_Vec3(hand.Arm.Basis.xBasis);
 			ArmY = new LGR_Vec3(hand.Arm.Basis.yBasis);
 			ArmZ = new LGR_Vec3(hand.Arm.Basis.zBasis);
+
+
+			// Scale yaw, pitch, and roll; Leap.Vector.Yaw is between -PI and PI.
+			Yaw = (float) (hand.Direction.Yaw / Math.PI);
+			Pitch = (float) (hand.Direction.Pitch / Math.PI);
+			Roll = (float) (hand.Direction.Roll / Math.PI);
 
 			// World coordinates
 			WristPos_World = new LGR_Vec3(hand.WristPosition);
