@@ -17,7 +17,7 @@ namespace LeapGestureRecognition.ViewModel
 		bool _newGesture;
 
 		// NOTE: A new EditGestureViewModel is instantiated on every call to EditGesture()
-		public EditGestureViewModel(MainViewModel mvm, BayesStaticGestureWrapper gesture = null, bool newGesture = false)
+		public EditGestureViewModel(MainViewModel mvm, StaticGestureClassWrapper gesture = null, bool newGesture = false)
 		{
 			_mvm = mvm;
 			_newGesture = newGesture;
@@ -31,6 +31,7 @@ namespace LeapGestureRecognition.ViewModel
 			else
 			{
 				Name = gesture.Name;
+				Id = gesture.Id;
 				Instances = _provider.GetStaticGestureInstances(gesture.Id);
 			}
 			
@@ -49,13 +50,13 @@ namespace LeapGestureRecognition.ViewModel
 		{
 			if (_newGesture)
 			{
-				Id = _provider.SaveNewBayesStaticGesture(Name, null); // Need to get id
+				Id = _provider.SaveNewStaticGestureClass(Name, null); // Need to get id
 			}
 
-			var editedGesture = new BayesStaticGesture(Instances);
+			var editedGesture = new StaticGestureClass(Instances);
 			var sampleInstance = (Instances.Any()) ? Instances.FirstOrDefault().Gesture : null;
 
-			var gestureWrapper = new BayesStaticGestureWrapper()
+			var gestureWrapper = new StaticGestureClassWrapper()
 			{
 				Id = this.Id,
 				Name = this.Name,
@@ -63,16 +64,21 @@ namespace LeapGestureRecognition.ViewModel
 				SampleInstance = sampleInstance
 			};
 
-			_provider.SaveBayesStaticGesture(gestureWrapper);
+			_provider.SaveStaticGestureClass(gestureWrapper);
 
-			// Update the StaticGestureInstances table
-			foreach (int instanceId in Changeset.DeletedGestureInstances)
+			if (Changeset.ChangesExist())
 			{
-				_provider.DeleteStaticGestureInstance(instanceId);
-			}
-			foreach (var instance in Changeset.NewGestureInstances)
-			{
-				_provider.SaveNewStaticGestureInstance(Id, instance.Gesture);
+				// Update the StaticGestureInstances table
+				foreach (int instanceId in Changeset.DeletedGestureInstances)
+				{
+					_provider.DeleteStaticGestureInstance(instanceId);
+				}
+				foreach (var instance in Changeset.NewGestureInstances)
+				{
+					_provider.SaveNewStaticGestureInstance(Id, instance.Gesture);
+				}
+
+				//_provider.UpdateStaticGestureClass(Id);
 			}
 
 			_mvm.UpdateGestureLibrary();

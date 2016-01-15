@@ -21,14 +21,15 @@ namespace LeapGestureRecognition.Model
 		public LGR_StaticGesture(Frame frame)
 		{
 			Hands = new List<LGR_SingleHandStaticGesture>();
-			foreach (Hand hand in frame.Hands)
+			foreach (var hand in frame.Hands)
 			{
 				Hands.Add(new LGR_SingleHandStaticGesture(hand));
 			}
+
 		}
 
 		[DataMember]
-		public List<LGR_SingleHandStaticGesture> Hands { get; set; }
+		public List<LGR_SingleHandStaticGesture> Hands { get; set; } // Might not need this eventually, but maybe for displaying live hands
 
 		public LGR_StaticGesture DeepCopy()
 		{

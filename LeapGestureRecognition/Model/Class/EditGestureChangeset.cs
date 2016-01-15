@@ -18,6 +18,10 @@ namespace LeapGestureRecognition.Model
 			DeletedGestureInstances = new List<int>();
 			NewGestureInstances = new List<StaticGestureInstanceWrapper>();
 		}
-		
+
+		public bool ChangesExist()
+		{
+			return NewGestureInstances.Any() || DeletedGestureInstances.Any();
+		}
 	}
 }

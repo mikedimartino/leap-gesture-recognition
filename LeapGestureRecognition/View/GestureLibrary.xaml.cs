@@ -42,27 +42,28 @@ namespace LGR_Controls
 
 		private void ViewGesture(object sender, RoutedEventArgs e)
 		{
-			var gesture = (BayesStaticGestureWrapper)(e.Source as FrameworkElement).Tag;
+			var gesture = (StaticGestureClassWrapper)(e.Source as FrameworkElement).Tag;
 			_mvm.DisplayGesture(gesture.SampleInstance);
 		}
 
 		private void EditGesture(object sender, RoutedEventArgs e)
 		{
-			var gesture = (BayesStaticGestureWrapper)(e.Source as FrameworkElement).Tag;
+			var gesture = (StaticGestureClassWrapper)(e.Source as FrameworkElement).Tag;
 			_mvm.EditGesture(gesture);
 		}
 
 		private void DeleteGesture(object sender, RoutedEventArgs e)
 		{
-			var gesture = (BayesStaticGestureWrapper)(e.Source as FrameworkElement).Tag;
-			_mvm.SQLiteProvider.DeleteBayesStaticGesture(gesture.Id);
+			var gesture = (StaticGestureClassWrapper)(e.Source as FrameworkElement).Tag;
+			_mvm.SQLiteProvider.DeleteStaticGestureClass(gesture.Id);
+			_mvm.UpdateGestureLibrary();
 		}
 
 		private void GestureMouseDown(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ClickCount >= 2) // Double click
 			{
-				var gesture = (BayesStaticGestureWrapper)(sender as FrameworkElement).Tag;
+				var gesture = (StaticGestureClassWrapper)(sender as FrameworkElement).Tag;
 				_mvm.EditGesture(gesture);
 			}
 		}

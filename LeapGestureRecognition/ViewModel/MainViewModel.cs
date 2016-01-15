@@ -119,8 +119,8 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		private ObservableCollection<BayesStaticGestureWrapper> _StaticGestures = new ObservableCollection<BayesStaticGestureWrapper>();
-		public ObservableCollection<BayesStaticGestureWrapper> StaticGestures
+		private ObservableCollection<StaticGestureClassWrapper> _StaticGestures = new ObservableCollection<StaticGestureClassWrapper>();
+		public ObservableCollection<StaticGestureClassWrapper> StaticGestures
 		{
 			get { return _StaticGestures; }
 			set
@@ -380,7 +380,8 @@ namespace LeapGestureRecognition.ViewModel
 			switch (Mode)
 			{
 				case LGR_Mode.Playback:
-					_glHelper.DrawStaticGesture(SelectedGesture, ShowArms);
+					if(SelectedGesture != null) _glHelper.DrawStaticGesture(SelectedGesture, ShowArms);
+					else _glHelper.DrawFrame(CurrentFrame, ShowArms);
 					break;
 				default:
 					_glHelper.DrawFrame(CurrentFrame, ShowArms);
@@ -503,10 +504,10 @@ namespace LeapGestureRecognition.ViewModel
 		public void NewStaticGesture()
 		{
 			Mode = LGR_Mode.Default;
-			EditGesture(new BayesStaticGestureWrapper(), newGesture: true);
+			EditGesture(new StaticGestureClassWrapper(), newGesture: true);
 		}
 
-		public void EditGesture(BayesStaticGestureWrapper gesture, bool newGesture = false)
+		public void EditGesture(StaticGestureClassWrapper gesture, bool newGesture = false)
 		{
 			_editGestureControl.VM = new EditGestureViewModel(this, gesture, newGesture);
 			_editGestureControl.Visibility = Visibility.Visible;
@@ -579,7 +580,7 @@ namespace LeapGestureRecognition.ViewModel
 
 		public void UpdateGestureLibrary()
 		{
-			StaticGestures = _sqliteProvider.GetAllBayesStaticGestures();
+			StaticGestures = _sqliteProvider.GetAllStaticGestureClasses();
 		}
 		#endregion
 

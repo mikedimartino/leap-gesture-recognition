@@ -358,45 +358,45 @@ namespace LeapGestureRecognition.Util
 		// Replaces all existing StaticGestureInstances with these new ones
 		#endregion
 
-		#region BayesStaticGestures
-		public int SaveNewBayesStaticGesture(string name, BayesStaticGesture gesture) // Returns id of gesture
+		#region StaticGestureClass
+		public int SaveNewStaticGestureClass(string name, StaticGestureClass gesture) // Returns id of gesture
 		{
 			string sql;
 			string gestureJson = JsonConvert.SerializeObject(gesture);
 			//string sampleInstance = JsonConvert.SerializeObject(gesture.SampleInstance);
-			sql = String.Format("INSERT INTO BayesStaticGestures (name, sample_instance_json) VALUES ('{0}', '{1}')", name, gestureJson);
+			sql = String.Format("INSERT INTO StaticGestureClasses (name, sample_instance_json) VALUES ('{0}', '{1}')", name, gestureJson);
 			executeNonQuery(sql);
 			return singleIntValueQuery("SELECT last_insert_rowid()"); // Get the (auto-incremented) key
 		}
 
-		public void SaveBayesStaticGesture(BayesStaticGestureWrapper gestureWrapper)
+		public void SaveStaticGestureClass(StaticGestureClassWrapper gestureWrapper)
 		{
 			string sql;
 			string gestureJson = JsonConvert.SerializeObject(gestureWrapper.Gesture);
 			string sampleInstanceJson = JsonConvert.SerializeObject(gestureWrapper.SampleInstance);
-			sql = String.Format("UPDATE BayesStaticGestures SET name='{0}', gesture_json='{1}', sample_instance_json='{2}' WHERE id='{3}'", gestureWrapper.Name, gestureJson, sampleInstanceJson, gestureWrapper.Id);
+			sql = String.Format("UPDATE StaticGestureClasses SET name='{0}', gesture_json='{1}', sample_instance_json='{2}' WHERE id='{3}'", gestureWrapper.Name, gestureJson, sampleInstanceJson, gestureWrapper.Id);
 			executeNonQuery(sql);
 		}
 
-		public string GetBayesStaticGestureName(int id)
+		public string GetStaticGestureClassName(int id)
 		{
-			string sql = String.Format("SELECT name FROM BayesStaticGestures WHERE id='{0}'", id);
+			string sql = String.Format("SELECT name FROM StaticGestureClasses WHERE id='{0}'", id);
 			return singleStringValueQuery(sql);
 		}
 
-		public void DeleteBayesStaticGesture(int id)
+		public void DeleteStaticGestureClass(int id)
 		{
-			string sql = String.Format("DELETE FROM BayesStaticGestures WHERE id='{0}'", id);
+			string sql = String.Format("DELETE FROM StaticGestureClasses WHERE id='{0}'", id);
 			executeNonQuery(sql);
 			// Also delete all instances in StaticGestureInstances table
 			sql = String.Format("DELETE FROM StaticGestureInstances WHERE class_id='{0}'", id);
 			executeNonQuery(sql);
 		}
 
-		public ObservableCollection<BayesStaticGestureWrapper> GetAllBayesStaticGestures()
+		public ObservableCollection<StaticGestureClassWrapper> GetAllStaticGestureClasses()
 		{
-			var gestures = new ObservableCollection<BayesStaticGestureWrapper>();
-			string sql = "SELECT id, name, gesture_json, sample_instance_json FROM BayesStaticGestures";
+			var gestures = new ObservableCollection<StaticGestureClassWrapper>();
+			string sql = "SELECT id, name, gesture_json, sample_instance_json FROM StaticGestureClasses";
 			using (var connection = new SQLiteConnection(_connString))
 			{
 				connection.Open();
@@ -406,11 +406,11 @@ namespace LeapGestureRecognition.Util
 					{
 						while (reader.Read())
 						{
-							gestures.Add(new BayesStaticGestureWrapper() 
+							gestures.Add(new StaticGestureClassWrapper() 
 							{
 								Id = reader.GetInt32(0),
 								Name = reader.GetString(1),
-								Gesture = JsonConvert.DeserializeObject<BayesStaticGesture>(reader.GetString(2)),
+								Gesture = JsonConvert.DeserializeObject<StaticGestureClass>(reader.GetString(2)),
 								SampleInstance = JsonConvert.DeserializeObject<LGR_StaticGesture>(reader.GetString(3))
 							});
 						}

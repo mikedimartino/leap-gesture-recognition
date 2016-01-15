@@ -22,23 +22,28 @@ namespace LeapGestureRecognition.Model
 			PalmPosition = new LGR_Vec3(hand.PalmPosition); // Do not HandTransform.TransformPoint()
 			PalmNormal = new LGR_Vec3(hand.PalmNormal);
 			HandDirection = new LGR_Vec3(hand.Direction);
+			Yaw = hand.Direction.Yaw;
+			Pitch = hand.Direction.Pitch;
+			Roll = hand.Direction.Roll;
 			ArmX = new LGR_Vec3(hand.Arm.Basis.xBasis);
 			ArmY = new LGR_Vec3(hand.Arm.Basis.yBasis);
 			ArmZ = new LGR_Vec3(hand.Arm.Basis.zBasis);
-
-			// Coordinates relative to the hand's object space:
-			WristPos_Relative = new LGR_Vec3(HandTransform.TransformPoint(hand.WristPosition));
-			ElbowPos_Relative = new LGR_Vec3(HandTransform.TransformPoint(hand.Arm.ElbowPosition));
-			ForearmCenter_Relative = new LGR_Vec3(HandTransform.TransformPoint(hand.Arm.Center));
 
 			// World coordinates
 			WristPos_World = new LGR_Vec3(hand.WristPosition);
 			ElbowPos_World = new LGR_Vec3(hand.Arm.ElbowPosition);
 			ForearmCenter_World = new LGR_Vec3(hand.Arm.Center);
+			setFingerJointPositions_World(hand);
+			setFingerBasePositions_World(hand);
 
-			// Sets both _World and _Relative coordinates
-			setFingerJointPositions(hand);
-			setFingerBasePositions(hand);
+			// Relative coordinates
+			WristPos_Relative = new LGR_Vec3(hand.WristPosition);
+			ElbowPos_Relative = new LGR_Vec3(hand.Arm.ElbowPosition);
+			ForearmCenter_Relative = new LGR_Vec3(hand.Arm.Center);
+			// NOTE: HandScale and relative finger positions must be calculated after world coordinates. 
+			HandScale = GetFingerLength(Finger.FingerType.TYPE_MIDDLE);
+			setFingerJointPositions_Relative(hand);
+			setFingerBasePositions_Relative(hand);
 		}
 
 		[DataMember]
@@ -52,13 +57,21 @@ namespace LeapGestureRecognition.Model
 		[DataMember]
 		public LGR_Vec3 HandDirection { get; set; }
 		[DataMember]
+		public float Yaw { get; set; }
+		[DataMember]
+		public float Pitch { get; set; }
+		[DataMember]
+		public float Roll { get; set; }
+		[DataMember]
 		public LGR_Vec3 ArmX { get; set; }
 		[DataMember]
 		public LGR_Vec3 ArmY { get; set; }
 		[DataMember]
 		public LGR_Vec3 ArmZ { get; set; }
 
+
 		// Coordinates relative to the hand's object space:
+		private float HandScale;
 		[DataMember]
 		public Dictionary<Finger.FingerType, Dictionary<Finger.FingerJoint, LGR_Vec3>> FingerJointPositions_Relative;
 		[DataMember]
@@ -76,7 +89,7 @@ namespace LeapGestureRecognition.Model
 		[DataMember]
 		public LGR_Vec3 ForearmCenter_Relative { get; set; }
 
-		// World coordinates:
+		// World coordinates: // May want to consider scaling these as well
 		[DataMember]
 		public Dictionary<Finger.FingerType, Dictionary<Finger.FingerJoint, LGR_Vec3>> FingerJointPositions_World;
 		[DataMember]
@@ -111,26 +124,21 @@ namespace LeapGestureRecognition.Model
 
 
 		#region Private Methods
-		private void setFingerJointPositions(Hand hand)
+		private void setFingerJointPositions_World(Hand hand)
 		{
-			FingerJointPositions_Relative = new Dictionary<Finger.FingerType, Dictionary<Finger.FingerJoint, LGR_Vec3>>();
 			FingerJointPositions_World = new Dictionary<Finger.FingerType,Dictionary<Finger.FingerJoint,LGR_Vec3>>();
 			foreach (var finger in hand.Fingers)
 			{
-				FingerJointPositions_Relative.Add(finger.Type, new Dictionary<Finger.FingerJoint, LGR_Vec3>());
 				FingerJointPositions_World.Add(finger.Type, new Dictionary<Finger.FingerJoint, LGR_Vec3>());
 				foreach (var jointType in (Finger.FingerJoint[])System.Enum.GetValues(typeof(Finger.FingerJoint)))
 				{
-					// TODO: Confirm that Matrix.TransformPoint() does what I think it does.
-					LGR_Vec3 relativePoint = new LGR_Vec3(HandTransform.TransformPoint(finger.JointPosition(jointType)));
-					FingerJointPositions_Relative[finger.Type].Add(jointType, relativePoint);
 					LGR_Vec3 worldPoint = new LGR_Vec3(finger.JointPosition(jointType));
 					FingerJointPositions_World[finger.Type].Add(jointType, worldPoint);
 				}
 			}
 		}
 
-		private void setFingerBasePositions(Hand hand)
+		private void setFingerBasePositions_World(Hand hand)
 		{
 			Finger index = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_INDEX).FirstOrDefault();
 			Finger middle = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_MIDDLE).FirstOrDefault();
@@ -141,11 +149,33 @@ namespace LeapGestureRecognition.Model
 			MiddleBasePos_World = new LGR_Vec3(middle.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint);
 			RingBasePos_World = new LGR_Vec3(ring.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint);
 			PinkyBasePos_World = new LGR_Vec3(pinky.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint);
+		}
 
-			IndexBasePos_Relative = new LGR_Vec3(HandTransform.TransformPoint(index.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint));
-			MiddleBasePos_Relative = new LGR_Vec3(HandTransform.TransformPoint(middle.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint));
-			RingBasePos_Relative = new LGR_Vec3(HandTransform.TransformPoint(ring.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint));
-			PinkyBasePos_Relative = new LGR_Vec3(HandTransform.TransformPoint(pinky.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint));
+		private void setFingerJointPositions_Relative(Hand hand)
+		{
+			FingerJointPositions_Relative = new Dictionary<Finger.FingerType, Dictionary<Finger.FingerJoint, LGR_Vec3>>();
+			foreach (var finger in hand.Fingers)
+			{
+				FingerJointPositions_Relative.Add(finger.Type, new Dictionary<Finger.FingerJoint, LGR_Vec3>());
+				foreach (var jointType in (Finger.FingerJoint[])System.Enum.GetValues(typeof(Finger.FingerJoint)))
+				{
+					LGR_Vec3 relativePoint = new LGR_Vec3(HandTransform.TransformPoint(finger.JointPosition(jointType))) / HandScale;
+					FingerJointPositions_Relative[finger.Type].Add(jointType, relativePoint);
+				}
+			}
+		}
+
+		private void setFingerBasePositions_Relative(Hand hand)
+		{
+			Finger index = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_INDEX).FirstOrDefault();
+			Finger middle = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_MIDDLE).FirstOrDefault();
+			Finger ring = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_RING).FirstOrDefault();
+			Finger pinky = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_PINKY).FirstOrDefault();
+
+			IndexBasePos_Relative = new LGR_Vec3(HandTransform.TransformPoint(index.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint)) / HandScale;
+			MiddleBasePos_Relative = new LGR_Vec3(HandTransform.TransformPoint(middle.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint)) / HandScale;
+			RingBasePos_Relative = new LGR_Vec3(HandTransform.TransformPoint(ring.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint)) / HandScale;
+			PinkyBasePos_Relative = new LGR_Vec3(HandTransform.TransformPoint(pinky.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint)) / HandScale;
 		}
 
 
@@ -186,6 +216,7 @@ namespace LeapGestureRecognition.Model
 			length += joints[Finger.FingerJoint.JOINT_DIP].DistanceTo(joints[Finger.FingerJoint.JOINT_TIP]);
 			return length;
 		}
+
 		#endregion
 	}
 }

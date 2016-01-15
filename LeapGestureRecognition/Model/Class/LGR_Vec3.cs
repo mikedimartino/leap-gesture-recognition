@@ -12,7 +12,7 @@ namespace LeapGestureRecognition.Model
 	[DataContract]
 	public class LGR_Vec3
 	{
-		public LGR_Vec3() { }
+		public LGR_Vec3() { x = y = z = 0; }
 
 		public LGR_Vec3(float x, float y, float z)
 		{
@@ -59,6 +59,10 @@ namespace LeapGestureRecognition.Model
 		public static LGR_Vec3 operator *(LGR_Vec3 vec, float scalar)
 		{
 			return new LGR_Vec3(scalar * vec.x, scalar * vec.y, scalar * vec.z);
+		}
+		public static LGR_Vec3 operator /(LGR_Vec3 vec, float scalar)
+		{
+			return new LGR_Vec3(vec.x / scalar, vec.y / scalar, vec.z / scalar);
 		}
 		#endregion
 
