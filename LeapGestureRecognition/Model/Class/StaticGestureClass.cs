@@ -19,9 +19,9 @@ namespace LeapGestureRecognition.Model
 		}
 
 		[DataMember]
-		public Dictionary<FeatureType, object> MeanValues { get; set; }
+		public Dictionary<FeatureName, object> MeanValues { get; set; }
 		[DataMember]
-		public Dictionary<FeatureType, float> StdDevValues { get; set; } // Should I leave as float? Or change to object?
+		public Dictionary<FeatureName, float> StdDevValues { get; set; } // Should I leave as float? Or change to object?
 
 		private void computeMeanValues(ObservableCollection<StaticGestureInstanceWrapper> instances)
 		{
@@ -76,27 +76,27 @@ namespace LeapGestureRecognition.Model
 				}
 			}
 
-			MeanValues = new Dictionary<FeatureType, object>();
+			MeanValues = new Dictionary<FeatureName, object>();
 
-			MeanValues.Add(FeatureType.LeftPalmPosition, LeftPalmPosTotal / instances.Count);
-			MeanValues.Add(FeatureType.LeftThumbTipPosition, LeftThumbTipPosTotal / instances.Count);
-			MeanValues.Add(FeatureType.LeftIndexTipPosition, LeftIndexTipPosTotal / instances.Count);
-			MeanValues.Add(FeatureType.LeftMiddleTipPosition, LeftMiddleTipPosTotal / instances.Count);
-			MeanValues.Add(FeatureType.LeftRingTipPosition, LeftRingTipPosTotal / instances.Count);
-			MeanValues.Add(FeatureType.LeftPinkyTipPosition, LeftPinkyTipPosTotal / instances.Count);
-			MeanValues.Add(FeatureType.LeftYaw, LeftYawTotal / instances.Count);
-			MeanValues.Add(FeatureType.LeftPitch, LeftPitchTotal / instances.Count);
-			MeanValues.Add(FeatureType.LeftRoll, LeftRollTotal / instances.Count);
+			MeanValues.Add(FeatureName.LeftPalmPosition, LeftPalmPosTotal / instances.Count);
+			MeanValues.Add(FeatureName.LeftThumbTipPosition, LeftThumbTipPosTotal / instances.Count);
+			MeanValues.Add(FeatureName.LeftIndexTipPosition, LeftIndexTipPosTotal / instances.Count);
+			MeanValues.Add(FeatureName.LeftMiddleTipPosition, LeftMiddleTipPosTotal / instances.Count);
+			MeanValues.Add(FeatureName.LeftRingTipPosition, LeftRingTipPosTotal / instances.Count);
+			MeanValues.Add(FeatureName.LeftPinkyTipPosition, LeftPinkyTipPosTotal / instances.Count);
+			MeanValues.Add(FeatureName.LeftYaw, LeftYawTotal / instances.Count);
+			MeanValues.Add(FeatureName.LeftPitch, LeftPitchTotal / instances.Count);
+			MeanValues.Add(FeatureName.LeftRoll, LeftRollTotal / instances.Count);
 
-			MeanValues.Add(FeatureType.RightPalmPosition, RightPalmPosTotal / instances.Count);
-			MeanValues.Add(FeatureType.RightThumbTipPosition, RightThumbTipPosTotal / instances.Count);
-			MeanValues.Add(FeatureType.RightIndexTipPosition, RightIndexTipPosTotal / instances.Count);
-			MeanValues.Add(FeatureType.RightMiddleTipPosition, RightMiddleTipPosTotal / instances.Count);
-			MeanValues.Add(FeatureType.RightRingTipPosition, RightRingTipPosTotal / instances.Count);
-			MeanValues.Add(FeatureType.RightPinkyTipPosition, RightPinkyTipPosTotal / instances.Count);
-			MeanValues.Add(FeatureType.RightYaw, RightYawTotal / instances.Count);
-			MeanValues.Add(FeatureType.RightPitch, RightPitchTotal / instances.Count);
-			MeanValues.Add(FeatureType.RightRoll, RightRollTotal / instances.Count);
+			MeanValues.Add(FeatureName.RightPalmPosition, RightPalmPosTotal / instances.Count);
+			MeanValues.Add(FeatureName.RightThumbTipPosition, RightThumbTipPosTotal / instances.Count);
+			MeanValues.Add(FeatureName.RightIndexTipPosition, RightIndexTipPosTotal / instances.Count);
+			MeanValues.Add(FeatureName.RightMiddleTipPosition, RightMiddleTipPosTotal / instances.Count);
+			MeanValues.Add(FeatureName.RightRingTipPosition, RightRingTipPosTotal / instances.Count);
+			MeanValues.Add(FeatureName.RightPinkyTipPosition, RightPinkyTipPosTotal / instances.Count);
+			MeanValues.Add(FeatureName.RightYaw, RightYawTotal / instances.Count);
+			MeanValues.Add(FeatureName.RightPitch, RightPitchTotal / instances.Count);
+			MeanValues.Add(FeatureName.RightRoll, RightRollTotal / instances.Count);
 
 		}
 
@@ -128,51 +128,51 @@ namespace LeapGestureRecognition.Model
 				{
 					if (hand.IsLeft)
 					{
-						LeftPalmPosTotal += hand.PalmPosition.DistanceTo((LGR_Vec3)MeanValues[FeatureType.LeftPalmPosition]);
-						LeftThumbTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_THUMB][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureType.LeftThumbTipPosition]);
-						LeftIndexTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_INDEX][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureType.LeftIndexTipPosition]);
-						LeftMiddleTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_MIDDLE][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureType.LeftMiddleTipPosition]);
-						LeftRingTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_RING][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureType.LeftRingTipPosition]);
-						LeftPinkyTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_PINKY][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureType.LeftPinkyTipPosition]);
-						LeftYawTotal += Math.Abs(hand.Yaw - ((float)MeanValues[FeatureType.LeftYaw]));
-						LeftPitchTotal += Math.Abs(hand.Yaw - ((float)MeanValues[FeatureType.LeftPitch]));
-						LeftRollTotal += Math.Abs(hand.Yaw - ((float)MeanValues[FeatureType.LeftRoll]));
+						LeftPalmPosTotal += hand.PalmPosition.DistanceTo((LGR_Vec3)MeanValues[FeatureName.LeftPalmPosition]);
+						LeftThumbTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_THUMB][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureName.LeftThumbTipPosition]);
+						LeftIndexTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_INDEX][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureName.LeftIndexTipPosition]);
+						LeftMiddleTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_MIDDLE][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureName.LeftMiddleTipPosition]);
+						LeftRingTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_RING][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureName.LeftRingTipPosition]);
+						LeftPinkyTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_PINKY][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureName.LeftPinkyTipPosition]);
+						LeftYawTotal += Math.Abs(hand.Yaw - ((float)MeanValues[FeatureName.LeftYaw]));
+						LeftPitchTotal += Math.Abs(hand.Yaw - ((float)MeanValues[FeatureName.LeftPitch]));
+						LeftRollTotal += Math.Abs(hand.Yaw - ((float)MeanValues[FeatureName.LeftRoll]));
 					}
 					else
 					{
-						RightPalmPosTotal += hand.PalmPosition.DistanceTo((LGR_Vec3)MeanValues[FeatureType.RightPalmPosition]);
-						RightThumbTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_THUMB][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureType.RightThumbTipPosition]);
-						RightIndexTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_INDEX][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureType.RightIndexTipPosition]);
-						RightMiddleTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_MIDDLE][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureType.RightMiddleTipPosition]);
-						RightRingTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_RING][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureType.RightRingTipPosition]);
-						RightPinkyTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_PINKY][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureType.RightPinkyTipPosition]);
-						RightYawTotal += Math.Abs(hand.Yaw - ((float)MeanValues[FeatureType.RightYaw]));
-						RightPitchTotal += Math.Abs(hand.Yaw - ((float)MeanValues[FeatureType.RightPitch]));
-						RightRollTotal += Math.Abs(hand.Yaw - ((float)MeanValues[FeatureType.RightRoll]));
+						RightPalmPosTotal += hand.PalmPosition.DistanceTo((LGR_Vec3)MeanValues[FeatureName.RightPalmPosition]);
+						RightThumbTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_THUMB][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureName.RightThumbTipPosition]);
+						RightIndexTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_INDEX][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureName.RightIndexTipPosition]);
+						RightMiddleTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_MIDDLE][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureName.RightMiddleTipPosition]);
+						RightRingTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_RING][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureName.RightRingTipPosition]);
+						RightPinkyTipPosTotal += hand.FingerJointPositions_Relative[Finger.FingerType.TYPE_PINKY][Finger.FingerJoint.JOINT_TIP].DistanceTo((LGR_Vec3)MeanValues[FeatureName.RightPinkyTipPosition]);
+						RightYawTotal += Math.Abs(hand.Yaw - ((float)MeanValues[FeatureName.RightYaw]));
+						RightPitchTotal += Math.Abs(hand.Yaw - ((float)MeanValues[FeatureName.RightPitch]));
+						RightRollTotal += Math.Abs(hand.Yaw - ((float)MeanValues[FeatureName.RightRoll]));
 					}
 				}
 			}
 
-			StdDevValues = new Dictionary<FeatureType, float>();
-			StdDevValues.Add(FeatureType.LeftPalmPosition, LeftPalmPosTotal / instances.Count);
-			StdDevValues.Add(FeatureType.LeftThumbTipPosition, LeftThumbTipPosTotal / instances.Count);
-			StdDevValues.Add(FeatureType.LeftIndexTipPosition, LeftIndexTipPosTotal / instances.Count);
-			StdDevValues.Add(FeatureType.LeftMiddleTipPosition, LeftMiddleTipPosTotal / instances.Count);
-			StdDevValues.Add(FeatureType.LeftRingTipPosition, LeftRingTipPosTotal / instances.Count);
-			StdDevValues.Add(FeatureType.LeftPinkyTipPosition, LeftPinkyTipPosTotal / instances.Count);
-			StdDevValues.Add(FeatureType.LeftYaw, LeftYawTotal / instances.Count);
-			StdDevValues.Add(FeatureType.LeftPitch, LeftPitchTotal / instances.Count);
-			StdDevValues.Add(FeatureType.LeftRoll, LeftRollTotal / instances.Count);
+			StdDevValues = new Dictionary<FeatureName, float>();
+			StdDevValues.Add(FeatureName.LeftPalmPosition, LeftPalmPosTotal / instances.Count);
+			StdDevValues.Add(FeatureName.LeftThumbTipPosition, LeftThumbTipPosTotal / instances.Count);
+			StdDevValues.Add(FeatureName.LeftIndexTipPosition, LeftIndexTipPosTotal / instances.Count);
+			StdDevValues.Add(FeatureName.LeftMiddleTipPosition, LeftMiddleTipPosTotal / instances.Count);
+			StdDevValues.Add(FeatureName.LeftRingTipPosition, LeftRingTipPosTotal / instances.Count);
+			StdDevValues.Add(FeatureName.LeftPinkyTipPosition, LeftPinkyTipPosTotal / instances.Count);
+			StdDevValues.Add(FeatureName.LeftYaw, LeftYawTotal / instances.Count);
+			StdDevValues.Add(FeatureName.LeftPitch, LeftPitchTotal / instances.Count);
+			StdDevValues.Add(FeatureName.LeftRoll, LeftRollTotal / instances.Count);
 
-			StdDevValues.Add(FeatureType.RightPalmPosition, RightPalmPosTotal / instances.Count);
-			StdDevValues.Add(FeatureType.RightThumbTipPosition, RightThumbTipPosTotal / instances.Count);
-			StdDevValues.Add(FeatureType.RightIndexTipPosition, RightIndexTipPosTotal / instances.Count);
-			StdDevValues.Add(FeatureType.RightMiddleTipPosition, RightMiddleTipPosTotal / instances.Count);
-			StdDevValues.Add(FeatureType.RightRingTipPosition, RightRingTipPosTotal / instances.Count);
-			StdDevValues.Add(FeatureType.RightPinkyTipPosition, RightPinkyTipPosTotal / instances.Count);
-			StdDevValues.Add(FeatureType.RightYaw, RightYawTotal / instances.Count);
-			StdDevValues.Add(FeatureType.RightPitch, RightPitchTotal / instances.Count);
-			StdDevValues.Add(FeatureType.RightRoll, RightRollTotal / instances.Count);
+			StdDevValues.Add(FeatureName.RightPalmPosition, RightPalmPosTotal / instances.Count);
+			StdDevValues.Add(FeatureName.RightThumbTipPosition, RightThumbTipPosTotal / instances.Count);
+			StdDevValues.Add(FeatureName.RightIndexTipPosition, RightIndexTipPosTotal / instances.Count);
+			StdDevValues.Add(FeatureName.RightMiddleTipPosition, RightMiddleTipPosTotal / instances.Count);
+			StdDevValues.Add(FeatureName.RightRingTipPosition, RightRingTipPosTotal / instances.Count);
+			StdDevValues.Add(FeatureName.RightPinkyTipPosition, RightPinkyTipPosTotal / instances.Count);
+			StdDevValues.Add(FeatureName.RightYaw, RightYawTotal / instances.Count);
+			StdDevValues.Add(FeatureName.RightPitch, RightPitchTotal / instances.Count);
+			StdDevValues.Add(FeatureName.RightRoll, RightRollTotal / instances.Count);
 
 		}
 			

@@ -76,8 +76,8 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		private LGR_StaticGesture _SelectedGesture = null;
-		public LGR_StaticGesture SelectedGesture
+		private StaticGesture _SelectedGesture = null;
+		public StaticGesture SelectedGesture
 		{
 			get { return _SelectedGesture; }
 			set
@@ -348,7 +348,7 @@ namespace LeapGestureRecognition.ViewModel
 			else
 			{
 				var editGestureVM = (EditGestureViewModel)(sender as DispatcherTimer).Tag;
-				var newInstance = new LGR_StaticGesture(_controller.Frame());
+				var newInstance = new StaticGesture(_controller.Frame());
 				// Update instances in VM
 				editGestureVM.AddInstance(new StaticGestureInstanceWrapper(newInstance));
 				((DispatcherTimer)sender).Stop();
@@ -389,7 +389,7 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		public void DisplayGesture(LGR_StaticGesture gesture)
+		public void DisplayGesture(StaticGesture gesture)
 		{
 			Mode = LGR_Mode.Playback;
 			SelectedGesture = gesture;
@@ -397,7 +397,7 @@ namespace LeapGestureRecognition.ViewModel
 
 
 		#region Dialog Windows
-		public void DisplaySaveGestureDialog(LGR_StaticGesture gesture)
+		public void DisplaySaveGestureDialog(StaticGesture gesture)
 		{
 			//SaveGestureDialog saveNewGestureDialog = new SaveGestureDialog();
 			//while (saveNewGestureDialog.ShowDialog() == true)

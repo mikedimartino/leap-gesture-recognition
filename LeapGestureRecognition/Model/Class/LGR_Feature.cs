@@ -9,18 +9,20 @@ using System.Windows.Media;
 
 namespace LeapGestureRecognition.Model
 {
+	[DataContract]
 	public class LGR_Feature
 	{
-		public LGR_Feature(FeatureType type, object value)
+		public LGR_Feature(FeatureName name, object value)
 		{
-			Type = type;
+			Name = name;
 			Value = value;
 		}
 
-		public FeatureType Type { get; set; }
+		[DataMember]
+		public FeatureName Name { get; set; }
+		[DataMember]
 		public object Value { get; set; }
 		// Weight?
 	}
-
 
 }

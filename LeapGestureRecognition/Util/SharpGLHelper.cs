@@ -133,7 +133,7 @@ namespace LeapGestureRecognition.Util
 			_rotation += 3.0f;
 		}
 
-		public void DrawStaticGesture(LGR_StaticGesture gesture, bool showArms = true) 
+		public void DrawStaticGesture(StaticGesture gesture, bool showArms = true) 
 		{
 			foreach (var hand in gesture.Hands)
 			{

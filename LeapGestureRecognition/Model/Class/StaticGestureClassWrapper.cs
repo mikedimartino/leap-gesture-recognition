@@ -10,6 +10,6 @@ namespace LeapGestureRecognition.Model
 		public int Id { get; set; }
 		public string Name { get; set; }
 		public StaticGestureClass Gesture { get; set; }
-		public LGR_StaticGesture SampleInstance { get; set; } // For drawing
+		public StaticGesture SampleInstance { get; set; } // For drawing
 	}
 }

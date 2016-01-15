@@ -331,7 +331,7 @@ namespace LeapGestureRecognition.Util
 							{
 								Id = reader.GetInt32(0),
 								ClassId = reader.GetInt32(1),
-								Gesture = JsonConvert.DeserializeObject<LGR_StaticGesture>(reader.GetString(2)),
+								Gesture = JsonConvert.DeserializeObject<StaticGesture>(reader.GetString(2)),
 							};
 							instance.InstanceName = String.Format("class {0} inst {1}", instance.ClassId, instance.Id);
 							gestureInstances.Add(instance);
@@ -342,7 +342,7 @@ namespace LeapGestureRecognition.Util
 			return gestureInstances;
 		}
 
-		public void SaveNewStaticGestureInstance(int classId, LGR_StaticGesture instance) // Whenever this is called it will be a new instance.
+		public void SaveNewStaticGestureInstance(int classId, StaticGesture instance) // Whenever this is called it will be a new instance.
 		{
 			string serializedInstance = JsonConvert.SerializeObject(instance);
 			string sql = String.Format("INSERT INTO StaticGestureInstances (class_id, json) VALUES ('{0}', '{1}')", classId, serializedInstance);
@@ -411,7 +411,7 @@ namespace LeapGestureRecognition.Util
 								Id = reader.GetInt32(0),
 								Name = reader.GetString(1),
 								Gesture = JsonConvert.DeserializeObject<StaticGestureClass>(reader.GetString(2)),
-								SampleInstance = JsonConvert.DeserializeObject<LGR_StaticGesture>(reader.GetString(3))
+								SampleInstance = JsonConvert.DeserializeObject<StaticGesture>(reader.GetString(3))
 							});
 						}
 					}

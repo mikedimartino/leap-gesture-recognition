@@ -15,7 +15,7 @@ namespace LeapGestureRecognition.Model
 			InstanceName = "new instance";
 		}
 
-		public StaticGestureInstanceWrapper(LGR_StaticGesture instance)
+		public StaticGestureInstanceWrapper(StaticGesture instance)
 		{
 			Gesture = instance;
 			Id = -1;
@@ -25,7 +25,7 @@ namespace LeapGestureRecognition.Model
 
 		public int Id { get; set; }
 		public int ClassId { get; set; }
-		public LGR_StaticGesture Gesture { get; set; }
+		public StaticGesture Gesture { get; set; }
 		public string InstanceName { get; set; }
 	}
 }
