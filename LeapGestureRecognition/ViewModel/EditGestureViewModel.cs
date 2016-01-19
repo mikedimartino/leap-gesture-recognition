@@ -1,4 +1,4 @@
-﻿using LeapGestureRecognition.Model;
+﻿using LGR;
 using LeapGestureRecognition.Util;
 using System;
 using System.Collections.Generic;
@@ -43,6 +43,7 @@ namespace LeapGestureRecognition.ViewModel
 		public string Name { get; set; }
 		public ObservableCollection<StaticGestureInstanceWrapper> Instances { get; set; }
 		public EditGestureChangeset Changeset { get; set; }
+		public bool RecordingInProgress { get; set; } // Currently recording gesture instances?
 		#endregion
 
 		#region Public Methods

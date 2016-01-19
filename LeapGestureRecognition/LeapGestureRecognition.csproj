@@ -119,30 +119,32 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\Class\GestureDistance.cs" />
     <Compile Include="Model\Class\StaticGestureClassWrapper.cs" />
-    <Compile Include="Model\Class\LGR_Feature.cs" />
+    <Compile Include="Model\Class\Feature.cs" />
     <Compile Include="Model\Class\CustomCommand.cs" />
     <Compile Include="Model\Class\CustomMenuItem.cs" />
     <Compile Include="Model\Class\Camera.cs" />
     <Compile Include="Model\Class\EditGestureChangeset.cs" />
-    <Compile Include="Model\Class\StaticGesture.cs" />
+    <Compile Include="Model\Class\StaticGestureInstance.cs" />
     <Compile Include="Model\Class\StaticGestureClass.cs" />
     <Compile Include="Model\Class\StaticGestureInstanceWrapper.cs" />
+    <Compile Include="Model\Class\StaticGestureRecorder.cs" />
     <Compile Include="Model\Enum\FeatureName.cs" />
     <Compile Include="Model\Enum\GestureType.cs" />
     <Compile Include="Model\Enum\LGR_Mode.cs" />
-    <Compile Include="Model\Interface\IGesture.cs" />
-    <Compile Include="Model\Class\LGR_Vec3.cs" />
+    <Compile Include="Model\Class\Vec3.cs" />
     <Compile Include="Model\Class\LGR_Configuration.cs" />
-    <Compile Include="Model\Class\LGR_HandMeasurements.cs" />
-    <Compile Include="Model\Class\LGR_SingleHandStaticGesture.cs" />
+    <Compile Include="Model\Class\HandMeasurements.cs" />
+    <Compile Include="Model\Class\SingleHandStaticGesture.cs" />
     <Compile Include="Model\Class\OptionsChangeset.cs" />
-    <Compile Include="Model\Class\LGR_User.cs" />
+    <Compile Include="Model\Class\User.cs" />
     <Compile Include="Util\Constants.cs" />
     <Compile Include="Util\CustomLeapListener.cs" />
     <Compile Include="Util\HelperMethods.cs" />
     <Compile Include="Util\SQLiteProvider.cs" />
     <Compile Include="Util\SharpGLHelper.cs" />
+    <Compile Include="Util\StatisticalClassifier.cs" />
     <Compile Include="ViewModel\EditGestureViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\OptionsViewModel.cs" />
@@ -164,6 +166,9 @@
     </Compile>
     <Compile Include="View\OptionsDialog.xaml.cs">
       <DependentUpon>OptionsDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\RecognitionMonitor.xaml.cs">
+      <DependentUpon>RecognitionMonitor.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\RenameGestureDialog.xaml.cs">
       <DependentUpon>RenameGestureDialog.xaml</DependentUpon>
@@ -188,6 +193,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\OptionsDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\RecognitionMonitor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

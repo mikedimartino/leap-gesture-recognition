@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media;
 
-namespace LeapGestureRecognition.Model
+namespace LGR
 {
 	public class LGR_Configuration
 	{
@@ -19,8 +19,8 @@ namespace LeapGestureRecognition.Model
 			BoneColors = provider.GetBoneColors();
 		}
 
-		public LGR_User ActiveUser { get; set; }
-		public List<LGR_User> AllUsers { get; set; } // Not sure if this should go here or in MainViewModel (or somewhere else).
+		public User ActiveUser { get; set; }
+		public List<User> AllUsers { get; set; } // Not sure if this should go here or in MainViewModel (or somewhere else).
 		public Dictionary<string, bool> BoolOptions { get; set; }
 		public Dictionary<string, Color> BoneColors { get; set; }
 	}

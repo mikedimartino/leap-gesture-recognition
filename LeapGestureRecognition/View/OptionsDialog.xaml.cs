@@ -1,4 +1,4 @@
-﻿using LeapGestureRecognition.Model;
+﻿using LGR;
 using LeapGestureRecognition.Util;
 using LeapGestureRecognition.ViewModel;
 using System;
@@ -106,39 +106,39 @@ namespace LeapGestureRecognition.View
 
 		private void User_RadioButton_Click(object sender, RoutedEventArgs e)
 		{
-			LGR_User activeUser = (LGR_User)(e.Source as FrameworkElement).Tag;
+			User activeUser = (User)(e.Source as FrameworkElement).Tag;
 			_vm.ActiveUserChanged(activeUser);
 		}
 
 		private void Edit_Button_Click(object sender, RoutedEventArgs e)
 		{
 			Button editButton = e.Source as Button;
-			LGR_User user = (LGR_User) editButton.Tag;
+			User user = (User) editButton.Tag;
 			user.ShowEditInfo = !user.ShowEditInfo;
 			editButton.Content = user.ShowEditInfo ? "Done" : "Edit";
 		}
 
 		private void Delete_Button_Click(object sender, RoutedEventArgs e)
 		{
-			LGR_User user = (LGR_User)(e.Source as FrameworkElement).Tag;
+			User user = (User)(e.Source as FrameworkElement).Tag;
 			_vm.DeleteUser(user);
 		}
 
 		private void UserName_TextBox_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			LGR_User user = (LGR_User)(e.Source as FrameworkElement).Tag;
+			User user = (User)(e.Source as FrameworkElement).Tag;
 			_vm.UserEdited(user);
 		}
 
 		private void UserName_TextBox_LostFocus(object sender, RoutedEventArgs e)
 		{
-			LGR_User user = (LGR_User)(e.Source as FrameworkElement).Tag;
+			User user = (User)(e.Source as FrameworkElement).Tag;
 			_vm.UserEdited(user);
 		}
 
 		private void Remeasure_Hands_Button_Click(object sender, RoutedEventArgs e)
 		{
-			LGR_User user = (LGR_User)(e.Source as FrameworkElement).Tag;
+			User user = (User)(e.Source as FrameworkElement).Tag;
 			_vm.RemeasureHand(user);
 		}
 

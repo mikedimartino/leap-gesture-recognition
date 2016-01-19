@@ -1,4 +1,4 @@
-﻿using LeapGestureRecognition.Model;
+﻿using LGR;
 using LeapGestureRecognition.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -53,23 +53,27 @@ namespace LGR_Controls
 
 		private void Save_Button_Click(object sender, RoutedEventArgs e)
 		{
+			if (_vm.RecordingInProgress) return;
 			_vm.SaveGesture();
-			Visibility = Visibility.Collapsed;
-			_mvm.Mode = LGR_Mode.Default;
+			_mvm.Mode = LGR_Mode.Recognize;
 		}
 
 		private void Cancel_Button_Click(object sender, RoutedEventArgs e)
 		{
-			Visibility = Visibility.Collapsed;
-			_mvm.Mode = LGR_Mode.Default;
+			if (_vm.RecordingInProgress) return;
+			_mvm.Mode = LGR_Mode.Recognize;
 		}
 
 		private void RecordNewInstance_Button_Click(object sender, RoutedEventArgs e)
 		{
 			var editGestureVM = (EditGestureViewModel)(e.Source as FrameworkElement).Tag;
-			_mvm.RecordNewGestureInstance(editGestureVM);
+			_mvm.RecordGestureInstances(_vm);
 		}
 
+		private void RecordNewInstances_Button_Click(object sender, RoutedEventArgs e)
+		{
+
+		}
 		#region PropertyChanged
 		// This should probably be in ViewModel. Oh well..
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -104,6 +108,8 @@ namespace LGR_Controls
 				_vm.ViewInstance(instance);
 			}
 		}
+
+		
 
 		
 	}

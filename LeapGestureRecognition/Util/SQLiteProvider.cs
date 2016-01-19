@@ -1,5 +1,5 @@
 ﻿using Leap;
-using LeapGestureRecognition.Model;
+using LGR;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -216,7 +216,7 @@ namespace LeapGestureRecognition.Util
 		#endregion
 
 		#region Users
-		public LGR_User GetActiveUser()
+		public User GetActiveUser()
 		{
 			//string sql = String.Format("SELECT value FROM StringOptions WHERE name='{0}'", Constants.StringOptionsNames.ActiveUser);
 			//string activeUserName = singleValueQuery(sql);
@@ -229,7 +229,7 @@ namespace LeapGestureRecognition.Util
 					using (SQLiteDataReader reader = command.ExecuteReader())
 					{
 						reader.Read();
-						return new LGR_User()
+						return new User()
 						{
 							Name = reader.GetString(0),
 							IsActive = true,
@@ -255,7 +255,7 @@ namespace LeapGestureRecognition.Util
 			executeBatchNonQuery(queries);
 		}
 
-		public void UpdateUser(LGR_User user)
+		public void UpdateUser(User user)
 		{
 			string sql = String.Format("UPDATE Users SET name='{0}', is_active='{1}', pinky_length='{2}', " + 
 				"ring_length='{3}', middle_length='{4}', index_length='{5}', thumb_length='{6}' WHERE id='{7}'",
@@ -265,7 +265,7 @@ namespace LeapGestureRecognition.Util
 			executeNonQuery(sql);
 		}
 
-		public void SaveNewUser(LGR_User user) // Return the id of the user
+		public void SaveNewUser(User user) // Return the id of the user
 		{
 			string sql = String.Format("INSERT INTO Users (name, is_active, pinky_length, ring_length, middle_length, index_length, thumb_length) " +
 				"VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')", user.Name, user.IsActive ? 1 : 0,
@@ -275,9 +275,9 @@ namespace LeapGestureRecognition.Util
 			// Set the id of user:
 		}
 
-		public List<LGR_User> GetAllUsers()
+		public List<User> GetAllUsers()
 		{
-			List<LGR_User> users = new List<LGR_User>();
+			List<User> users = new List<User>();
 			string sql = "SELECT name, is_active, pinky_length, ring_length, middle_length, index_length, thumb_length, id FROM Users";
 			using (var connection = new SQLiteConnection(_connString))
 			{
@@ -288,7 +288,7 @@ namespace LeapGestureRecognition.Util
 					{
 						while (reader.Read())
 						{
-							users.Add(new LGR_User()
+							users.Add(new User()
 							{
 								Name = reader.GetString(0),
 								IsActive = reader.GetInt32(1) == 1,
@@ -331,7 +331,7 @@ namespace LeapGestureRecognition.Util
 							{
 								Id = reader.GetInt32(0),
 								ClassId = reader.GetInt32(1),
-								Gesture = JsonConvert.DeserializeObject<StaticGesture>(reader.GetString(2)),
+								Gesture = JsonConvert.DeserializeObject<StaticGestureInstance>(reader.GetString(2)),
 							};
 							instance.InstanceName = String.Format("class {0} inst {1}", instance.ClassId, instance.Id);
 							gestureInstances.Add(instance);
@@ -342,7 +342,7 @@ namespace LeapGestureRecognition.Util
 			return gestureInstances;
 		}
 
-		public void SaveNewStaticGestureInstance(int classId, StaticGesture instance) // Whenever this is called it will be a new instance.
+		public void SaveNewStaticGestureInstance(int classId, StaticGestureInstance instance) // Whenever this is called it will be a new instance.
 		{
 			string serializedInstance = JsonConvert.SerializeObject(instance);
 			string sql = String.Format("INSERT INTO StaticGestureInstances (class_id, json) VALUES ('{0}', '{1}')", classId, serializedInstance);
@@ -411,7 +411,7 @@ namespace LeapGestureRecognition.Util
 								Id = reader.GetInt32(0),
 								Name = reader.GetString(1),
 								Gesture = JsonConvert.DeserializeObject<StaticGestureClass>(reader.GetString(2)),
-								SampleInstance = JsonConvert.DeserializeObject<StaticGesture>(reader.GetString(3))
+								SampleInstance = JsonConvert.DeserializeObject<StaticGestureInstance>(reader.GetString(3))
 							});
 						}
 					}

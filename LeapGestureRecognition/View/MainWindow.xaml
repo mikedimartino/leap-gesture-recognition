@@ -28,6 +28,13 @@
 			</Menu.ItemContainerStyle>
 		</Menu>
 		<TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10 0">
+			<Run Text="Gesture: " />
+			<Run Text="{Binding RecognizedGesture}"/>
+			
+			<Run Text="   ---   " />
+
+			
+			
 			<Run Text="Active user: " />
 			<Run Text="{Binding ActiveUser.Name}" />
 		</TextBlock>
@@ -51,7 +58,9 @@
 
 					<GridSplitter Grid.Row="1" Height="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#444444" />
 
-					<lgrContrls:EditGesture Grid.Row="2" x:Name="editGestureControl" Visibility="{Binding CurrentlyEditingGesture, Converter={StaticResource BoolToVis}}" />
+					<lgrContrls:EditGesture Grid.Row="2" x:Name="editGestureControl" Visibility="{Binding DisplayEditGesture, Converter={StaticResource BoolToVis}}" />
+
+					<lgrContrls:RecognitionMonitor Grid.Row="2" x:Name="recognitionMonitorControl" Visibility="{Binding DisplayRecognitionMonitor, Converter={StaticResource BoolToVis}}"  />
 
 				</Grid>
 				

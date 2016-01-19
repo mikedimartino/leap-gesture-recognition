@@ -1,5 +1,5 @@
 ﻿using Leap;
-using LeapGestureRecognition.Model;
+using LGR;
 using LeapGestureRecognition.ViewModel;
 using SharpGL;
 using System;
@@ -31,7 +31,7 @@ namespace LeapGestureRecognition.Util
 			foreach (Hand hand in frame.Hands)
 			{
 				float opacity = hand.Confidence;
-				DrawHand(new LGR_SingleHandStaticGesture(hand), showArms, opacity);
+				DrawHand(new SingleHandStaticGesture(hand), showArms, opacity);
 			}
 		}
 
@@ -39,10 +39,10 @@ namespace LeapGestureRecognition.Util
 		{
 			int axisLength = 300;
 			double axisRadius = 2;
-			LGR_Vec3 origin = new LGR_Vec3(0, 0, 0);
-			LGR_Vec3 xAxis = new LGR_Vec3(1, 0, 0);
-			LGR_Vec3 yAxis = new LGR_Vec3(0, 1, 0);
-			LGR_Vec3 zAxis = new LGR_Vec3(0, 0, 1);
+			Vec3 origin = new Vec3(0, 0, 0);
+			Vec3 xAxis = new Vec3(1, 0, 0);
+			Vec3 yAxis = new Vec3(0, 1, 0);
+			Vec3 zAxis = new Vec3(0, 0, 1);
 
 			// +X = red, +Y = green, +Z = blue
 			DrawCylinder(axisRadius, origin, xAxis * axisLength, Colors.Red, 1.0f);
@@ -70,7 +70,7 @@ namespace LeapGestureRecognition.Util
 			_gl.Cylinder(cylQuadric, radius, radius, height, 10, 10);
 		}
 
-		public void DrawCylinder(double radius, LGR_Vec3 basePosition, LGR_Vec3 topPosition, Color color, float opacity = 1)
+		public void DrawCylinder(double radius, Vec3 basePosition, Vec3 topPosition, Color color, float opacity = 1)
 		{
 			DrawCylinder(radius, basePosition.ToLeapVector(), topPosition.ToLeapVector(), color, opacity);
 		}
@@ -86,7 +86,7 @@ namespace LeapGestureRecognition.Util
 			_gl.Sphere(sphereQuadric, radius, 25, 25);
 		}
 
-		public void DrawSphere(LGR_Vec3 position, double radius, Color color, float opacity = 1)
+		public void DrawSphere(Vec3 position, double radius, Color color, float opacity = 1)
 		{
 			DrawSphere(position.ToLeapVector(), radius, color, opacity);
 		}
@@ -133,7 +133,7 @@ namespace LeapGestureRecognition.Util
 			_rotation += 3.0f;
 		}
 
-		public void DrawStaticGesture(StaticGesture gesture, bool showArms = true) 
+		public void DrawStaticGesture(StaticGestureInstance gesture, bool showArms = true) 
 		{
 			foreach (var hand in gesture.Hands)
 			{
@@ -142,7 +142,7 @@ namespace LeapGestureRecognition.Util
 		}
 
 		// Diagram of hand: https://blog.leapmotion.com/wp-content/uploads/2014/05/boneapi1.png
-		public void DrawHand(LGR_SingleHandStaticGesture hand, bool showArms, float opacity = 1)
+		public void DrawHand(SingleHandStaticGesture hand, bool showArms, float opacity = 1)
 		{
 			// Draw wrist position
 			DrawSphere(hand.WristPos_World, Constants.WristSphereRadius, _boneColors[Constants.BoneNames.Wrist], opacity);
@@ -154,10 +154,10 @@ namespace LeapGestureRecognition.Util
 				var finger = fjp.Value;
 				var fingerType = fjp.Key;
 
-				LGR_Vec3 mcp = finger[Finger.FingerJoint.JOINT_MCP];
-				LGR_Vec3 pip = finger[Finger.FingerJoint.JOINT_PIP];
-				LGR_Vec3 dip = finger[Finger.FingerJoint.JOINT_DIP];
-				LGR_Vec3 tip = finger[Finger.FingerJoint.JOINT_TIP];
+				Vec3 mcp = finger[Finger.FingerJoint.JOINT_MCP];
+				Vec3 pip = finger[Finger.FingerJoint.JOINT_PIP];
+				Vec3 dip = finger[Finger.FingerJoint.JOINT_DIP];
+				Vec3 tip = finger[Finger.FingerJoint.JOINT_TIP];
 
 				DrawSphere(mcp, Constants.FingerTipRadius, Colors.White, opacity);
 				DrawSphere(pip, Constants.FingerTipRadius, Colors.White, opacity);
@@ -174,10 +174,10 @@ namespace LeapGestureRecognition.Util
 			}
 
 			// Draw hand bones
-			LGR_Vec3 indexMCP = hand.FingerJointPositions_World[Finger.FingerType.TYPE_INDEX][Finger.FingerJoint.JOINT_MCP];
-			LGR_Vec3 middleMCP = hand.FingerJointPositions_World[Finger.FingerType.TYPE_MIDDLE][Finger.FingerJoint.JOINT_MCP];
-			LGR_Vec3 ringMCP = hand.FingerJointPositions_World[Finger.FingerType.TYPE_RING][Finger.FingerJoint.JOINT_MCP];
-			LGR_Vec3 pinkyMCP = hand.FingerJointPositions_World[Finger.FingerType.TYPE_PINKY][Finger.FingerJoint.JOINT_MCP];
+			Vec3 indexMCP = hand.FingerJointPositions_World[Finger.FingerType.TYPE_INDEX][Finger.FingerJoint.JOINT_MCP];
+			Vec3 middleMCP = hand.FingerJointPositions_World[Finger.FingerType.TYPE_MIDDLE][Finger.FingerJoint.JOINT_MCP];
+			Vec3 ringMCP = hand.FingerJointPositions_World[Finger.FingerType.TYPE_RING][Finger.FingerJoint.JOINT_MCP];
+			Vec3 pinkyMCP = hand.FingerJointPositions_World[Finger.FingerType.TYPE_PINKY][Finger.FingerJoint.JOINT_MCP];
 
 			DrawCylinder(Constants.FingerTipRadius, hand.IndexBasePos_World, indexMCP, _boneColors[Constants.BoneNames.Index_Metacarpal], opacity);
 			DrawCylinder(Constants.FingerTipRadius, hand.MiddleBasePos_World, middleMCP, _boneColors[Constants.BoneNames.Middle_Metacarpal], opacity);
@@ -197,14 +197,14 @@ namespace LeapGestureRecognition.Util
 				float forearmWidth = hand.PinkyBasePos_World.DistanceTo(hand.ThumbBasePos_World);
 
 				// Draw two cylinders for arms (Ulna - pinky side, Radius - thumb side)
-				LGR_Vec3 ulnaBase = hand.WristPos_World + ((forearmWidth / 2) * hand.ArmX);
-				LGR_Vec3 ulnaTop = hand.ElbowPos_World + ((forearmWidth / 2) * hand.ArmX);
+				Vec3 ulnaBase = hand.WristPos_World + ((forearmWidth / 2) * hand.ArmX);
+				Vec3 ulnaTop = hand.ElbowPos_World + ((forearmWidth / 2) * hand.ArmX);
 				DrawSphere(ulnaBase, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
 				DrawSphere(ulnaTop, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
 				DrawCylinder(Constants.FingerTipRadius, ulnaBase, ulnaTop, _boneColors[Constants.BoneNames.Arm], opacity);
 
-				LGR_Vec3 radiusBase = hand.WristPos_World - ((forearmWidth / 2) * hand.ArmX);
-				LGR_Vec3 radiusTop = hand.ElbowPos_World - ((forearmWidth / 2) * hand.ArmX);
+				Vec3 radiusBase = hand.WristPos_World - ((forearmWidth / 2) * hand.ArmX);
+				Vec3 radiusTop = hand.ElbowPos_World - ((forearmWidth / 2) * hand.ArmX);
 				DrawSphere(radiusBase, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
 				DrawSphere(radiusTop, Constants.FingerTipRadius * 1.2, Colors.CadetBlue, opacity);
 				DrawCylinder(Constants.FingerTipRadius, radiusBase, radiusTop, _boneColors[Constants.BoneNames.Arm], opacity);

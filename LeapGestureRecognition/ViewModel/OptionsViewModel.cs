@@ -1,4 +1,4 @@
-﻿using LeapGestureRecognition.Model;
+﻿using LGR;
 using LeapGestureRecognition.View;
 using System;
 using System.Collections.Generic;
@@ -19,15 +19,15 @@ namespace LeapGestureRecognition.ViewModel
 			_mvm = mvm;
 			Config = _mvm.Config;
 			Changeset = new OptionsChangeset();
-			Users = new ObservableCollection<LGR_User>(_mvm.Config.AllUsers.Select(user => new LGR_User(user))); // Need to make copy, not reference.
+			Users = new ObservableCollection<User>(_mvm.Config.AllUsers.Select(user => new User(user))); // Need to make copy, not reference.
 		}
 
 		#region Public Properties
 		public LGR_Configuration Config { get; set; }
 		public OptionsChangeset Changeset { get; set; }
 
-		private ObservableCollection<LGR_User> _Users;
-		public ObservableCollection<LGR_User> Users // A copy (not reference) of _mvm's Config.AllUsers
+		private ObservableCollection<User> _Users;
+		public ObservableCollection<User> Users // A copy (not reference) of _mvm's Config.AllUsers
 		{
 			get { return _Users; }
 			set
@@ -63,12 +63,12 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		public void ActiveUserChanged(LGR_User user)
+		public void ActiveUserChanged(User user)
 		{
 			Changeset.ActiveUser = user;
 		}
 
-		public void DeleteUser(LGR_User user)
+		public void DeleteUser(User user)
 		{
 			// Might want to add some logic for when active user is deleted // Maybe disable delete?
 			Users.Remove(user);
@@ -77,19 +77,19 @@ namespace LeapGestureRecognition.ViewModel
 			Changeset.DeletedUserIds.Add(user.Id);
 		}
 
-		public void UserEdited(LGR_User user)
+		public void UserEdited(User user)
 		{
 			// Might want to add some logic for when active user is deleted // Maybe disable delete?
 			if (Changeset.ModifiedUsers.Contains(user)) return;
 			Changeset.ModifiedUsers.Add(user);
 		}
 
-		public void RemeasureHand(LGR_User user)
+		public void RemeasureHand(User user)
 		{
 			MeasureHandDialog measureHandDialog = new MeasureHandDialog(_mvm);
 			while (measureHandDialog.ShowDialog() == true)
 			{
-				LGR_HandMeasurements newMeasurements = _mvm.MeasureHand();
+				HandMeasurements newMeasurements = _mvm.MeasureHand();
 				if (newMeasurements == null)
 				{
 					string errorMessage = "Unable to measure hand. Please try again.";
@@ -104,7 +104,7 @@ namespace LeapGestureRecognition.ViewModel
 
 		public void CreateNewUser(string name = "New User")
 		{
-			LGR_User newUser = new LGR_User() { Name = name };
+			User newUser = new User() { Name = name };
 			Users.Add(newUser);
 			Changeset.NewUsers.Add(newUser);
 		}

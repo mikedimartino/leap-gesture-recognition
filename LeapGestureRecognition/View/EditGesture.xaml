@@ -43,10 +43,10 @@
 					</ListBox.ItemTemplate>
 				</ListBox>
 
-				<Button Grid.Row="5" Click="RecordNewInstance_Button_Click" Tag="{Binding}" Margin="50 5 50 15">Record New Instance</Button>
+				<Button Grid.Row="5"  Click="RecordNewInstance_Button_Click" Tag="{Binding}" HorizontalAlignment="Center" Margin="50 5 50 15">Record Gesture</Button>
 
 				<WrapPanel Grid.Row="6" HorizontalAlignment="Center">
-					<Button IsDefault="True" Click="Save_Button_Click" Tag="{Binding}" MinWidth="60" Margin="0,0,10,0">Save</Button>
+					<Button IsDefault="True" Click="Save_Button_Click" Tag="{Binding}" MinWidth="60" Margin="0 0 10 0">Save</Button>
 					<Button IsCancel="True" Click="Cancel_Button_Click" MinWidth="60">Cancel</Button>
 				</WrapPanel>
 

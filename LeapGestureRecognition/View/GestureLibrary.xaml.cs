@@ -1,4 +1,4 @@
-﻿using LeapGestureRecognition.Model;
+﻿using LGR;
 using LeapGestureRecognition.Util;
 using LeapGestureRecognition.ViewModel;
 using System;

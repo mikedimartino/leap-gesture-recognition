@@ -10,7 +10,7 @@ using LeapGestureRecognition.Util;
 using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows;
-using LeapGestureRecognition.Model;
+using LGR;
 using System.Collections.ObjectModel;
 using LeapGestureRecognition.View;
 using System.Threading;
@@ -26,16 +26,18 @@ namespace LeapGestureRecognition.ViewModel
 		private System.Windows.Controls.ScrollViewer _scrollViewer;
 		private GestureLibrary _gestureLibraryControl;
 		private EditGesture _editGestureControl;
+		private RecognitionMonitor _recognitionMonitorControl;
 
 		private static Camera _camera;
 
 		private CustomLeapListener _listener;
 		private SharpGLHelper _glHelper;
 		private SQLiteProvider _sqliteProvider;
-		LGR_Configuration _config;
+		private LGR_Configuration _config;
 
+		private StatisticalClassifier _classifier;
 
-		public MainViewModel(OpenGL gl, System.Windows.Controls.ScrollViewer scrollViewer, GestureLibrary gestureLibraryControl, EditGesture editGestureControl, Controller controller, CustomLeapListener listener)
+		public MainViewModel(OpenGL gl, System.Windows.Controls.ScrollViewer scrollViewer, GestureLibrary gestureLibraryControl, EditGesture editGestureControl, RecognitionMonitor recognitionMonitorControl, Controller controller, CustomLeapListener listener)
 		{
 			_gl = gl;
 			_controller = controller;
@@ -47,44 +49,73 @@ namespace LeapGestureRecognition.ViewModel
 			_gestureLibraryControl.SetMvm(this);
 			_editGestureControl = editGestureControl;
 			_editGestureControl.SetMvm(this);
+			_recognitionMonitorControl = recognitionMonitorControl;
+			_recognitionMonitorControl.SetMvm(this);
 			_sqliteProvider = new SQLiteProvider(Constants.SQLiteFileName);
 			_config = new LGR_Configuration(_sqliteProvider);
 			_glHelper = new SharpGLHelper(_gl, _config.BoneColors);
 
 			UpdateGestureLibrary();
 			initMenuBar();
+
+			// Needs to be initialized after UpdateGestureLibrary()
+			_classifier = new StatisticalClassifier(StaticGestures);
+			updateRankedStaticGestures(_controller.Frame());
+
+			System.Timers.Timer recognizeTimer = new System.Timers.Timer();
+			recognizeTimer.Elapsed += new System.Timers.ElapsedEventHandler(OnRecognizeTimerExpired);
+			recognizeTimer.Interval = 100;
+			recognizeTimer.Enabled = true;
 		}
 
+		private void OnRecognizeTimerExpired(object source, System.Timers.ElapsedEventArgs e)
+		{
+			if (Mode == LGR_Mode.Recognize)
+			{
+				updateRankedStaticGestures(CurrentFrame);
+			}
+		}
 		
 
 		#region Public Properties
 		public SQLiteProvider SQLiteProvider { get { return _sqliteProvider; } }
 
-		public static double OpenGLWindowWidth { get; set; }
-		public static double OpenGLWindowHeight { get; set; }
-		public static Frame CurrentFrame { get; set; }
+		public double OpenGLWindowWidth { get; set; }
+		public double OpenGLWindowHeight { get; set; }
+		public Frame CurrentFrame { get; set; }
 		public ObservableCollection<CustomMenuItem> MenuBar { get; set; }
 
-		private bool _CurrentlyEditingGesture = false;
-		public bool CurrentlyEditingGesture 
+		private bool _DisplayEditGesture = false;
+		public bool DisplayEditGesture 
 		{ 
-			get { return _CurrentlyEditingGesture; }
+			get { return _DisplayEditGesture; }
 			set
 			{
-				_CurrentlyEditingGesture = value;
-				OnPropertyChanged("CurrentlyEditingGesture");
+				_DisplayEditGesture = value;
+				OnPropertyChanged("DisplayEditGesture");
 			}
 		}
 
-		private StaticGesture _SelectedGesture = null;
-		public StaticGesture SelectedGesture
+		private bool _DispalyRecognitionMonitor = true;
+		public bool DisplayRecognitionMonitor 
+		{
+			get { return _DispalyRecognitionMonitor; }
+			set 
+			{ 
+				_DispalyRecognitionMonitor = value;
+				OnPropertyChanged("DisplayRecognitionMonitor");
+			}
+		}
+
+		private StaticGestureInstance _SelectedGesture = null;
+		public StaticGestureInstance SelectedGesture
 		{
 			get { return _SelectedGesture; }
 			set
 			{
 				_SelectedGesture = value;
 				OnPropertyChanged("SelectedGesture");
-				CurrentlyEditingGesture = _SelectedGesture != null;
+				DisplayEditGesture = _SelectedGesture != null;
 			}
 		}
 
@@ -102,11 +133,31 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		private LGR_Mode _Mode = LGR_Mode.Default;
+		//private LGR_Mode _Mode = LGR_Mode.Default;
+		private LGR_Mode _Mode = LGR_Mode.Recognize;
 		public LGR_Mode Mode
 		{
 			get { return _Mode; }
-			set { _Mode = value; }
+			set 
+			{
+				_Mode = value; 
+				switch (_Mode)
+				{
+					case LGR_Mode.Recognize:
+						DisplayRecognitionMonitor = true;
+						DisplayEditGesture = false;
+						//updateRankedStaticGestures(CurrentFrame);
+						break;
+					case LGR_Mode.Edit:
+						DisplayRecognitionMonitor = false;
+						DisplayEditGesture = true;
+						break;
+					default:
+						DisplayRecognitionMonitor = true;
+						DisplayEditGesture = false;
+						break;
+				}
+			}
 		}
 
 		public LGR_Configuration Config
@@ -127,7 +178,19 @@ namespace LeapGestureRecognition.ViewModel
 			{
 				_StaticGestures = value;
 				UpdateGestureLibraryMenu(); // Should move this... will continuously clear GestureLibraryMenuItems unnecessarily 
+				if(_classifier != null) _classifier.GestureClasses = _StaticGestures;
 				OnPropertyChanged("StaticGestures");
+			}
+		}
+
+		private ObservableCollection<GestureDistance> _RankedStaticGestures = new ObservableCollection<GestureDistance>();
+		public ObservableCollection<GestureDistance> RankedStaticGestures
+		{
+			get { return _RankedStaticGestures; }
+			set
+			{
+				_RankedStaticGestures = value;
+				OnPropertyChanged("RankedStaticGestures");
 			}
 		}
 
@@ -151,7 +214,18 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		public LGR_User ActiveUser { get { return _config.ActiveUser; } }
+		public User ActiveUser { get { return _config.ActiveUser; } }
+
+		private string _RecognizedGesture;
+		public string RecognizedGesture 
+		{
+			get { return _RecognizedGesture; }
+			set
+			{
+				_RecognizedGesture = value;
+				OnPropertyChanged("RecognizedGesture");
+			}
+		}
 
 
 		#region Options
@@ -323,51 +397,22 @@ namespace LeapGestureRecognition.ViewModel
 		#endregion
 
 
-		#region RecordNewGestureInstance
-		private int recordNewGestureInstanceTimerCount = -1;
-		private int newGestureInstanceDelaySeconds = 5;
-		public void RecordNewGestureInstance(EditGestureViewModel editGestureVM)
+		public void RecordGestureInstances(EditGestureViewModel editGestureVM) // Maybe add delay and numInstances to parameters
 		{
-			Mode = LGR_Mode.Default;
-			recordNewGestureInstanceTimerCount = newGestureInstanceDelaySeconds;
-			WriteLineToOutputWindow("Taking snapshot in " + recordNewGestureInstanceTimerCount);
-
-			DispatcherTimer recordNewGestureInstanceTimer = new DispatcherTimer();
-			recordNewGestureInstanceTimer.Tick += recordNewGestureInstanceTimer_Tick;
-			recordNewGestureInstanceTimer.Tag = editGestureVM;
-			recordNewGestureInstanceTimer.Interval = new TimeSpan(0, 0, 1);
-			recordNewGestureInstanceTimer.Start();
+			var recorder = new StaticGestureRecorder(this, editGestureVM);
+			recorder.RecordGestureInstancesWithCountdown(5, 500, 10);
 		}
-
-		private void recordNewGestureInstanceTimer_Tick(object sender, EventArgs e)
-		{
-			if (--recordNewGestureInstanceTimerCount > 0)
-			{
-				WriteLineToOutputWindow("Taking snapshot in " + recordNewGestureInstanceTimerCount);
-			}
-			else
-			{
-				var editGestureVM = (EditGestureViewModel)(sender as DispatcherTimer).Tag;
-				var newInstance = new StaticGesture(_controller.Frame());
-				// Update instances in VM
-				editGestureVM.AddInstance(new StaticGestureInstanceWrapper(newInstance));
-				((DispatcherTimer)sender).Stop();
-				WriteLineToOutputWindow("Snapshot recorded");
-				DisplayGesture(newInstance);
-			}
-		}
-		#endregion
 
 		// Measures hand on screen
-		public LGR_HandMeasurements MeasureHand()
+		public HandMeasurements MeasureHand()
 		{
 			Hand hand = _controller.Frame().Hands.FirstOrDefault();
 			if (hand == null) return null;
-			return new LGR_SingleHandStaticGesture(hand).GetMeasurements();
+			return new SingleHandStaticGesture(hand).GetMeasurements();
 		}
 
 
-		public void DrawScene()
+		public void DrawScene() // This is really the main loop of the entire program. Should maybe rename.
 		{
 			//  Clear the color and depth buffer.
 			_gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
@@ -379,9 +424,12 @@ namespace LeapGestureRecognition.ViewModel
 
 			switch (Mode)
 			{
-				case LGR_Mode.Playback:
-					if(SelectedGesture != null) _glHelper.DrawStaticGesture(SelectedGesture, ShowArms);
+				case LGR_Mode.Edit:
+					if(SelectedGesture != null && !_editGestureControl.VM.RecordingInProgress) _glHelper.DrawStaticGesture(SelectedGesture, ShowArms);
 					else _glHelper.DrawFrame(CurrentFrame, ShowArms);
+					break;
+				case LGR_Mode.Recognize:
+					_glHelper.DrawFrame(CurrentFrame, ShowArms); 
 					break;
 				default:
 					_glHelper.DrawFrame(CurrentFrame, ShowArms);
@@ -389,76 +437,14 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		public void DisplayGesture(StaticGesture gesture)
+		public void DisplayGesture(StaticGestureInstance gesture)
 		{
-			Mode = LGR_Mode.Playback;
+			Mode = LGR_Mode.Edit;
 			SelectedGesture = gesture;
 		}
 
 
 		#region Dialog Windows
-		public void DisplaySaveGestureDialog(StaticGesture gesture)
-		{
-			//SaveGestureDialog saveNewGestureDialog = new SaveGestureDialog();
-			//while (saveNewGestureDialog.ShowDialog() == true)
-			//{
-			//	string name = saveNewGestureDialog.EnteredName;
-			//	if (string.IsNullOrWhiteSpace(name))
-			//	{
-			//		string errorMsg = String.Format("Error: Name cannot be whitespace.", name);
-			//		WriteLineToOutputWindow(errorMsg);
-			//		saveNewGestureDialog = new SaveGestureDialog(errorMsg);
-			//		continue;
-			//	}
-			//	if (_sqliteProvider.GestureExists(name))
-			//	{
-			//		string errorMsg = String.Format("Error: A gesture named '{0}' already exists.", name);
-			//		WriteLineToOutputWindow(errorMsg);
-			//		saveNewGestureDialog = new SaveGestureDialog(errorMsg);
-			//	}
-			//	else
-			//	{
-			//		_sqliteProvider.SaveGesture(name, gesture);
-			//		StaticGestures.Add(gesture);
-			//		WriteLineToOutputWindow(String.Format("Successfully saved gesture '{0}'.", name));
-			//		break;
-			//	}
-			//}
-		}
-
-		public void DisplayRenameGestureDialog(string oldName)
-		{
-			//RenameGestureDialog renameGestureDialog = new RenameGestureDialog(oldName);
-			//while (renameGestureDialog.ShowDialog() == true)
-			//{
-			//	string newName = renameGestureDialog.EnteredName;
-			//	if (newName == oldName) return;
-
-			//	if (string.IsNullOrWhiteSpace(newName))
-			//	{
-			//		string errorMsg = String.Format("Error: Name cannot be whitespace.", newName);
-			//		WriteLineToOutputWindow(errorMsg);
-			//		renameGestureDialog = new RenameGestureDialog(oldName, errorMsg);
-			//		continue;
-			//	}
-
-			//	if (_sqliteProvider.GestureExists(newName))
-			//	{
-			//		string errorMsg = String.Format("Error: A gesture named '{0}' already exists.", newName);
-			//		WriteLineToOutputWindow(errorMsg);
-			//		renameGestureDialog = new RenameGestureDialog(oldName, errorMsg);
-			//	}
-			//	else
-			//	{
-			//		_sqliteProvider.RenameGesture(oldName, newName);
-			//		WriteLineToOutputWindow(String.Format("Successfully renamed '{0}' to '{1}'.", oldName, newName));
-			//		UpdateGestureLibrary();
-			//		//updateGestureLibraryMenu(); // Handled in StaticGestures setter
-			//		break;
-			//	}
-			//}
-		}
-
 		public void DisplayOptionsDialog()
 		{
 			OptionsDialog optionsDialog = new OptionsDialog(this);
@@ -477,7 +463,7 @@ namespace LeapGestureRecognition.ViewModel
 					_config.BoneColors[boneColor.Key] = boneColor.Value;
 				}
 				// Users
-				LGR_User newActiveUser = optionsDialog.Changeset.ActiveUser;
+				User newActiveUser = optionsDialog.Changeset.ActiveUser;
 				if (newActiveUser != null && newActiveUser.Id != _config.ActiveUser.Id)
 				{
 					_sqliteProvider.SetActiveUser(newActiveUser.Id);
@@ -510,7 +496,8 @@ namespace LeapGestureRecognition.ViewModel
 		public void EditGesture(StaticGestureClassWrapper gesture, bool newGesture = false)
 		{
 			_editGestureControl.VM = new EditGestureViewModel(this, gesture, newGesture);
-			_editGestureControl.Visibility = Visibility.Visible;
+			//_editGestureControl.Visibility = Visibility.Visible;
+			Mode = LGR_Mode.Edit;
 			if (!newGesture) DisplayGesture(gesture.SampleInstance);
 		}
 
@@ -545,6 +532,10 @@ namespace LeapGestureRecognition.ViewModel
 			_camera.UpdateView();
 		}
 
+		public void UpdateGestureLibrary()
+		{
+			StaticGestures = _sqliteProvider.GetAllStaticGestureClasses();
+		}
 		#endregion
 
 		#region Private Methods
@@ -565,6 +556,12 @@ namespace LeapGestureRecognition.ViewModel
 			MenuBar.Add(defaultMode);
 			#endregion
 
+			#region RECOGNIZE MODE
+			CustomMenuItem recognizeMode = new CustomMenuItem("Recognize Mode");
+			recognizeMode.Command = new CustomCommand(a => Mode = LGR_Mode.Recognize);
+			MenuBar.Add(recognizeMode);
+			#endregion
+
 			#region OPTIONS
 			CustomMenuItem options = new CustomMenuItem("Options");
 			options.Command = new CustomCommand(a => DisplayOptionsDialog());
@@ -578,9 +575,16 @@ namespace LeapGestureRecognition.ViewModel
 			#endregion
 		}
 
-		public void UpdateGestureLibrary()
+		private float recognitionThreshold = 1.5f;
+		private void updateRankedStaticGestures(Frame frame)
 		{
-			StaticGestures = _sqliteProvider.GetAllStaticGestureClasses();
+			if (frame.Hands.Count == 0) return;
+			var distances = _classifier.GetDistancesFromAllClasses(new StaticGestureInstance(frame));
+			RankedStaticGestures = new ObservableCollection<GestureDistance>(distances.OrderBy(g => g.Value).Select(g => new GestureDistance(g.Key, g.Value)));
+
+			var closestGesture = RankedStaticGestures.FirstOrDefault();
+			if (closestGesture != null && closestGesture.Distance < 1.5f) RecognizedGesture = closestGesture.Gesture.Name;
+			else RecognizedGesture = "";
 		}
 		#endregion
 

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 
-namespace LeapGestureRecognition.Model
+namespace LGR
 {
 	public class CustomMenuItem : MenuItem
 	{

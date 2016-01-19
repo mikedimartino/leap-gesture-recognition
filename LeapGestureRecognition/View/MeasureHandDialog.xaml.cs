@@ -1,4 +1,4 @@
-﻿using LeapGestureRecognition.Model;
+﻿using LGR;
 using LeapGestureRecognition.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ namespace LeapGestureRecognition.View
 			errorMessageTB.Text = errorMessage;
 		}
 
-		public LGR_HandMeasurements HandMeasurements { get; set; }
+		public HandMeasurements HandMeasurements { get; set; }
 
 		private void Ok_Button_Click(object sender, RoutedEventArgs e)
 		{
