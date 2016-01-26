@@ -130,6 +130,7 @@
     <Compile Include="Model\Class\StaticGestureClass.cs" />
     <Compile Include="Model\Class\StaticGestureInstanceWrapper.cs" />
     <Compile Include="Model\Class\StaticGestureRecorder.cs" />
+    <Compile Include="Model\Enum\HandConfiguration.cs" />
     <Compile Include="Model\Enum\FeatureName.cs" />
     <Compile Include="Model\Enum\GestureType.cs" />
     <Compile Include="Model\Enum\LGR_Mode.cs" />

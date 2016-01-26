@@ -174,10 +174,10 @@ namespace LeapGestureRecognition.Util
 			}
 
 			// Draw hand bones
-			Vec3 indexMCP = hand.FingerJointPositions_World[Finger.FingerType.TYPE_INDEX][Finger.FingerJoint.JOINT_MCP];
-			Vec3 middleMCP = hand.FingerJointPositions_World[Finger.FingerType.TYPE_MIDDLE][Finger.FingerJoint.JOINT_MCP];
-			Vec3 ringMCP = hand.FingerJointPositions_World[Finger.FingerType.TYPE_RING][Finger.FingerJoint.JOINT_MCP];
-			Vec3 pinkyMCP = hand.FingerJointPositions_World[Finger.FingerType.TYPE_PINKY][Finger.FingerJoint.JOINT_MCP];
+			Vec3 indexMCP = hand.FingerJointPositions_World[Leap.Finger.FingerType.TYPE_INDEX][Finger.FingerJoint.JOINT_MCP];
+			Vec3 middleMCP = hand.FingerJointPositions_World[Leap.Finger.FingerType.TYPE_MIDDLE][Finger.FingerJoint.JOINT_MCP];
+			Vec3 ringMCP = hand.FingerJointPositions_World[Leap.Finger.FingerType.TYPE_RING][Finger.FingerJoint.JOINT_MCP];
+			Vec3 pinkyMCP = hand.FingerJointPositions_World[Leap.Finger.FingerType.TYPE_PINKY][Finger.FingerJoint.JOINT_MCP];
 
 			DrawCylinder(Constants.FingerTipRadius, hand.IndexBasePos_World, indexMCP, _boneColors[Constants.BoneNames.Index_Metacarpal], opacity);
 			DrawCylinder(Constants.FingerTipRadius, hand.MiddleBasePos_World, middleMCP, _boneColors[Constants.BoneNames.Middle_Metacarpal], opacity);
