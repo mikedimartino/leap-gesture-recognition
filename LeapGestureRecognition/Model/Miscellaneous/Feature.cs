@@ -12,7 +12,7 @@ namespace LGR
 	[DataContract]
 	public class Feature
 	{
-		public Feature(FeatureName name, object value, float weight = 1)
+		public Feature(FeatureName name, object value, int weight = 1)
 		{
 			Name = name;
 			Value = value;
@@ -24,7 +24,7 @@ namespace LGR
 		[DataMember]
 		public object Value { get; set; }
 		[DataMember]
-		public float Weight { get; set; }
+		public int Weight { get; set; }
 	}
 
 }

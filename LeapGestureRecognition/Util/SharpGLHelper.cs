@@ -31,7 +31,7 @@ namespace LeapGestureRecognition.Util
 			foreach (Hand hand in frame.Hands)
 			{
 				float opacity = hand.Confidence;
-				DrawHand(new SingleHandStaticGesture(hand), showArms, opacity);
+				DrawHand(new StaticGestureInstanceSingleHand(hand), showArms, opacity);
 			}
 		}
 
@@ -142,7 +142,7 @@ namespace LeapGestureRecognition.Util
 		}
 
 		// Diagram of hand: https://blog.leapmotion.com/wp-content/uploads/2014/05/boneapi1.png
-		public void DrawHand(SingleHandStaticGesture hand, bool showArms, float opacity = 1)
+		public void DrawHand(StaticGestureInstanceSingleHand hand, bool showArms, float opacity = 1)
 		{
 			// Draw wrist position
 			DrawSphere(hand.WristPos_World, Constants.WristSphereRadius, _boneColors[Constants.BoneNames.Wrist], opacity);

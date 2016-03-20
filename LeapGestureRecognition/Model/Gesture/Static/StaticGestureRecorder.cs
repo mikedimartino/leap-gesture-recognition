@@ -10,7 +10,7 @@ namespace LGR
 	public class StaticGestureRecorder
 	{
 		private MainViewModel _mvm;
-		private EditGestureViewModel _editGestureVM;
+		private EditStaticGestureViewModel _editStaticGestureVM;
 		private DispatcherTimer _startTimer;
 		private DispatcherTimer _recordSnapshotTimer;
 
@@ -18,10 +18,10 @@ namespace LGR
 		private int _remainingSnapshots = 0;
 
 
-		public StaticGestureRecorder(MainViewModel mvm, EditGestureViewModel editGestureVM)
+		public StaticGestureRecorder(MainViewModel mvm, EditStaticGestureViewModel editStaticGestureVM)
 		{
 			_mvm = mvm;
-			_editGestureVM = editGestureVM;
+			_editStaticGestureVM = editStaticGestureVM;
 			_startTimer = new DispatcherTimer();
 			_recordSnapshotTimer = new DispatcherTimer();
 		}
@@ -34,7 +34,7 @@ namespace LGR
 			_startTimer.Interval = new TimeSpan(0, 0, 1);
 			_startTimer.Start();
 
-			_editGestureVM.RecordingInProgress = true;
+			_editStaticGestureVM.RecordingInProgress = true;
 		}
 
 		public void RecordGestureInstances(int numInstances)
@@ -44,7 +44,7 @@ namespace LGR
 			_recordSnapshotTimer.Interval = new TimeSpan(0, 0, 1);
 			_recordSnapshotTimer.Start();
 
-			_editGestureVM.RecordingInProgress = true;
+			_editStaticGestureVM.RecordingInProgress = true;
 		}
 		#endregion
 
@@ -66,13 +66,13 @@ namespace LGR
 		{
 			if (_remainingSnapshots-- > 0)
 			{
-				_editGestureVM.AddInstance(new StaticGestureInstanceWrapper(_mvm.CurrentFrame));
+				_editStaticGestureVM.AddInstance(new StaticGestureInstanceWrapper(_mvm.CurrentFrame));
 			}
 			else
 			{
 				_recordSnapshotTimer.Stop();
 				_mvm.WriteLineToOutputWindow("Finished recording gesture instances.");
-				_editGestureVM.RecordingInProgress = false;
+				_editStaticGestureVM.RecordingInProgress = false;
 			}
 		}
 		#endregion

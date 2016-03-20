@@ -4,7 +4,7 @@
         Title="SharpGL WPF Application"  
         xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF"
 				xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
-				xmlns:lgrContrls="clr-namespace:LGR_Controls;assembly="
+				xmlns:lgrControls="clr-namespace:LGR_Controls;assembly="
 				WindowStartupLocation="CenterScreen" WindowState="Maximized"
 				DataContext="{Binding MainViewModel}">
 	<Window.Resources>
@@ -27,16 +27,10 @@
 				</Style>
 			</Menu.ItemContainerStyle>
 		</Menu>
+		
 		<TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10 0">
 			<Run Text="Gesture: " />
 			<Run Text="{Binding RecognizedGesture}"/>
-			
-			<Run Text="   ---   " />
-
-			
-			
-			<Run Text="Active user: " />
-			<Run Text="{Binding ActiveUser.Name}" />
 		</TextBlock>
 
 		<Grid Grid.Row="1">
@@ -54,13 +48,15 @@
 						<RowDefinition />
 					</Grid.RowDefinitions>
 
-					<lgrContrls:GestureLibrary Grid.Row="0" x:Name="gestureLibraryControl" />
+					<lgrControls:GestureLibrary Grid.Row="0" x:Name="gestureLibraryControl" />
 
 					<GridSplitter Grid.Row="1" Height="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#444444" />
 
-					<lgrContrls:EditGesture Grid.Row="2" x:Name="editGestureControl" Visibility="{Binding DisplayEditGesture, Converter={StaticResource BoolToVis}}" />
+					<lgrControls:EditStaticGesture Grid.Row="2" x:Name="editStaticGestureControl" Visibility="{Binding DisplayEditStaticGesture, Converter={StaticResource BoolToVis}}" />
 
-					<lgrContrls:RecognitionMonitor Grid.Row="2" x:Name="recognitionMonitorControl" Visibility="{Binding DisplayRecognitionMonitor, Converter={StaticResource BoolToVis}}"  />
+					<lgrControls:EditDynamicGesture Grid.Row="2" x:Name="editDynamicGestureControl" Visibility="{Binding DisplayEditDynamicGesture, Converter={StaticResource BoolToVis}}" />
+
+					<lgrControls:RecognitionMonitor Grid.Row="2" x:Name="recognitionMonitorControl" Visibility="{Binding DisplayRecognitionMonitor, Converter={StaticResource BoolToVis}}"  />
 
 				</Grid>
 				
@@ -79,7 +75,7 @@
 				<sharpGL:OpenGLControl 
 					Name="openGLControl" OpenGLDraw="openGLControl_OpenGLDraw" 
 					OpenGLInitialized="openGLControl_OpenGLInitialized" Resized="openGLControl_Resized"
-					DrawFPS="True" RenderContextType="FBO" FrameRate="20" 
+					DrawFPS="True" RenderContextType="FBO" FrameRate="{Binding SharpGLFrameRate}" 
 					Grid.Row="0" />
 
 				<GridSplitter Grid.Row="1" Height="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#444444" />

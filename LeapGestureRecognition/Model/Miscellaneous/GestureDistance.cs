@@ -8,13 +8,13 @@ namespace LGR
 	public class GestureDistance
 	{
 		public GestureDistance() { }
-		public GestureDistance(StaticGestureClassWrapper gesture, float distance)
+		public GestureDistance(string gestureName, float distance)
 		{
-			Gesture = gesture;
+			Name = gestureName;
 			Distance = distance;
 		}
 
-		public StaticGestureClassWrapper Gesture { get; set; }
+		public string Name { get; set; }
 		public float Distance { get; set; }
 	}
 }

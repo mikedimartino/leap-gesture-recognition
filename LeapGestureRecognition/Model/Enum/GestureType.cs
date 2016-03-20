@@ -7,8 +7,7 @@ namespace LGR
 {
 	public enum GestureType
 	{
-		SingleHandStatic,
-		// TwoHandStatic?,
-		// Dynamic
+		Static,
+		Dynamic
 	}
 }

@@ -8,27 +8,43 @@ namespace LGR
 {
 	public class StatisticalClassifier
 	{
-		private ObservableCollection<StaticGestureClassWrapper> _gestureClasses;
+		private ObservableCollection<StaticGestureClassWrapper> _staticGestureClasses;
+		private ObservableCollection<DynamicGestureClassWrapper> _dynamicGestureClasses;
 
-		public StatisticalClassifier(ObservableCollection<StaticGestureClassWrapper> gestureClasses) 
+		public StatisticalClassifier(ObservableCollection<StaticGestureClassWrapper> staticGestureClasses, ObservableCollection<DynamicGestureClassWrapper> dynamicGestureClasses) 
 		{
-			_gestureClasses = gestureClasses;
+			_staticGestureClasses = staticGestureClasses;
+			_dynamicGestureClasses = dynamicGestureClasses;
 		}
 
-		public ObservableCollection<StaticGestureClassWrapper> GestureClasses
+		#region Public Properties
+		public ObservableCollection<StaticGestureClassWrapper> StaticGestureClasses
 		{
-			get { return _gestureClasses; }
-			set { _gestureClasses = value; }
+			get { return _staticGestureClasses; }
+			set { _staticGestureClasses = value; }
 		}
 
+		public ObservableCollection<DynamicGestureClassWrapper> DynamicGestureClasses
+		{
+			get { return _dynamicGestureClasses; }
+			set { _dynamicGestureClasses = value; }
+		}
+		#endregion
+
+		#region Public Methods
 		public Dictionary<StaticGestureClassWrapper, float> GetDistancesFromAllClasses(StaticGestureInstance gestureInstance)
 		{
-			var gestureDistances = new Dictionary<StaticGestureClassWrapper, float>();
-			foreach (var gestureClass in _gestureClasses)
-			{
-				gestureDistances.Add(gestureClass, gestureClass.Gesture.DistanceTo(gestureInstance));
-			}
-			return gestureDistances;
+				lock (_staticGestureClasses)
+				{
+					var gestureDistances = new Dictionary<StaticGestureClassWrapper, float>();
+					foreach (var gestureClass in _staticGestureClasses)
+					{
+						gestureDistances.Add(gestureClass, gestureClass.Gesture.DistanceTo(gestureInstance));
+					}
+					return gestureDistances;
+				}
 		}
+		#endregion
+
 	}
 }

@@ -17,7 +17,8 @@
 
 				<DataGrid Grid.Row="1" ItemsSource="{Binding RankedStaticGestures}" IsReadOnly="True" AutoGenerateColumns="False">
 					<DataGrid.Columns>
-						<DataGridTextColumn Width="*" Header="Gesture" Binding="{Binding Gesture.Name}" />
+						<!--<DataGridTextColumn Width="*" Header="Gesture" Binding="{Binding Gesture.Name}" />-->
+						<DataGridTextColumn Width="*" Header="Gesture" Binding="{Binding Name}" />
 						<DataGridTextColumn Width="Auto" Header="Distance" Binding="{Binding Distance}" />
 					</DataGrid.Columns>
 				</DataGrid>

@@ -24,6 +24,8 @@ namespace LGR_Controls
 	{
 		private MainViewModel _mvm;
 
+		private Brush backgroundColor;
+
 		public GestureLibrary()
 		{
 			InitializeComponent();
@@ -33,6 +35,7 @@ namespace LGR_Controls
 		{
 			InitializeComponent();
 			_mvm = mvm;
+			Brush backGroundColor = this.Background;
 		}
 
 		public void SetMvm(MainViewModel mvm) // Make property instead?
@@ -43,29 +46,65 @@ namespace LGR_Controls
 		private void ViewGesture(object sender, RoutedEventArgs e)
 		{
 			var gesture = (StaticGestureClassWrapper)(e.Source as FrameworkElement).Tag;
-			_mvm.DisplayGesture(gesture.SampleInstance);
+			_mvm.DisplayStaticGesture(gesture.SampleInstance);
 		}
 
 		private void EditGesture(object sender, RoutedEventArgs e)
 		{
-			var gesture = (StaticGestureClassWrapper)(e.Source as FrameworkElement).Tag;
-			_mvm.EditGesture(gesture);
+			object gesture = (e.Source as FrameworkElement).Tag;
+			if (gesture is StaticGestureClassWrapper)
+			{
+				_mvm.EditStaticGesture((StaticGestureClassWrapper)gesture);
+			}
+			else if (gesture is DynamicGestureClassWrapper)
+			{
+				_mvm.EditDynamicGesture((DynamicGestureClassWrapper)gesture);
+			}
 		}
 
 		private void DeleteGesture(object sender, RoutedEventArgs e)
 		{
 			var gesture = (StaticGestureClassWrapper)(e.Source as FrameworkElement).Tag;
 			_mvm.SQLiteProvider.DeleteStaticGestureClass(gesture.Id);
-			_mvm.UpdateGestureLibrary();
+			_mvm.UpdateStaticGestureLibrary();
 		}
 
-		private void GestureMouseDown(object sender, MouseButtonEventArgs e)
+		private void StaticGestureMouseDown(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ClickCount >= 2) // Double click
 			{
 				var gesture = (StaticGestureClassWrapper)(sender as FrameworkElement).Tag;
-				_mvm.EditGesture(gesture);
+				_mvm.EditStaticGesture(gesture);
 			}
+		}
+
+		private void DynamicGestureMouseDown(object sender, MouseButtonEventArgs e)
+		{
+			//if (e.ClickCount >= 2) // Double click    
+			//{
+			//	var gesture = (DynamicGestureClassWrapper)(sender as FrameworkElement).Tag;
+			//	_mvm.EditStaticGesture(gesture);
+			//}
+		}
+
+
+
+		Brush activeTabBrush = new SolidColorBrush(Colors.LightBlue);
+
+		private void StaticTabClicked(object sender, MouseButtonEventArgs e)
+		{
+			staticTab.Background = activeTabBrush;
+			dynamicTab.Background = backgroundColor;
+			staticGesturesList.Visibility = Visibility.Visible;
+			dynamicGesturesList.Visibility = Visibility.Collapsed;
+		}
+
+		private void DynamicTabClicked(object sender, MouseButtonEventArgs e)
+		{
+			dynamicTab.Background = activeTabBrush;
+			staticTab.Background = backgroundColor;
+			dynamicGesturesList.Visibility = Visibility.Visible;
+			staticGesturesList.Visibility = Visibility.Collapsed;
 		}
 	}
 }

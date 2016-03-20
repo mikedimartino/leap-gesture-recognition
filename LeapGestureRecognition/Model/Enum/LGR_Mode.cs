@@ -10,7 +10,8 @@ namespace LGR
 		Default,
 		Playback,
 		Recognize,
-		Edit,
+		EditStatic,
+		EditDynamic,
 		Learn,
 		Debug,
 	};

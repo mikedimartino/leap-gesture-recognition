@@ -10,15 +10,49 @@
 			<Grid Margin="10">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
 					<RowDefinition Height="*"/>
 				</Grid.RowDefinitions>
 
 				<TextBlock Grid.Row="0" FontSize="15" FontWeight="Bold" Margin="0 0 0 8">Gesture Library</TextBlock>
 
-				<ListBox Grid.Row="1" ItemsSource="{Binding StaticGestures}" Grid.Column="0" HorizontalContentAlignment="Stretch">
+				<Grid Grid.Row="1" Margin="0 0 0 5">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*" />
+						<ColumnDefinition Width="*" />
+					</Grid.ColumnDefinitions>
+
+					<Border Grid.Column="0" BorderBrush="Black" BorderThickness="1" Background="LightBlue" MouseDown="StaticTabClicked" x:Name="staticTab">
+						<TextBlock TextAlignment="Center">Static</TextBlock>
+					</Border>
+
+					<Border Grid.Column="1" BorderBrush="Black" BorderThickness="1" MouseDown="DynamicTabClicked" x:Name="dynamicTab">
+						<TextBlock TextAlignment="Center">Dynamic</TextBlock>
+					</Border>
+				</Grid>
+				
+				<ListBox Grid.Row="2" ItemsSource="{Binding StaticGestures}" Grid.Column="0" HorizontalContentAlignment="Stretch" x:Name="staticGesturesList">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
-							<Grid MouseDown="GestureMouseDown" Tag="{Binding}">
+							<Grid MouseDown="StaticGestureMouseDown" Tag="{Binding}">
+								<TextBlock Text="{Binding Name}" Tag="{Binding}">
+									<TextBlock.ContextMenu>
+										<ContextMenu>
+											<!--<MenuItem Header="View" Click="ViewGesture" Tag="{Binding}" />-->
+											<MenuItem Header="Edit" Click="EditGesture" Tag="{Binding}" />
+											<MenuItem Header="Delete" Click="DeleteGesture" Tag="{Binding}" />
+										</ContextMenu>
+									</TextBlock.ContextMenu>
+								</TextBlock>
+							</Grid>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+
+				<ListBox Grid.Row="2" ItemsSource="{Binding DynamicGestures}" Grid.Column="0"  HorizontalContentAlignment="Stretch" Visibility="Collapsed" x:Name="dynamicGesturesList" >
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<Grid MouseDown="DynamicGestureMouseDown" Tag="{Binding}">
 								<TextBlock Text="{Binding Name}" Tag="{Binding}">
 									<TextBlock.ContextMenu>
 										<ContextMenu>

@@ -25,7 +25,8 @@ namespace LeapGestureRecognition.ViewModel
 		private static Controller _controller;
 		private System.Windows.Controls.ScrollViewer _scrollViewer;
 		private GestureLibrary _gestureLibraryControl;
-		private EditGesture _editGestureControl;
+		private EditStaticGesture _editStaticGestureControl;
+		private EditDynamicGesture _editDynamicGestureControl;
 		private RecognitionMonitor _recognitionMonitorControl;
 
 		private static Camera _camera;
@@ -37,7 +38,7 @@ namespace LeapGestureRecognition.ViewModel
 
 		private StatisticalClassifier _classifier;
 
-		public MainViewModel(OpenGL gl, System.Windows.Controls.ScrollViewer scrollViewer, GestureLibrary gestureLibraryControl, EditGesture editGestureControl, RecognitionMonitor recognitionMonitorControl, Controller controller, CustomLeapListener listener)
+		public MainViewModel(OpenGL gl, System.Windows.Controls.ScrollViewer scrollViewer, GestureLibrary gestureLibraryControl, EditStaticGesture editStaticGestureControl, EditDynamicGesture editDynamicGestureControl, RecognitionMonitor recognitionMonitorControl, Controller controller, CustomLeapListener listener)
 		{
 			_gl = gl;
 			_controller = controller;
@@ -47,19 +48,23 @@ namespace LeapGestureRecognition.ViewModel
 			_scrollViewer = scrollViewer;
 			_gestureLibraryControl = gestureLibraryControl;
 			_gestureLibraryControl.SetMvm(this);
-			_editGestureControl = editGestureControl;
-			_editGestureControl.SetMvm(this);
+			_editStaticGestureControl = editStaticGestureControl;
+			_editStaticGestureControl.SetMvm(this);
+			_editDynamicGestureControl = editDynamicGestureControl;
+			_editDynamicGestureControl.SetMvm(this);
 			_recognitionMonitorControl = recognitionMonitorControl;
 			_recognitionMonitorControl.SetMvm(this);
 			_sqliteProvider = new SQLiteProvider(Constants.SQLiteFileName);
 			_config = new LGR_Configuration(_sqliteProvider);
 			_glHelper = new SharpGLHelper(_gl, _config.BoneColors);
 
-			UpdateGestureLibrary();
+			DynamicGestureRecorder = new DynamicGestureRecorder(SharpGLFrameRate);
+
+			UpdateStaticGestureLibrary();
 			initMenuBar();
 
 			// Needs to be initialized after UpdateGestureLibrary()
-			_classifier = new StatisticalClassifier(StaticGestures);
+			_classifier = new StatisticalClassifier(StaticGestures, DynamicGestures);
 			updateRankedStaticGestures(_controller.Frame());
 
 			System.Timers.Timer recognizeTimer = new System.Timers.Timer();
@@ -84,41 +89,66 @@ namespace LeapGestureRecognition.ViewModel
 		public double OpenGLWindowHeight { get; set; }
 		public Frame CurrentFrame { get; set; }
 		public ObservableCollection<CustomMenuItem> MenuBar { get; set; }
+		public DynamicGestureRecorder DynamicGestureRecorder { get; set; }
 
-		private bool _DisplayEditGesture = false;
-		public bool DisplayEditGesture 
+		public int SharpGLFrameRate = 30;
+
+		private bool _DisplayEditStaticGesture = false;
+		public bool DisplayEditStaticGesture 
 		{ 
-			get { return _DisplayEditGesture; }
+			get { return _DisplayEditStaticGesture; }
 			set
 			{
-				_DisplayEditGesture = value;
-				OnPropertyChanged("DisplayEditGesture");
+				_DisplayEditStaticGesture = value;
+				OnPropertyChanged("DisplayEditStaticGesture");
 			}
 		}
 
-		private bool _DispalyRecognitionMonitor = true;
+		private bool _DisplayEditDynamicGesture = false;
+		public bool DisplayEditDynamicGesture
+		{
+			get { return _DisplayEditDynamicGesture; }
+			set
+			{
+				_DisplayEditDynamicGesture = value;
+				OnPropertyChanged("DisplayEditDynamicGesture");
+			}
+		}
+
+		private bool _DisplayRecognitionMonitor = true;
 		public bool DisplayRecognitionMonitor 
 		{
-			get { return _DispalyRecognitionMonitor; }
+			get { return _DisplayRecognitionMonitor; }
 			set 
 			{ 
-				_DispalyRecognitionMonitor = value;
+				_DisplayRecognitionMonitor = value;
 				OnPropertyChanged("DisplayRecognitionMonitor");
 			}
 		}
 
-		private StaticGestureInstance _SelectedGesture = null;
-		public StaticGestureInstance SelectedGesture
+		private StaticGestureInstance _SelectedStaticGesture = null;
+		public StaticGestureInstance SelectedStaticGesture
 		{
-			get { return _SelectedGesture; }
+			get { return _SelectedStaticGesture; }
 			set
 			{
-				_SelectedGesture = value;
-				OnPropertyChanged("SelectedGesture");
-				DisplayEditGesture = _SelectedGesture != null;
+				_SelectedStaticGesture = value;
+				OnPropertyChanged("SelectedStaticGesture");
+				DisplayEditStaticGesture = _SelectedStaticGesture != null;
 			}
 		}
 
+		private DynamicGestureInstance _SelectedDynamicGesture = null;
+		public DynamicGestureInstance SelectedDynamicGesture
+		{
+			get { return _SelectedDynamicGesture; }
+			set
+			{
+				_SelectedDynamicGesture = value;
+				OnPropertyChanged("SelectedDynamicGesture");
+				DisplayEditStaticGesture = _SelectedDynamicGesture != null;
+			}
+		}
 
 		private string _outputWindowContent;
 		public string OutputWindowContent
@@ -145,16 +175,24 @@ namespace LeapGestureRecognition.ViewModel
 				{
 					case LGR_Mode.Recognize:
 						DisplayRecognitionMonitor = true;
-						DisplayEditGesture = false;
+						DisplayEditStaticGesture = false;
+						DisplayEditDynamicGesture = false;
 						//updateRankedStaticGestures(CurrentFrame);
 						break;
-					case LGR_Mode.Edit:
+					case LGR_Mode.EditStatic:
 						DisplayRecognitionMonitor = false;
-						DisplayEditGesture = true;
+						DisplayEditStaticGesture = true;
+						DisplayEditDynamicGesture = false;
+						break;
+					case LGR_Mode.EditDynamic:
+						DisplayRecognitionMonitor = false;
+						DisplayEditStaticGesture = false;
+						DisplayEditDynamicGesture = true;
 						break;
 					default:
 						DisplayRecognitionMonitor = true;
-						DisplayEditGesture = false;
+						DisplayEditStaticGesture = false;
+						DisplayEditDynamicGesture = false;
 						break;
 				}
 			}
@@ -176,10 +214,13 @@ namespace LeapGestureRecognition.ViewModel
 			get { return _StaticGestures; }
 			set
 			{
-				_StaticGestures = value;
-				UpdateGestureLibraryMenu(); // Should move this... will continuously clear GestureLibraryMenuItems unnecessarily 
-				if(_classifier != null) _classifier.GestureClasses = _StaticGestures;
-				OnPropertyChanged("StaticGestures");
+				lock (StaticGestures) // This was accessed by multiple threads (StatisticalClassifier has a reference to it and uses a timer).
+				{
+					_StaticGestures = value;
+					UpdateGestureLibraryMenu(); // Should move this... will continuously clear GestureLibraryMenuItems unnecessarily 
+					if (_classifier != null) _classifier.StaticGestureClasses = _StaticGestures;
+					OnPropertyChanged("StaticGestures");
+				}
 			}
 		}
 
@@ -202,6 +243,24 @@ namespace LeapGestureRecognition.ViewModel
 				GestureLibraryMenuItems.Add(new CustomMenuItem(gesture.Name));
 			}
 		}
+
+		private ObservableCollection<DynamicGestureClassWrapper> _DynamicGestures = new ObservableCollection<DynamicGestureClassWrapper>();
+		public ObservableCollection<DynamicGestureClassWrapper> DynamicGestures
+		{
+			get { return _DynamicGestures; }
+			set
+			{
+				lock (DynamicGestures) // This was accessed by multiple threads (StatisticalClassifier has a reference to it and uses a timer).
+				{
+					_DynamicGestures = value;
+					//UpdateGestureLibraryMenu(); // Should move this... will continuously clear GestureLibraryMenuItems unnecessarily 
+					//if (_classifier != null) _classifier.GestureClasses = _StaticGestures;
+					OnPropertyChanged("DynamicGestures");
+				}
+			}
+		}
+
+
 
 		private ObservableCollection<CustomMenuItem> _GestureLibraryMenuItems = new ObservableCollection<CustomMenuItem>();
 		public ObservableCollection<CustomMenuItem> GestureLibraryMenuItems
@@ -373,6 +432,21 @@ namespace LeapGestureRecognition.ViewModel
 				case Key.RightCtrl:
 					_camera.Roll = -1;
 					break;
+
+				case Key.NumPad1:
+					dynamicGestureStep++;
+					break;
+				case Key.NumPad0:
+					if(dynamicGestureStep > 0) dynamicGestureStep--;
+					break;
+
+				// End the dynamic gesture recording:
+				case Key.Enter:
+					if (Mode == LGR_Mode.Debug)
+					{
+						var instances = DynamicGestureRecorder.Instances;
+					}
+					break;
 			}
 		}
 
@@ -397,7 +471,7 @@ namespace LeapGestureRecognition.ViewModel
 		#endregion
 
 
-		public void RecordGestureInstances(EditGestureViewModel editGestureVM) // Maybe add delay and numInstances to parameters
+		public void RecordGestureInstances(EditStaticGestureViewModel editGestureVM) // Maybe add delay and numInstances to parameters
 		{
 			var recorder = new StaticGestureRecorder(this, editGestureVM);
 			recorder.RecordGestureInstancesWithCountdown(5, 500, 10);
@@ -408,9 +482,8 @@ namespace LeapGestureRecognition.ViewModel
 		{
 			Hand hand = _controller.Frame().Hands.FirstOrDefault();
 			if (hand == null) return null;
-			return new SingleHandStaticGesture(hand).GetMeasurements();
+			return new StaticGestureInstanceSingleHand(hand).GetMeasurements();
 		}
-
 
 		public void DrawScene() // This is really the main loop of the entire program. Should maybe rename.
 		{
@@ -424,12 +497,39 @@ namespace LeapGestureRecognition.ViewModel
 
 			switch (Mode)
 			{
-				case LGR_Mode.Edit:
-					if(SelectedGesture != null && !_editGestureControl.VM.RecordingInProgress) _glHelper.DrawStaticGesture(SelectedGesture, ShowArms);
+				case LGR_Mode.EditStatic:
+					if(SelectedStaticGesture != null && !_editStaticGestureControl.VM.RecordingInProgress) _glHelper.DrawStaticGesture(SelectedStaticGesture, ShowArms);
 					else _glHelper.DrawFrame(CurrentFrame, ShowArms);
+					break;
+				case LGR_Mode.EditDynamic:
+					if (_editDynamicGestureControl.VM.RecordingInProgress)
+					{
+						DynamicGestureRecorder.ProcessFrame(CurrentFrame);
+						ClearOutputWindow();
+						WriteLineToOutputWindow("Dynamic Gesture Recorder Debug Info:");
+						WriteLineToOutputWindow(DynamicGestureRecorder.DebugMessage);
+						_glHelper.DrawFrame(CurrentFrame, ShowArms);
+					}
+					else
+					{
+						if (SelectedDynamicGesture != null && !_editDynamicGestureControl.VM.RecordingInProgress)
+						{
+							int sampleIndex = dynamicGestureStep % SelectedDynamicGesture.Samples.Count;
+							_glHelper.DrawStaticGesture(SelectedDynamicGesture.Samples[sampleIndex], ShowArms);
+						}
+						else _glHelper.DrawFrame(CurrentFrame, ShowArms);
+					}
+					
 					break;
 				case LGR_Mode.Recognize:
 					_glHelper.DrawFrame(CurrentFrame, ShowArms); 
+					break;
+				case LGR_Mode.Debug:
+					_glHelper.DrawFrame(CurrentFrame, ShowArms);
+					DynamicGestureRecorder.ProcessFrame(CurrentFrame);
+					ClearOutputWindow();
+					WriteLineToOutputWindow("Dynamic Gesture Recorder Debug Info:");
+					WriteLineToOutputWindow(DynamicGestureRecorder.DebugMessage);
 					break;
 				default:
 					_glHelper.DrawFrame(CurrentFrame, ShowArms);
@@ -437,12 +537,19 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		public void DisplayGesture(StaticGestureInstance gesture)
+		public void DisplayStaticGesture(StaticGestureInstance gestureInstance)
 		{
-			Mode = LGR_Mode.Edit;
-			SelectedGesture = gesture;
+			Mode = LGR_Mode.EditStatic;
+			SelectedStaticGesture = gestureInstance;
 		}
 
+		private int dynamicGestureStep = 0;
+		public void DisplayDynamicGesture(DynamicGestureInstance gestureInstance)
+		{
+			Mode = LGR_Mode.EditDynamic;
+			SelectedDynamicGesture = gestureInstance;
+			dynamicGestureStep = 0;
+		}
 
 		#region Dialog Windows
 		public void DisplayOptionsDialog()
@@ -489,18 +596,27 @@ namespace LeapGestureRecognition.ViewModel
 
 		public void NewStaticGesture()
 		{
-			Mode = LGR_Mode.Default;
-			EditGesture(new StaticGestureClassWrapper(), newGesture: true);
+			EditStaticGesture(new StaticGestureClassWrapper(), newGesture: true);
 		}
 
-		public void EditGesture(StaticGestureClassWrapper gesture, bool newGesture = false)
+		public void EditStaticGesture(StaticGestureClassWrapper gesture, bool newGesture = false)
 		{
-			_editGestureControl.VM = new EditGestureViewModel(this, gesture, newGesture);
+			_editStaticGestureControl.VM = new EditStaticGestureViewModel(this, gesture, newGesture);
 			//_editGestureControl.Visibility = Visibility.Visible;
-			Mode = LGR_Mode.Edit;
-			if (!newGesture) DisplayGesture(gesture.SampleInstance);
+			Mode = LGR_Mode.EditStatic;
+			if (!newGesture) DisplayStaticGesture(gesture.SampleInstance);
 		}
 
+		public void NewDynamicGesture()
+		{
+			EditDynamicGesture(new DynamicGestureClassWrapper(), newGesture: true);
+		}
+
+		public void EditDynamicGesture(DynamicGestureClassWrapper gesture, bool newGesture = false)
+		{
+			_editDynamicGestureControl.VM = new EditDynamicGestureViewModel(this, gesture, newGesture);
+			Mode = LGR_Mode.EditDynamic;
+		}
 		#endregion
 
 		#region Output Window
@@ -513,6 +629,11 @@ namespace LeapGestureRecognition.ViewModel
 		{
 			// TODO: Might want to restrict the size of log
 			OutputWindowContent += "> " + message;
+		}
+
+		public void ClearOutputWindow()
+		{
+			OutputWindowContent = "";
 		}
 		#endregion
 
@@ -532,9 +653,14 @@ namespace LeapGestureRecognition.ViewModel
 			_camera.UpdateView();
 		}
 
-		public void UpdateGestureLibrary()
+		public void UpdateStaticGestureLibrary()
 		{
 			StaticGestures = _sqliteProvider.GetAllStaticGestureClasses();
+		}
+
+		public void UpdateDynamicGestureLibrary()
+		{
+			DynamicGestures = _sqliteProvider.GetAllDynamicGestureClasses();
 		}
 		#endregion
 
@@ -562,6 +688,12 @@ namespace LeapGestureRecognition.ViewModel
 			MenuBar.Add(recognizeMode);
 			#endregion
 
+			#region DEBUG MODE
+			CustomMenuItem debugMode = new CustomMenuItem("Debug Mode");
+			debugMode.Command = new CustomCommand(a => Mode = LGR_Mode.Debug);
+			MenuBar.Add(debugMode);
+			#endregion
+
 			#region OPTIONS
 			CustomMenuItem options = new CustomMenuItem("Options");
 			options.Command = new CustomCommand(a => DisplayOptionsDialog());
@@ -573,6 +705,12 @@ namespace LeapGestureRecognition.ViewModel
 			newStaticGesture.Command = new CustomCommand(a => NewStaticGesture());
 			MenuBar.Add(newStaticGesture);
 			#endregion
+
+			#region NEW DYNAMIC GESTURE
+			CustomMenuItem newDynamicGesture = new CustomMenuItem("New Dynamic Gesture");
+			newDynamicGesture.Command = new CustomCommand(a => NewDynamicGesture());
+			MenuBar.Add(newDynamicGesture);
+			#endregion
 		}
 
 		private float recognitionThreshold = 1.5f;
@@ -580,10 +718,10 @@ namespace LeapGestureRecognition.ViewModel
 		{
 			if (frame.Hands.Count == 0) return;
 			var distances = _classifier.GetDistancesFromAllClasses(new StaticGestureInstance(frame));
-			RankedStaticGestures = new ObservableCollection<GestureDistance>(distances.OrderBy(g => g.Value).Select(g => new GestureDistance(g.Key, g.Value)));
+			RankedStaticGestures = new ObservableCollection<GestureDistance>(distances.OrderBy(g => g.Value).Select(g => new GestureDistance(g.Key.Name, g.Value)));
 
 			var closestGesture = RankedStaticGestures.FirstOrDefault();
-			if (closestGesture != null && closestGesture.Distance < 1.5f) RecognizedGesture = closestGesture.Gesture.Name;
+			if (closestGesture != null && closestGesture.Distance < 3.0f) RecognizedGesture = closestGesture.Name;
 			else RecognizedGesture = "";
 		}
 		#endregion

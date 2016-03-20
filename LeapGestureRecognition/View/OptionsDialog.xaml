@@ -28,7 +28,7 @@
 			</ListBox.ItemContainerStyle>
 			<ListBoxItem x:Name="generalListBoxItem" Content="General" Selected="ListBoxItem_Selected" Tag="General" />
 			<ListBoxItem Content="Bone Colors" Selected="ListBoxItem_Selected" Tag="BoneColors" />
-			<ListBoxItem Content="Users" Selected="ListBoxItem_Selected" Tag="Users" />
+			<!--<ListBoxItem Content="Users" Selected="ListBoxItem_Selected" Tag="Users" />-->
 		</ListBox>
 
 		<Border Grid.Column="1">

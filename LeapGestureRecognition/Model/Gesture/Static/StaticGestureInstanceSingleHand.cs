@@ -8,12 +8,12 @@ using System.Runtime.Serialization;
 namespace LGR
 {
 	[DataContract]
-	public class SingleHandStaticGesture
+	public class StaticGestureInstanceSingleHand
 	{
-		public SingleHandStaticGesture() { }
+		public StaticGestureInstanceSingleHand() { }
 
 		// Gotta figure out how to handle both hands
-		public SingleHandStaticGesture(Hand hand)
+		public StaticGestureInstanceSingleHand(Hand hand)
 		{
 			HandTransform = getHandTransform(hand);
 
@@ -51,8 +51,8 @@ namespace LGR
 			setFingerJointPositions_Relative(hand);
 			setFingerBasePositions_Relative(hand);
 
-			PalmSphereRadius = hand.SphereRadius;
-			PalmSphereCenter = new Vec3(hand.SphereCenter);
+			PalmSphereRadius = hand.SphereRadius / HandScale;
+			PalmSphereCenter = new Vec3(HandTransform.TransformPoint(hand.SphereCenter)) / HandScale;
 
 			buildFingerFeatures(hand);
 		}

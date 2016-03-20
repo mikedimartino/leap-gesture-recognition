@@ -1,0 +1,66 @@
+﻿<UserControl x:Class="LGR_Controls.EditDynamicGesture"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+						 xmlns:Converters="clr-namespace:LGR_Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+	<UserControl.Resources>
+		<BooleanToVisibilityConverter x:Key="BoolToVis" />
+		<Converters:ReverseBooleanToVisibilityConverter x:Key="ReverseBoolToVis" />
+	</UserControl.Resources>
+	
+	<Grid Background="#DADADA">
+		<Border Margin="10" BorderBrush="Black" BorderThickness="1">
+			<Grid Margin="10">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*"/>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+				</Grid.RowDefinitions>
+
+				<TextBlock Grid.Row="0" FontSize="15" FontWeight="Bold" Margin="0 0 0 8">Edit Dynamic Gesture</TextBlock>
+
+				<TextBlock Grid.Row="1" FontWeight="Bold">Name</TextBlock>
+
+				<TextBox Grid.Row="2" Margin="0 0 0 8" Text="{Binding Name}" />
+
+				<TextBlock Grid.Row="3" FontWeight="Bold">Instances</TextBlock>
+
+				<ListBox Grid.Row="4" ItemsSource="{Binding Instances}" Grid.Column="0" HorizontalContentAlignment="Stretch">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<Grid MouseDown="InstanceMouseDown" HorizontalAlignment="Stretch" Tag="{Binding}">
+								<TextBlock Text="{Binding InstanceName}" Tag="{Binding}">
+									<TextBlock.ContextMenu>
+										<ContextMenu>
+											<MenuItem Header="View" Click="ViewInstance" Tag="{Binding}" />
+											<MenuItem Header="Delete" Click="DeleteInstance" Tag="{Binding}" />
+										</ContextMenu>
+									</TextBlock.ContextMenu>
+								</TextBlock>
+							</Grid>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+
+				<Button Grid.Row="5"  Click="StartRecordingSession_Button_Click" Tag="{Binding}" Visibility="{Binding RecordingInProgress, Converter={StaticResource ReverseBoolToVis}}"
+								HorizontalAlignment="Center" Margin="50 5 50 15">Start Recording Session</Button>
+
+				<Button Grid.Row="5"  Click="EndRecordingSession_Button_Click" Tag="{Binding}" Visibility="{Binding RecordingInProgress, Converter={StaticResource BoolToVis}}" 
+								HorizontalAlignment="Center" Margin="50 5 50 15">End Recording Session</Button>
+
+				<WrapPanel Grid.Row="6" HorizontalAlignment="Center">
+					<Button IsDefault="True" Click="Save_Button_Click" Tag="{Binding}" MinWidth="60" Margin="0 0 10 0">Save</Button>
+					<Button IsCancel="True" Click="Cancel_Button_Click" MinWidth="60">Cancel</Button>
+				</WrapPanel>
+
+			</Grid>
+		</Border>
+	</Grid>
+</UserControl>

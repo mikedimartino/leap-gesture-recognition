@@ -31,5 +31,8 @@ namespace LGR
 		// Finger specific
 		RightFingerTipPositions,
 		RightFingersExtended,
+
+		// Position of hands relative to each other (LeftHandPosition - RightHandPosition)
+		LeftToRightHand,
 	};
 }
