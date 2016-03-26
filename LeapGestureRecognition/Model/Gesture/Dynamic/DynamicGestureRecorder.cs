@@ -14,9 +14,14 @@ namespace LGR
 		WaitingToStart,
 		InStartPosition,
 		RecordingGesture,
+		RecordingJustFinished,
 		InEndPosition,
 	}
 
+	public class DGRecordedEventArgs
+	{
+		public DynamicGestureInstance DGInstance { get; set; }
+	}
 
 	public class DynamicGestureRecorder
 	{
@@ -50,19 +55,18 @@ namespace LGR
 		public DynamicGestureInstance MostRecentInstance { get; set; }
 		#endregion
 
-
 		#region Public Methods
 		StaticGestureInstance _startOfGesture;
 		List<StaticGestureInstance> _gestureSamples;
 
 		public void ProcessFrame(Frame frame)
 		{
-			if (_mvm != null)
-			{
-				MainViewModel.ClearOutputWindow();
-				MainViewModel.WriteLineToOutputWindow("Dynamic Gesture Recorder Debug Info:");
-				MainViewModel.WriteLineToOutputWindow(DebugMessage);
-			}
+			//if (_mvm != null)
+			//{
+			//	MainViewModel.ClearOutputWindow();
+			//	MainViewModel.WriteLineToOutputWindow("Dynamic Gesture Recorder Debug Info:");
+			//	MainViewModel.WriteLineToOutputWindow(DebugMessage);
+			//}
 
 			if (_lastFrame == null)
 			{
@@ -112,12 +116,15 @@ namespace LGR
 							Instances.Add(MostRecentInstance);
 						}
 
-						State = DGRecorderState.InEndPosition; // Put this first so "InEndPosition" is printed while we process the frames
+						State = DGRecorderState.RecordingJustFinished; // Put this first so "InEndPosition" is printed while we process the frames
 					}
 					else
 					{
 						_gestureSamples.Add(new StaticGestureInstance(frame));
 					}
+					break;
+				case DGRecorderState.RecordingJustFinished:
+					State = DGRecorderState.InEndPosition;
 					break;
 				case DGRecorderState.InEndPosition:
 					if (!handsStill)
@@ -165,5 +172,6 @@ namespace LGR
 			return frame.Hands.Any(h => h.PalmVelocity.Magnitude > 100.0f);
 		}
 		#endregion
+
 	}
 }

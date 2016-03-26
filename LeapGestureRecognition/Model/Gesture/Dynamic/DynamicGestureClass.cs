@@ -18,6 +18,12 @@ namespace LGR
 		public GestureType GestureType { get { return GestureType.Dynamic; } }
 		#endregion
 
-
+		#region Public Methods
+		private Random rand = new Random();
+		public float DistanceTo(DynamicGestureInstance otherInstance)
+		{
+			return 0.1f * rand.Next(100);
+		}
+		#endregion
 	}
 }

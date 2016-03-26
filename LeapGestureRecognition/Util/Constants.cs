@@ -19,6 +19,12 @@ namespace LeapGestureRecognition.Util
 
 		public static int FrameRate = 30;
 
+		public static Brush ActiveTabBrush = Brushes.LightBlue;
+
+		public static float StaticRecognitionDistance = 3.0f;
+		public static float DynamicRecognitionDistance = 3.0f;
+		public static Brush RecognizedRowBackgroundColor = Brushes.Yellow;
+
 		public static Dictionary<string, Color> DefaultBoneColors = new Dictionary<string, Color>() 
 		{
 			{ BoneNames.Palm, Colors.White },

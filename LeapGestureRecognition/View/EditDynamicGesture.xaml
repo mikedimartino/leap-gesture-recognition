@@ -10,12 +10,14 @@
 		<BooleanToVisibilityConverter x:Key="BoolToVis" />
 		<converters:ReverseBooleanToVisibilityConverter x:Key="ReverseBoolToVis" />
 		<converters:ReverseBooleanConverter x:Key="ReverseBool" />
+		<converters:DGStateToStringConverter x:Key="DGStateToString" />
 	</UserControl.Resources>
 	
 	<Grid Background="#DADADA">
 		<Border Margin="10" BorderBrush="Black" BorderThickness="1">
 			<Grid Margin="10">
 				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
 					<RowDefinition Height="Auto"/>
 					<RowDefinition Height="Auto"/>
 					<RowDefinition Height="Auto"/>
@@ -29,11 +31,22 @@
 
 				<TextBlock Grid.Row="1" FontWeight="Bold">Name</TextBlock>
 
-				<TextBox Grid.Row="2" Margin="0 0 0 8" Text="{Binding Name}" />
+				<TextBox Grid.Row="2" Margin="0 0 0 8" Text="{Binding Name}" IsEnabled="{Binding RecordingInProgress, Converter={StaticResource ReverseBool}}" />
 
-				<TextBlock Grid.Row="3" FontWeight="Bold">Instances</TextBlock>
+				<StackPanel Grid.Row="3" Orientation="Vertical" Visibility="{Binding RecordingInProgress, Converter={StaticResource BoolToVis}}">
+					<TextBlock FontWeight="Bold">Current State</TextBlock>
+					<TextBlock FontSize="20" FontStyle="Italic" Text="{Binding CurrentDGRecorderState, Converter={StaticResource DGStateToString}}" Margin="0 5"/>
+					
+					<TextBlock Margin="0 8">
+						<Run Text="New Instances Recorded: " FontWeight="Bold" />
+						<Run Text="{Binding NewInstancesCount}" />
+					</TextBlock>
+				</StackPanel>
 
-				<ListBox Grid.Row="4" ItemsSource="{Binding Instances}" Grid.Column="0" HorizontalContentAlignment="Stretch" SelectionChanged="Instance_SelectionChanged">
+				<TextBlock Grid.Row="4" FontWeight="Bold">Instances</TextBlock>
+
+				<ListBox Grid.Row="5" ItemsSource="{Binding Instances}" Grid.Column="0" HorizontalContentAlignment="Stretch" 
+								 SelectionChanged="Instance_SelectionChanged" IsEnabled="{Binding RecordingInProgress, Converter={StaticResource ReverseBool}}">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
 							<Grid MouseDown="InstanceMouseDown" HorizontalAlignment="Stretch" Tag="{Binding}">
@@ -50,13 +63,13 @@
 					</ListBox.ItemTemplate>
 				</ListBox>
 
-				<Button Grid.Row="5"  Click="StartRecordingSession_Button_Click" Tag="{Binding}" Visibility="{Binding RecordingInProgress, Converter={StaticResource ReverseBoolToVis}}"
+				<Button Grid.Row="6"  Click="StartRecordingSession_Button_Click" Tag="{Binding}" Visibility="{Binding RecordingInProgress, Converter={StaticResource ReverseBoolToVis}}"
 								HorizontalAlignment="Center" Margin="50 5 50 15">Start Recording Session</Button>
 
-				<Button Grid.Row="5"  Click="EndRecordingSession_Button_Click" Tag="{Binding}" Visibility="{Binding RecordingInProgress, Converter={StaticResource BoolToVis}}" 
+				<Button Grid.Row="6"  Click="EndRecordingSession_Button_Click" Tag="{Binding}" Visibility="{Binding RecordingInProgress, Converter={StaticResource BoolToVis}}" 
 								HorizontalAlignment="Center" Margin="50 5 50 15">End Recording Session</Button>
 
-				<WrapPanel Grid.Row="6" HorizontalAlignment="Center">
+				<WrapPanel Grid.Row="7" HorizontalAlignment="Center">
 					<Button IsDefault="True" Click="Save_Button_Click" Tag="{Binding}" MinWidth="60" Margin="0 0 10 0" IsEnabled="{Binding RecordingInProgress, Converter={StaticResource ReverseBool}}">Save</Button>
 					<Button IsCancel="True" Click="Cancel_Button_Click" MinWidth="60">Cancel</Button>
 				</WrapPanel>

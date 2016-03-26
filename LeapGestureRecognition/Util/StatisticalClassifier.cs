@@ -52,8 +52,7 @@ namespace LGR
 				var gestureDistances = new Dictionary<DynamicGestureClassWrapper, float>();
 				foreach (var gestureClass in _dynamicGestureClasses)
 				{
-					//gestureDistances.Add(gestureClass, gestureClass.Gesture.DistanceTo(gestureInstance));
-					gestureDistances.Add(gestureClass, 69);
+					gestureDistances.Add(gestureClass, gestureClass.Gesture.DistanceTo(gestureInstance));
 				}
 				return gestureDistances;
 			}

@@ -158,7 +158,9 @@
     <Compile Include="ViewModel\OptionsViewModel.cs" />
     <Compile Include="ViewModel\RecognitionMonitorViewModel.cs" />
     <Compile Include="View\Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="View\Converters\DGStateToStringConverter.cs" />
     <Compile Include="View\Converters\FeatureWeightKeyToLabelConverter.cs" />
+    <Compile Include="View\Converters\GestureDistanceToBackgroundConverter.cs" />
     <Compile Include="View\Converters\ReverseBooleanConverter.cs" />
     <Compile Include="View\Converters\ReverseBooleanToVisibilityConverter.cs" />
     <Compile Include="View\EditDynamicGesture.xaml.cs">

@@ -3,8 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+						 xmlns:converters="clr-namespace:LGR_Converters"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+	<UserControl.Resources>
+		<converters:DGStateToStringConverter x:Key="DGStateToString" />
+		<converters:GestureDistanceToBackgroundConverter x:Key="DistanceToBackground" />
+	</UserControl.Resources>
+	
 	<Grid Background="#DADADA">
 		<Border Margin="10" BorderBrush="Black" BorderThickness="1">
 			<Grid Margin="10">
@@ -15,33 +21,44 @@
 				</Grid.RowDefinitions>
 
 				<TextBlock Grid.Row="0" FontSize="15" FontWeight="Bold" Margin="0 0 0 8">Recognition Monitor</TextBlock>
-
-				<Grid Grid.Row="1" Margin="0 0 0 5">
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="*" />
-						<ColumnDefinition Width="*" />
-					</Grid.ColumnDefinitions>
-
-					<Border Grid.Column="0" BorderBrush="Black" BorderThickness="1" Background="LightBlue" MouseDown="StaticTabClicked" x:Name="staticTab">
-						<TextBlock TextAlignment="Center">Static</TextBlock>
-					</Border>
-
-					<Border Grid.Column="1" BorderBrush="Black" BorderThickness="1" MouseDown="DynamicTabClicked" x:Name="dynamicTab">
-						<TextBlock TextAlignment="Center">Dynamic</TextBlock>
-					</Border>
-				</Grid>
-
-				
 				
 				<DataGrid Grid.Row="2" x:Name="staticRecognitionMonitor" ItemsSource="{Binding RankedStaticGestures}" IsReadOnly="True" AutoGenerateColumns="False" Visibility="Visible">
 					<DataGrid.Columns>
 						<DataGridTextColumn Width="*" Header="Gesture" Binding="{Binding Name}" />
 						<DataGridTextColumn Width="Auto" Header="Distance" Binding="{Binding Distance}" />
 					</DataGrid.Columns>
+					<DataGrid.RowStyle>
+						<Style TargetType="DataGridRow">
+							<Setter Property="Background" Value="{Binding Distance, Converter={StaticResource DistanceToBackground}, ConverterParameter='Static'}" />
+							<Setter Property="IsHitTestVisible" Value="False" />
+						</Style>
+					</DataGrid.RowStyle>
 				</DataGrid>
 				
-				<Grid Grid.Row="2" x:Name="dynamicRecognitionMonitor" Visibility="Collapsed">
-					<TextBlock Text="{Binding CurrentState}" />
+				<Grid Grid.Row="2" x:Name="dynamicRecognitionMonitor" Visibility="Collapsed" Margin="0 5 0 5">
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="*" />
+						</Grid.RowDefinitions>
+						<TextBlock Grid.Row="0" FontWeight="Bold">Current State</TextBlock>
+						<TextBlock Grid.Row="1" FontSize="20" FontStyle="Italic" Text="{Binding CurrentState, Converter={StaticResource DGStateToString}}" Margin="0 5"/>
+						<TextBlock Grid.Row="2" FontWeight="Bold" Margin="0 5">Most Recent Results</TextBlock>
+						<DataGrid Grid.Row="3" ItemsSource="{Binding RankedDynamicGestures}" IsReadOnly="True" AutoGenerateColumns="False" Visibility="Visible">
+							<DataGrid.Columns>
+								<DataGridTextColumn Width="*" Header="Gesture" Binding="{Binding Name}" />
+								<DataGridTextColumn Width="Auto" Header="Distance" Binding="{Binding Distance}" />
+							</DataGrid.Columns>
+							<DataGrid.RowStyle>
+								<Style TargetType="DataGridRow">
+									<Setter Property="Background" Value="{Binding Distance, Converter={StaticResource DistanceToBackground}, ConverterParameter='Dynamic'}" />
+									<Setter Property="IsHitTestVisible" Value="False" />
+								</Style>
+							</DataGrid.RowStyle>
+						</DataGrid>
+					</Grid>
 				</Grid>
 
 			</Grid>

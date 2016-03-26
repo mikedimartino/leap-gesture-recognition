@@ -56,12 +56,39 @@ namespace LeapGestureRecognition.ViewModel
 				OnPropertyChanged("RecordingInProgress");
 			}
 		}
+
+		private DGRecorderState _CurrentDGRecorderState;
+		public DGRecorderState CurrentDGRecorderState
+		{
+			get { return _CurrentDGRecorderState; }
+			set
+			{
+				_CurrentDGRecorderState = value;
+				OnPropertyChanged("CurrentDGRecorderState");
+			}
+		}
+
+		private int _NewInstancesCount = 0;
+		public int NewInstancesCount
+		{
+			get { return _NewInstancesCount; }
+			set
+			{
+				_NewInstancesCount = value;
+				OnPropertyChanged("NewInstancesCount");
+			}
+		}
 		#endregion
 
 		#region Public Methods
 		public void ProcessFrame(Frame frame)
 		{
-			if (RecordingInProgress) _recorder.ProcessFrame(frame);
+			if (RecordingInProgress)
+			{
+				_recorder.ProcessFrame(frame);
+				CurrentDGRecorderState = _recorder.State;
+				NewInstancesCount = _recorder.Instances.Count;
+			}
 		}
 
 		public void SaveGesture()
@@ -72,14 +99,14 @@ namespace LeapGestureRecognition.ViewModel
 			}
 
 			var editedGesture = new DynamicGestureClass(Instances);
-			var sampleInstance = (Instances.Any()) ? Instances.FirstOrDefault().Instance : null;
+			//var sampleInstance = (Instances.Any()) ? Instances.FirstOrDefault().Instance : null;
 
 			var gestureWrapper = new DynamicGestureClassWrapper()
 			{
 				Id = this.Id,
 				Name = this.Name,
 				Gesture = editedGesture,
-				SampleInstance = sampleInstance
+				SampleInstance = null
 			};
 
 			_provider.SaveDynamicGestureClass(gestureWrapper);

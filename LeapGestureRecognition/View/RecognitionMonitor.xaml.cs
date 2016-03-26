@@ -23,12 +23,9 @@ namespace LGR_Controls
 	{
 		private RecognitionMonitorViewModel _vm;
 
-		Brush _backgroundColor;
-
 		public RecognitionMonitor()
 		{
 			InitializeComponent();
-			_backgroundColor = this.Background;
 		}
 
 
@@ -42,21 +39,15 @@ namespace LGR_Controls
 			}
 		}
 
-		Brush activeTabBrush = new SolidColorBrush(Colors.LightBlue);
-
-		private void StaticTabClicked(object sender, MouseButtonEventArgs e)
+		public void SwitchToStaticMode()
 		{
-			staticTab.Background = activeTabBrush;
-			dynamicTab.Background = _backgroundColor;
 			staticRecognitionMonitor.Visibility = Visibility.Visible;
 			dynamicRecognitionMonitor.Visibility = Visibility.Collapsed;
 			_vm.Mode = GestureType.Static;
 		}
 
-		private void DynamicTabClicked(object sender, MouseButtonEventArgs e)
+		public void SwitchToDynamicMode()
 		{
-			dynamicTab.Background = activeTabBrush;
-			staticTab.Background = _backgroundColor;
 			dynamicRecognitionMonitor.Visibility = Visibility.Visible;
 			staticRecognitionMonitor.Visibility = Visibility.Collapsed;
 			_vm.Mode = GestureType.Dynamic;

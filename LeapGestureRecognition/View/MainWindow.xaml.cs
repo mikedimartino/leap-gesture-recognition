@@ -25,7 +25,7 @@ namespace LeapGestureRecognition
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		private MainViewModel _vm;
+		MainViewModel _vm;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -42,7 +42,7 @@ namespace LeapGestureRecognition
 			openGLControl.MouseWheel += _vm.OnMouseWheel;
 			KeyDown += _vm.OnKeyDown;
 			KeyUp += _vm.OnKeyUp;
-			openGLControl.MouseMove += _vm.OnMouseMove;
+			openGLControl.MouseMove += _vm.OnMouseMoveOverOpenGLWindow;
 			MouseUp += _vm.OnMouseUp;
 			openGLControl.MouseDown += _vm.OnMouseDown;
 			openGLControl.MouseLeave += _vm.OnMouseLeaveOpenGLWindow;
@@ -82,6 +82,20 @@ namespace LeapGestureRecognition
 		{
 			//  TODO: Set the projection matrix here.
 			_vm.HandleResize(Width, Height);
+		}
+
+		private void StaticTabClicked(object sender, MouseButtonEventArgs e)
+		{
+			staticTab.Background = Constants.ActiveTabBrush;
+			dynamicTab.Background = Brushes.Transparent;
+			_vm.OnStaticTabClicked();
+		}
+
+		private void DynamicTabClicked(object sender, MouseButtonEventArgs e)
+		{
+			dynamicTab.Background = Constants.ActiveTabBrush;
+			staticTab.Background = Brushes.Transparent;
+			_vm.OnDynamicTabClicked();
 		}
 		
 	}

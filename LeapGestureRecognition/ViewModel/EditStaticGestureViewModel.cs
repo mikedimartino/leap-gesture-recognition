@@ -56,8 +56,6 @@ namespace LeapGestureRecognition.ViewModel
 		public EditStaticGestureChangeset Changeset { get; set; }
 		public ObservableCollection<FeatureWeight> FeatureWeights { get; set; }
 
-		//public bool RecordingInProgress { get { return _recorder.RecordingInProgress; } } // Currently recording gesture instances?
-
 		private bool _RecordingInProgress = false;
 		public bool RecordingInProgress
 		{
@@ -68,7 +66,6 @@ namespace LeapGestureRecognition.ViewModel
 				OnPropertyChanged("RecordingInProgress");
 			}
 		}
-
 		#endregion
 
 		#region Public Methods

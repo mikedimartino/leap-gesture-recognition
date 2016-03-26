@@ -24,8 +24,6 @@ namespace LGR_Controls
 	{
 		private MainViewModel _mvm;
 
-		private Brush backgroundColor;
-
 		public GestureLibrary()
 		{
 			InitializeComponent();
@@ -101,24 +99,17 @@ namespace LGR_Controls
 			}
 		}
 
-
-
-		Brush activeTabBrush = new SolidColorBrush(Colors.LightBlue);
-
-		private void StaticTabClicked(object sender, MouseButtonEventArgs e)
+		public void ShowStaticGestures()
 		{
-			staticTab.Background = activeTabBrush;
-			dynamicTab.Background = backgroundColor;
 			staticGesturesList.Visibility = Visibility.Visible;
 			dynamicGesturesList.Visibility = Visibility.Collapsed;
 		}
 
-		private void DynamicTabClicked(object sender, MouseButtonEventArgs e)
+		public void ShowDynamicGestures()
 		{
-			dynamicTab.Background = activeTabBrush;
-			staticTab.Background = backgroundColor;
 			dynamicGesturesList.Visibility = Visibility.Visible;
 			staticGesturesList.Visibility = Visibility.Collapsed;
 		}
+
 	}
 }
