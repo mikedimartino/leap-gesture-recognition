@@ -1,4 +1,5 @@
 ﻿using LeapGestureRecognition.ViewModel;
+using LGR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,17 +21,45 @@ namespace LGR_Controls
 	/// </summary>
 	public partial class RecognitionMonitor : UserControl
 	{
-		private MainViewModel _mvm;
+		private RecognitionMonitorViewModel _vm;
+
+		Brush _backgroundColor;
 
 		public RecognitionMonitor()
 		{
 			InitializeComponent();
+			_backgroundColor = this.Background;
 		}
 
-		public void SetMvm(MainViewModel mvm) // Make property instead?
+
+		public RecognitionMonitorViewModel VM
 		{
-			_mvm = mvm;
-			DataContext = _mvm;
+			get { return _vm; }
+			set
+			{
+				_vm = value;
+				this.DataContext = _vm;
+			}
+		}
+
+		Brush activeTabBrush = new SolidColorBrush(Colors.LightBlue);
+
+		private void StaticTabClicked(object sender, MouseButtonEventArgs e)
+		{
+			staticTab.Background = activeTabBrush;
+			dynamicTab.Background = _backgroundColor;
+			staticRecognitionMonitor.Visibility = Visibility.Visible;
+			dynamicRecognitionMonitor.Visibility = Visibility.Collapsed;
+			_vm.Mode = GestureType.Static;
+		}
+
+		private void DynamicTabClicked(object sender, MouseButtonEventArgs e)
+		{
+			dynamicTab.Background = activeTabBrush;
+			staticTab.Background = _backgroundColor;
+			dynamicRecognitionMonitor.Visibility = Visibility.Visible;
+			staticRecognitionMonitor.Visibility = Visibility.Collapsed;
+			_vm.Mode = GestureType.Dynamic;
 		}
 	}
 }

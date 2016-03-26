@@ -17,6 +17,8 @@ namespace LeapGestureRecognition.Util
 
 		public static Color DefaultColor = Colors.White;
 
+		public static int FrameRate = 30;
+
 		public static Dictionary<string, Color> DefaultBoneColors = new Dictionary<string, Color>() 
 		{
 			{ BoneNames.Palm, Colors.White },

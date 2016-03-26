@@ -9,19 +9,40 @@
 		<Border Margin="10" BorderBrush="Black" BorderThickness="1">
 			<Grid Margin="10">
 				<Grid.RowDefinitions>
-					<RowDefinition Height="Auto"/>
-					<RowDefinition Height="*"/>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="*" />
 				</Grid.RowDefinitions>
 
 				<TextBlock Grid.Row="0" FontSize="15" FontWeight="Bold" Margin="0 0 0 8">Recognition Monitor</TextBlock>
 
-				<DataGrid Grid.Row="1" ItemsSource="{Binding RankedStaticGestures}" IsReadOnly="True" AutoGenerateColumns="False">
+				<Grid Grid.Row="1" Margin="0 0 0 5">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*" />
+						<ColumnDefinition Width="*" />
+					</Grid.ColumnDefinitions>
+
+					<Border Grid.Column="0" BorderBrush="Black" BorderThickness="1" Background="LightBlue" MouseDown="StaticTabClicked" x:Name="staticTab">
+						<TextBlock TextAlignment="Center">Static</TextBlock>
+					</Border>
+
+					<Border Grid.Column="1" BorderBrush="Black" BorderThickness="1" MouseDown="DynamicTabClicked" x:Name="dynamicTab">
+						<TextBlock TextAlignment="Center">Dynamic</TextBlock>
+					</Border>
+				</Grid>
+
+				
+				
+				<DataGrid Grid.Row="2" x:Name="staticRecognitionMonitor" ItemsSource="{Binding RankedStaticGestures}" IsReadOnly="True" AutoGenerateColumns="False" Visibility="Visible">
 					<DataGrid.Columns>
-						<!--<DataGridTextColumn Width="*" Header="Gesture" Binding="{Binding Gesture.Name}" />-->
 						<DataGridTextColumn Width="*" Header="Gesture" Binding="{Binding Name}" />
 						<DataGridTextColumn Width="Auto" Header="Distance" Binding="{Binding Distance}" />
 					</DataGrid.Columns>
 				</DataGrid>
+				
+				<Grid Grid.Row="2" x:Name="dynamicRecognitionMonitor" Visibility="Collapsed">
+					<TextBlock Text="{Binding CurrentState}" />
+				</Grid>
 
 			</Grid>
 		</Border>

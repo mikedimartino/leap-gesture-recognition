@@ -5,10 +5,12 @@
         xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF"
 				xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
 				xmlns:lgrControls="clr-namespace:LGR_Controls;assembly="
+				xmlns:converters="clr-namespace:LGR_Converters"
 				WindowStartupLocation="CenterScreen" WindowState="Maximized"
 				DataContext="{Binding MainViewModel}">
 	<Window.Resources>
 		<BooleanToVisibilityConverter x:Key="BoolToVis" />
+		<converters:ReverseBooleanToVisibilityConverter x:Key="ReverseBoolToVis" />
 	</Window.Resources>
 
 	<Grid Background="#DADADA">
@@ -52,18 +54,26 @@
 
 					<GridSplitter Grid.Row="1" Height="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#444444" />
 
-					<lgrControls:EditStaticGesture Grid.Row="2" x:Name="editStaticGestureControl" Visibility="{Binding DisplayEditStaticGesture, Converter={StaticResource BoolToVis}}" />
+					<!-- For some reason it helps to wrap the below lgrControls on Grid.Row=2 in Grid for toggling visibility -->
+					<Grid Grid.Row="2" Visibility="{Binding ShowEditStaticGesture, Converter={StaticResource BoolToVis}}">
+						<lgrControls:EditStaticGesture x:Name="editStaticGestureControl" />
+					</Grid>
 
-					<lgrControls:EditDynamicGesture Grid.Row="2" x:Name="editDynamicGestureControl" Visibility="{Binding DisplayEditDynamicGesture, Converter={StaticResource BoolToVis}}" />
+					<Grid Grid.Row="2" Visibility="{Binding ShowEditDynamicGesture, Converter={StaticResource BoolToVis}}">
+						<lgrControls:EditDynamicGesture x:Name="editDynamicGestureControl" />
+					</Grid>
 
-					<lgrControls:RecognitionMonitor Grid.Row="2" x:Name="recognitionMonitorControl" Visibility="{Binding DisplayRecognitionMonitor, Converter={StaticResource BoolToVis}}"  />
+					<Grid Grid.Row="2" Visibility="{Binding ShowRecognitionMonitor, Converter={StaticResource BoolToVis}}">
+						<lgrControls:RecognitionMonitor Grid.Row="2" x:Name="recognitionMonitorControl" />
+					</Grid>
+					
 
 				</Grid>
 				
 			</Grid>
 			
 
-			<GridSplitter Grid.Column="1" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#444444" />
+			<GridSplitter Grid.Column="1" Width="5" VerticalAlignment="Center" HorizontalAlignment="Stretch" Background="#444444" />
 
 			<Grid Grid.Column="2">
 				<Grid.RowDefinitions>
@@ -75,14 +85,15 @@
 				<sharpGL:OpenGLControl 
 					Name="openGLControl" OpenGLDraw="openGLControl_OpenGLDraw" 
 					OpenGLInitialized="openGLControl_OpenGLInitialized" Resized="openGLControl_Resized"
-					DrawFPS="True" RenderContextType="FBO" FrameRate="{Binding SharpGLFrameRate}" 
+					DrawFPS="True" RenderContextType="FBO" 
 					Grid.Row="0" />
 
 				<GridSplitter Grid.Row="1" Height="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#444444" />
 
 				<!-- Output window -->
 				<ScrollViewer Grid.Row="2" Name="outputWindowScrollViewer" Background="#DADADA" VerticalScrollBarVisibility="Visible">
-					<TextBox IsReadOnly="True" Text="{Binding OutputWindowContent}" TextWrapping="Wrap" Background="Transparent" VerticalAlignment="Stretch" />
+					<!--<TextBox IsReadOnly="True" Text="{Binding OutputWindowContent}" TextWrapping="Wrap" Background="Transparent" VerticalAlignment="Stretch" />-->
+					<TextBox IsReadOnly="True" x:Name="outputWindowTextBox" TextWrapping="Wrap" Background="Transparent" VerticalAlignment="Stretch" />
 				</ScrollViewer>
 			</Grid>
 			

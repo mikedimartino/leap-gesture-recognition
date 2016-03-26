@@ -23,5 +23,6 @@ namespace LGR
 		{
 			return NewGestureInstances.Any() || DeletedGestureInstances.Any();
 		}
+
 	}
 }

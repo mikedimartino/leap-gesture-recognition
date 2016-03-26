@@ -17,14 +17,22 @@ namespace LGR
 		private int _startTimerCountdown = 0;
 		private int _remainingSnapshots = 0;
 
+		public event EventHandler RecordingSessionFinished;
 
-		public StaticGestureRecorder(MainViewModel mvm, EditStaticGestureViewModel editStaticGestureVM)
+
+		public StaticGestureRecorder(EditStaticGestureViewModel editStaticGestureVM, MainViewModel mvm)
 		{
-			_mvm = mvm;
 			_editStaticGestureVM = editStaticGestureVM;
+			_mvm = mvm;
 			_startTimer = new DispatcherTimer();
 			_recordSnapshotTimer = new DispatcherTimer();
+
+			RecordingInProgress = false;
 		}
+
+		#region Public Properties
+		public bool RecordingInProgress { get; set; }
+		#endregion
 
 		#region Public Methods
 		public void RecordGestureInstancesWithCountdown(int countdownSeconds, int betweenDelayMilliseconds, int numInstances)
@@ -34,7 +42,7 @@ namespace LGR
 			_startTimer.Interval = new TimeSpan(0, 0, 1);
 			_startTimer.Start();
 
-			_editStaticGestureVM.RecordingInProgress = true;
+			RecordingInProgress = true;
 		}
 
 		public void RecordGestureInstances(int numInstances)
@@ -44,16 +52,24 @@ namespace LGR
 			_recordSnapshotTimer.Interval = new TimeSpan(0, 0, 1);
 			_recordSnapshotTimer.Start();
 
-			_editStaticGestureVM.RecordingInProgress = true;
+			RecordingInProgress = true;
+		}
+
+		public void Stop()
+		{
+			_startTimer.Stop();
+			_recordSnapshotTimer.Stop();
+			RecordingInProgress = false;
 		}
 		#endregion
+
 
 		#region Private Methods
 		private void startTimerCountdown_Tick(object sender, EventArgs e)
 		{
 			if (--_startTimerCountdown > 0)
 			{
-				_mvm.WriteLineToOutputWindow("Recording gesture in " + _startTimerCountdown);
+				MainViewModel.WriteLineToOutputWindow("Recording gesture in " + _startTimerCountdown);
 			}
 			else
 			{
@@ -71,11 +87,17 @@ namespace LGR
 			else
 			{
 				_recordSnapshotTimer.Stop();
-				_mvm.WriteLineToOutputWindow("Finished recording gesture instances.");
-				_editStaticGestureVM.RecordingInProgress = false;
+				MainViewModel.WriteLineToOutputWindow("Finished recording gesture instances.");
+				RecordingInProgress = false;
+				OnRecordingSessionFinished();
 			}
 		}
 		#endregion
+
+		protected virtual void OnRecordingSessionFinished()
+		{
+			if (RecordingSessionFinished != null) RecordingSessionFinished(this, EventArgs.Empty);
+		}
 
 	}
 }

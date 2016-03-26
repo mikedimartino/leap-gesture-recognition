@@ -1,4 +1,5 @@
-﻿using LeapGestureRecognition.Util;
+﻿using Leap;
+using LeapGestureRecognition.Util;
 using LGR;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace LeapGestureRecognition.ViewModel
 			_mvm = mvm;
 			_newGesture = newGesture;
 			_provider = _mvm.SQLiteProvider;
+			_recorder = new DynamicGestureRecorder(_mvm);
 
 			if (newGesture)
 			{
@@ -42,7 +44,7 @@ namespace LeapGestureRecognition.ViewModel
 		public string Name { get; set; }
 		public ObservableCollection<DynamicGestureInstanceWrapper> Instances { get; set; }
 		public EditDynamicGestureChangeset Changeset { get; set; }
-
+		public ObservableCollection<FeatureWeight> FeatureWeights { get; set; }
 
 		private bool _RecordingInProgress;
 		public bool RecordingInProgress
@@ -57,6 +59,11 @@ namespace LeapGestureRecognition.ViewModel
 		#endregion
 
 		#region Public Methods
+		public void ProcessFrame(Frame frame)
+		{
+			if (RecordingInProgress) _recorder.ProcessFrame(frame);
+		}
+
 		public void SaveGesture()
 		{
 			if (_newGesture)
@@ -90,7 +97,13 @@ namespace LeapGestureRecognition.ViewModel
 				}
 			}
 
-			_mvm.UpdateStaticGestureLibrary();
+			_mvm.UpdateDynamicGestureLibrary();
+			_mvm.UpdateClassifier();
+		}
+
+		public void CancelEdit()
+		{
+			_mvm.Mode = LGR_Mode.Recognize;
 		}
 
 		public void DeleteInstance(DynamicGestureInstanceWrapper instance)
@@ -108,7 +121,7 @@ namespace LeapGestureRecognition.ViewModel
 
 		public void ViewInstance(DynamicGestureInstanceWrapper instance)
 		{
-			_mvm.DisplayDynamicGesture(instance.Instance);
+			_mvm.ViewDynamicGesture(instance.Instance);
 		}
 
 
@@ -120,13 +133,13 @@ namespace LeapGestureRecognition.ViewModel
 		public void EndRecordingSession() 
 		{
 			RecordingInProgress = false;
-			foreach (var instance in _mvm.DynamicGestureRecorder.Instances)
+			foreach (var instance in _recorder.Instances)
 			{
 				var instanceWrapper = new DynamicGestureInstanceWrapper(instance);
 				Instances.Add(instanceWrapper);
 				Changeset.NewGestureInstances.Add(instanceWrapper);
 			}
-			_mvm.DynamicGestureRecorder.Instances.Clear();
+			_recorder.Instances.Clear();
 		}
 		#endregion
 

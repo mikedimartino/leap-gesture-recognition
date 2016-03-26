@@ -53,12 +53,13 @@ namespace LGR_Controls
 
 		private void Save_Button_Click(object sender, RoutedEventArgs e)
 		{
-
+			_vm.SaveGesture();
+			_mvm.Mode = LGR_Mode.Recognize;
 		}
 
 		private void Cancel_Button_Click(object sender, RoutedEventArgs e)
 		{
-
+			_vm.CancelEdit();
 		}
 
 		private void StartRecordingSession_Button_Click(object sender, RoutedEventArgs e)
@@ -92,6 +93,12 @@ namespace LGR_Controls
 				var instance = (DynamicGestureInstanceWrapper)(sender as FrameworkElement).Tag;
 				_vm.ViewInstance(instance);
 			}
+		}
+
+		private void Instance_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			var instance = ((sender as ListBox).SelectedItem as DynamicGestureInstanceWrapper);
+			if(instance != null) _vm.ViewInstance(instance);
 		}
 
 		#region PropertyChanged

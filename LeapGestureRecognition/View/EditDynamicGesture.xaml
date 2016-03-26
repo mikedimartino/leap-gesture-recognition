@@ -3,12 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-						 xmlns:Converters="clr-namespace:LGR_Converters"
+						 xmlns:converters="clr-namespace:LGR_Converters"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
 	<UserControl.Resources>
 		<BooleanToVisibilityConverter x:Key="BoolToVis" />
-		<Converters:ReverseBooleanToVisibilityConverter x:Key="ReverseBoolToVis" />
+		<converters:ReverseBooleanToVisibilityConverter x:Key="ReverseBoolToVis" />
+		<converters:ReverseBooleanConverter x:Key="ReverseBool" />
 	</UserControl.Resources>
 	
 	<Grid Background="#DADADA">
@@ -32,7 +33,7 @@
 
 				<TextBlock Grid.Row="3" FontWeight="Bold">Instances</TextBlock>
 
-				<ListBox Grid.Row="4" ItemsSource="{Binding Instances}" Grid.Column="0" HorizontalContentAlignment="Stretch">
+				<ListBox Grid.Row="4" ItemsSource="{Binding Instances}" Grid.Column="0" HorizontalContentAlignment="Stretch" SelectionChanged="Instance_SelectionChanged">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
 							<Grid MouseDown="InstanceMouseDown" HorizontalAlignment="Stretch" Tag="{Binding}">
@@ -56,7 +57,7 @@
 								HorizontalAlignment="Center" Margin="50 5 50 15">End Recording Session</Button>
 
 				<WrapPanel Grid.Row="6" HorizontalAlignment="Center">
-					<Button IsDefault="True" Click="Save_Button_Click" Tag="{Binding}" MinWidth="60" Margin="0 0 10 0">Save</Button>
+					<Button IsDefault="True" Click="Save_Button_Click" Tag="{Binding}" MinWidth="60" Margin="0 0 10 0" IsEnabled="{Binding RecordingInProgress, Converter={StaticResource ReverseBool}}">Save</Button>
 					<Button IsCancel="True" Click="Cancel_Button_Click" MinWidth="60">Cancel</Button>
 				</WrapPanel>
 

@@ -44,6 +44,20 @@ namespace LGR
 					return gestureDistances;
 				}
 		}
+
+		public Dictionary<DynamicGestureClassWrapper, float> GetDistancesFromAllClasses(DynamicGestureInstance gestureInstance)
+		{
+			lock (_dynamicGestureClasses)
+			{
+				var gestureDistances = new Dictionary<DynamicGestureClassWrapper, float>();
+				foreach (var gestureClass in _dynamicGestureClasses)
+				{
+					//gestureDistances.Add(gestureClass, gestureClass.Gesture.DistanceTo(gestureInstance));
+					gestureDistances.Add(gestureClass, 69);
+				}
+				return gestureDistances;
+			}
+		}
 		#endregion
 
 	}

@@ -33,7 +33,7 @@ namespace LeapGestureRecognition
 		public MainWindow()
 		{
 			InitializeComponent();
-			_vm = new MainViewModel(openGLControl.OpenGL, outputWindowScrollViewer, gestureLibraryControl, editStaticGestureControl, editDynamicGestureControl, recognitionMonitorControl, new Controller(), new CustomLeapListener());
+			_vm = new MainViewModel(openGLControl.OpenGL, outputWindowScrollViewer, outputWindowTextBox, gestureLibraryControl, editStaticGestureControl, editDynamicGestureControl, recognitionMonitorControl, new Controller(), new CustomLeapListener());
 			DataContext = _vm;
 			//DataContext = new MainViewModel(new Controller(), new CustomLeapListener());
 			//_vm = (MainViewModel)this.DataContext;
@@ -47,7 +47,8 @@ namespace LeapGestureRecognition
 			openGLControl.MouseDown += _vm.OnMouseDown;
 			openGLControl.MouseLeave += _vm.OnMouseLeaveOpenGLWindow;
 			openGLControl.MouseEnter += _vm.OnMouseEnterOpenGLWindow;
-			
+			openGLControl.FrameRate = Constants.FrameRate;
+
 			Height = 600; //SystemParameters.FullPrimaryScreenHeight;
 			Width = 800; //SystemParameters.FullPrimaryScreenWidth;
 		}

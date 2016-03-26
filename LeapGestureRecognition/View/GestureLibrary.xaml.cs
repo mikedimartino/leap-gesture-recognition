@@ -35,7 +35,6 @@ namespace LGR_Controls
 		{
 			InitializeComponent();
 			_mvm = mvm;
-			Brush backGroundColor = this.Background;
 		}
 
 		public void SetMvm(MainViewModel mvm) // Make property instead?
@@ -45,8 +44,15 @@ namespace LGR_Controls
 
 		private void ViewGesture(object sender, RoutedEventArgs e)
 		{
-			var gesture = (StaticGestureClassWrapper)(e.Source as FrameworkElement).Tag;
-			_mvm.DisplayStaticGesture(gesture.SampleInstance);
+			object gesture = (e.Source as FrameworkElement).Tag;
+			if (gesture is StaticGestureClassWrapper)
+			{
+				_mvm.ViewStaticGesture(((StaticGestureClassWrapper)gesture).SampleInstance);
+			}
+			else if (gesture is DynamicGestureClassWrapper)
+			{
+				_mvm.ViewDynamicGesture(((DynamicGestureClassWrapper)gesture).SampleInstance);
+			}
 		}
 
 		private void EditGesture(object sender, RoutedEventArgs e)
@@ -64,9 +70,17 @@ namespace LGR_Controls
 
 		private void DeleteGesture(object sender, RoutedEventArgs e)
 		{
-			var gesture = (StaticGestureClassWrapper)(e.Source as FrameworkElement).Tag;
-			_mvm.SQLiteProvider.DeleteStaticGestureClass(gesture.Id);
-			_mvm.UpdateStaticGestureLibrary();
+			object gesture = (e.Source as FrameworkElement).Tag;
+			if (gesture is StaticGestureClassWrapper)
+			{
+				_mvm.SQLiteProvider.DeleteStaticGestureClass(((StaticGestureClassWrapper)gesture).Id);
+				_mvm.UpdateStaticGestureLibrary();
+			}
+			else if (gesture is DynamicGestureClassWrapper)
+			{
+				_mvm.SQLiteProvider.DeleteDynamicGestureClass(((DynamicGestureClassWrapper)gesture).Id);
+				_mvm.UpdateDynamicGestureLibrary();
+			}
 		}
 
 		private void StaticGestureMouseDown(object sender, MouseButtonEventArgs e)
@@ -80,11 +94,11 @@ namespace LGR_Controls
 
 		private void DynamicGestureMouseDown(object sender, MouseButtonEventArgs e)
 		{
-			//if (e.ClickCount >= 2) // Double click    
-			//{
-			//	var gesture = (DynamicGestureClassWrapper)(sender as FrameworkElement).Tag;
-			//	_mvm.EditStaticGesture(gesture);
-			//}
+			if (e.ClickCount >= 2) // Double click    
+			{
+				var gesture = (DynamicGestureClassWrapper)(sender as FrameworkElement).Tag;
+				_mvm.EditDynamicGesture(gesture);
+			}
 		}
 
 

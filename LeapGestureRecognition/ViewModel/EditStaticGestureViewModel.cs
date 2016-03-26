@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Windows.Threading;
 
 namespace LeapGestureRecognition.ViewModel
 {
@@ -14,6 +15,7 @@ namespace LeapGestureRecognition.ViewModel
 		private MainViewModel _mvm;
 		SQLiteProvider _provider;
 		bool _newGesture;
+		StaticGestureRecorder _recorder;
 
 		// NOTE: A new EditGestureViewModel is instantiated on every call to EditGesture()
 		public EditStaticGestureViewModel(MainViewModel mvm, StaticGestureClassWrapper gesture = null, bool newGesture = false)
@@ -21,19 +23,28 @@ namespace LeapGestureRecognition.ViewModel
 			_mvm = mvm;
 			_newGesture = newGesture;
 			_provider = _mvm.SQLiteProvider;
+			_recorder = new StaticGestureRecorder(this, _mvm);
+
+			_recorder.RecordingSessionFinished += OnRecordingSessionFinished;
+
+			var featureWeightsDict = new Dictionary<string, int>();
 
 			if (newGesture)
 			{
 				Name = "New Static Gesture";
 				Instances = new ObservableCollection<StaticGestureInstanceWrapper>();
+				featureWeightsDict = StaticGestureClass.GetDefaultFeatureWeights();
 			}
 			else
 			{
 				Name = gesture.Name;
 				Id = gesture.Id;
 				Instances = _provider.GetStaticGestureInstances(gesture.Id);
+				featureWeightsDict = gesture.Gesture.FeatureWeights;
 			}
-			
+
+			setFeatureWeights(featureWeightsDict);
+
 			Changeset = new EditStaticGestureChangeset();
 		}
 
@@ -41,19 +52,44 @@ namespace LeapGestureRecognition.ViewModel
 		public int Id { get; set; }
 		public string Name { get; set; }
 		public ObservableCollection<StaticGestureInstanceWrapper> Instances { get; set; }
+		public StaticGestureInstanceWrapper SelectedInstance { get; set; }
 		public EditStaticGestureChangeset Changeset { get; set; }
-		public bool RecordingInProgress { get; set; } // Currently recording gesture instances?
+		public ObservableCollection<FeatureWeight> FeatureWeights { get; set; }
+
+		//public bool RecordingInProgress { get { return _recorder.RecordingInProgress; } } // Currently recording gesture instances?
+
+		private bool _RecordingInProgress = false;
+		public bool RecordingInProgress
+		{
+			get { return _RecordingInProgress; }
+			set
+			{
+				_RecordingInProgress = value;
+				OnPropertyChanged("RecordingInProgress");
+			}
+		}
+
 		#endregion
 
 		#region Public Methods
 		public void SaveGesture()
 		{
+			Dictionary<string, int> featureWeightsDict = null;
 			if (_newGesture)
 			{
 				Id = _provider.SaveNewStaticGestureClass(Name, null); // Need to get id
 			}
+			else
+			{
+				// Fill featureWeightsDict
+				featureWeightsDict = new Dictionary<string, int>();
+				foreach (var fw in FeatureWeights)
+				{
+					featureWeightsDict.Add(fw.Name, fw.Weight);
+				}
+			}
 
-			var editedGesture = new StaticGestureClass(Instances);
+			var editedGesture = new StaticGestureClass(Instances, featureWeightsDict);
 			var sampleInstance = (Instances.Any()) ? Instances.FirstOrDefault().Gesture : null;
 
 			var gestureWrapper = new StaticGestureClassWrapper()
@@ -80,6 +116,7 @@ namespace LeapGestureRecognition.ViewModel
 			}
 
 			_mvm.UpdateStaticGestureLibrary();
+			_mvm.UpdateClassifier();
 		}
 
 		public void AddInstance(StaticGestureInstanceWrapper instance)
@@ -103,7 +140,48 @@ namespace LeapGestureRecognition.ViewModel
 
 		public void ViewInstance(StaticGestureInstanceWrapper instance)
 		{
-			_mvm.DisplayStaticGesture(instance.Gesture);
+			SelectedInstance = instance ?? Instances.FirstOrDefault();
+
+			if (instance != null)
+			{
+				_mvm.ViewStaticGesture(instance.Gesture);
+			}
+			else
+			{
+				_mvm.ViewStaticGesture(null);
+			}
+		}
+
+		public void RecordGestureInstances()
+		{
+			_recorder.RecordGestureInstancesWithCountdown(5, 500, 10);
+			RecordingInProgress = true;
+		}
+
+		public void OnRecordingSessionFinished(object source, EventArgs e)
+		{
+			RecordingInProgress = false;
+		}
+
+		public void CancelEdit()
+		{
+			if (RecordingInProgress)
+			{
+				MainViewModel.WriteLineToOutputWindow("Recording session cancelled.");
+				_recorder.Stop();
+			} 
+			_mvm.Mode = LGR_Mode.Recognize;
+		}
+		#endregion
+
+		#region Private Methods
+		private void setFeatureWeights(Dictionary<string, int> featureWeightsDict)
+		{
+			FeatureWeights = new ObservableCollection<FeatureWeight>();
+			foreach (var nameWeight in featureWeightsDict)
+			{
+				FeatureWeights.Add(new FeatureWeight(nameWeight.Key, nameWeight.Value));
+			}
 		}
 		#endregion
 

@@ -19,11 +19,17 @@ using LGR_Controls;
 
 namespace LeapGestureRecognition.ViewModel
 {
+	public class FrameEventArgs : EventArgs
+	{
+		public Frame Frame { get; set; }
+	}
+
 	public class MainViewModel : INotifyPropertyChanged
 	{
 		private static OpenGL _gl;
 		private static Controller _controller;
-		private System.Windows.Controls.ScrollViewer _scrollViewer;
+		private static System.Windows.Controls.ScrollViewer _scrollViewer;
+		private static System.Windows.Controls.TextBox _outputWindowTextBox;
 		private GestureLibrary _gestureLibraryControl;
 		private EditStaticGesture _editStaticGestureControl;
 		private EditDynamicGesture _editDynamicGestureControl;
@@ -38,7 +44,7 @@ namespace LeapGestureRecognition.ViewModel
 
 		private StatisticalClassifier _classifier;
 
-		public MainViewModel(OpenGL gl, System.Windows.Controls.ScrollViewer scrollViewer, GestureLibrary gestureLibraryControl, EditStaticGesture editStaticGestureControl, EditDynamicGesture editDynamicGestureControl, RecognitionMonitor recognitionMonitorControl, Controller controller, CustomLeapListener listener)
+		public MainViewModel(OpenGL gl, System.Windows.Controls.ScrollViewer scrollViewer, System.Windows.Controls.TextBox outputWindowTextBox, GestureLibrary gestureLibraryControl, EditStaticGesture editStaticGestureControl, EditDynamicGesture editDynamicGestureControl, RecognitionMonitor recognitionMonitorControl, Controller controller, CustomLeapListener listener)
 		{
 			_gl = gl;
 			_controller = controller;
@@ -46,41 +52,41 @@ namespace LeapGestureRecognition.ViewModel
 			_controller.AddListener(_listener);
 			_camera = new Camera(_gl);
 			_scrollViewer = scrollViewer;
+			_outputWindowTextBox = outputWindowTextBox;
 			_gestureLibraryControl = gestureLibraryControl;
 			_gestureLibraryControl.SetMvm(this);
 			_editStaticGestureControl = editStaticGestureControl;
 			_editStaticGestureControl.SetMvm(this);
 			_editDynamicGestureControl = editDynamicGestureControl;
 			_editDynamicGestureControl.SetMvm(this);
-			_recognitionMonitorControl = recognitionMonitorControl;
-			_recognitionMonitorControl.SetMvm(this);
 			_sqliteProvider = new SQLiteProvider(Constants.SQLiteFileName);
 			_config = new LGR_Configuration(_sqliteProvider);
 			_glHelper = new SharpGLHelper(_gl, _config.BoneColors);
 
-			DynamicGestureRecorder = new DynamicGestureRecorder(SharpGLFrameRate);
+			DynamicGestureRecorder = new DynamicGestureRecorder(this);
 
 			UpdateStaticGestureLibrary();
+			UpdateDynamicGestureLibrary();
+
 			initMenuBar();
 
 			// Needs to be initialized after UpdateGestureLibrary()
 			_classifier = new StatisticalClassifier(StaticGestures, DynamicGestures);
-			updateRankedStaticGestures(_controller.Frame());
 
-			System.Timers.Timer recognizeTimer = new System.Timers.Timer();
-			recognizeTimer.Elapsed += new System.Timers.ElapsedEventHandler(OnRecognizeTimerExpired);
-			recognizeTimer.Interval = 100;
-			recognizeTimer.Enabled = true;
+			_recognitionMonitorControl = recognitionMonitorControl;
+			_recognitionMonitorControl.VM = new RecognitionMonitorViewModel(_classifier);
+			
+			FrameReceived += _recognitionMonitorControl.VM.OnFrameReceived;
 		}
 
-		private void OnRecognizeTimerExpired(object source, System.Timers.ElapsedEventArgs e)
+		#region Events
+		public event EventHandler<FrameEventArgs> FrameReceived;
+
+		protected virtual void OnFrameReceived(Frame frame)
 		{
-			if (Mode == LGR_Mode.Recognize)
-			{
-				updateRankedStaticGestures(CurrentFrame);
-			}
+			if (FrameReceived != null) FrameReceived(this, new FrameEventArgs() { Frame = frame });
 		}
-		
+		#endregion
 
 		#region Public Properties
 		public SQLiteProvider SQLiteProvider { get { return _sqliteProvider; } }
@@ -91,38 +97,36 @@ namespace LeapGestureRecognition.ViewModel
 		public ObservableCollection<CustomMenuItem> MenuBar { get; set; }
 		public DynamicGestureRecorder DynamicGestureRecorder { get; set; }
 
-		public int SharpGLFrameRate = 30;
-
-		private bool _DisplayEditStaticGesture = false;
-		public bool DisplayEditStaticGesture 
+		private bool _ShowEditStaticGesture = false;
+		public bool ShowEditStaticGesture 
 		{ 
-			get { return _DisplayEditStaticGesture; }
+			get { return _ShowEditStaticGesture; }
 			set
 			{
-				_DisplayEditStaticGesture = value;
-				OnPropertyChanged("DisplayEditStaticGesture");
+				_ShowEditStaticGesture = value;
+				OnPropertyChanged("ShowEditStaticGesture");
 			}
 		}
 
-		private bool _DisplayEditDynamicGesture = false;
-		public bool DisplayEditDynamicGesture
+		private bool _ShowEditDynamicGesture = false;
+		public bool ShowEditDynamicGesture
 		{
-			get { return _DisplayEditDynamicGesture; }
+			get { return _ShowEditDynamicGesture; }
 			set
 			{
-				_DisplayEditDynamicGesture = value;
-				OnPropertyChanged("DisplayEditDynamicGesture");
+				_ShowEditDynamicGesture = value;
+				OnPropertyChanged("ShowEditDynamicGesture");
 			}
 		}
 
-		private bool _DisplayRecognitionMonitor = true;
-		public bool DisplayRecognitionMonitor 
+		private bool _ShowRecognitionMonitor = true;
+		public bool ShowRecognitionMonitor 
 		{
-			get { return _DisplayRecognitionMonitor; }
+			get { return _ShowRecognitionMonitor; }
 			set 
 			{ 
-				_DisplayRecognitionMonitor = value;
-				OnPropertyChanged("DisplayRecognitionMonitor");
+				_ShowRecognitionMonitor = value;
+				OnPropertyChanged("ShowRecognitionMonitor");
 			}
 		}
 
@@ -134,7 +138,6 @@ namespace LeapGestureRecognition.ViewModel
 			{
 				_SelectedStaticGesture = value;
 				OnPropertyChanged("SelectedStaticGesture");
-				DisplayEditStaticGesture = _SelectedStaticGesture != null;
 			}
 		}
 
@@ -146,20 +149,16 @@ namespace LeapGestureRecognition.ViewModel
 			{
 				_SelectedDynamicGesture = value;
 				OnPropertyChanged("SelectedDynamicGesture");
-				DisplayEditStaticGesture = _SelectedDynamicGesture != null;
 			}
 		}
 
-		private string _outputWindowContent;
-		public string OutputWindowContent
+		public static string OutputWindowContent
 		{
-			get { return _outputWindowContent; }
+			get { return _outputWindowTextBox.Text; }
 			set
 			{
-				if (_outputWindowContent == value) return;
-				_outputWindowContent = value;
+				_outputWindowTextBox.Text = value;
 				_scrollViewer.ScrollToBottom();
-				OnPropertyChanged("OutputWindowContent");
 			}
 		}
 
@@ -174,27 +173,31 @@ namespace LeapGestureRecognition.ViewModel
 				switch (_Mode)
 				{
 					case LGR_Mode.Recognize:
-						DisplayRecognitionMonitor = true;
-						DisplayEditStaticGesture = false;
-						DisplayEditDynamicGesture = false;
-						//updateRankedStaticGestures(CurrentFrame);
+						ShowRecognitionMonitor = true;
+						ShowEditStaticGesture = false;
+						ShowEditDynamicGesture = false;
+						_recognitionMonitorControl.VM = new RecognitionMonitorViewModel(_classifier);
 						break;
 					case LGR_Mode.EditStatic:
-						DisplayRecognitionMonitor = false;
-						DisplayEditStaticGesture = true;
-						DisplayEditDynamicGesture = false;
+						ShowRecognitionMonitor = false;
+						ShowEditStaticGesture = true;
+						ShowEditDynamicGesture = false;
 						break;
 					case LGR_Mode.EditDynamic:
-						DisplayRecognitionMonitor = false;
-						DisplayEditStaticGesture = false;
-						DisplayEditDynamicGesture = true;
+						ShowRecognitionMonitor = false;
+						ShowEditStaticGesture = false;
+						ShowEditDynamicGesture = true;
 						break;
 					default:
-						DisplayRecognitionMonitor = true;
-						DisplayEditStaticGesture = false;
-						DisplayEditDynamicGesture = false;
+						ShowRecognitionMonitor = true;
+						ShowEditStaticGesture = false;
+						ShowEditDynamicGesture = false;
 						break;
 				}
+				//OnPropertyChanged("Mode");
+				OnPropertyChanged("ShowRecognitionMonitor");
+				OnPropertyChanged("ShowEditStaticGesture");
+				OnPropertyChanged("ShowEditDynamicGesture");
 			}
 		}
 
@@ -414,23 +417,30 @@ namespace LeapGestureRecognition.ViewModel
 		{
 			switch (e.Key)
 			{
+				//case Key.Left:
+				//	_camera.Yaw = 1;
+				//	break;
+				//case Key.Right:
+				//	_camera.Yaw = -1;
+				//	break;
+				//case Key.Up:
+				//	_camera.Pitch = 1;
+				//	break;
+				//case Key.Down:
+				//	_camera.Pitch = -1;
+				//	break;
+				//case Key.LeftCtrl:
+				//	_camera.Roll = 1;
+				//	break;
+				//case Key.RightCtrl:
+				//	_camera.Roll = -1;
+				//	break;
+
 				case Key.Left:
-					_camera.Yaw = 1;
+					dynamicGestureStep--;
 					break;
 				case Key.Right:
-					_camera.Yaw = -1;
-					break;
-				case Key.Up:
-					_camera.Pitch = 1;
-					break;
-				case Key.Down:
-					_camera.Pitch = -1;
-					break;
-				case Key.LeftCtrl:
-					_camera.Roll = 1;
-					break;
-				case Key.RightCtrl:
-					_camera.Roll = -1;
+					dynamicGestureStep++;
 					break;
 
 				case Key.NumPad1:
@@ -471,11 +481,11 @@ namespace LeapGestureRecognition.ViewModel
 		#endregion
 
 
-		public void RecordGestureInstances(EditStaticGestureViewModel editGestureVM) // Maybe add delay and numInstances to parameters
-		{
-			var recorder = new StaticGestureRecorder(this, editGestureVM);
-			recorder.RecordGestureInstancesWithCountdown(5, 500, 10);
-		}
+		//public void RecordGestureInstances(EditStaticGestureViewModel editGestureVM) // Maybe add delay and numInstances to parameters
+		//{
+		//	var recorder = new StaticGestureRecorder(this, editGestureVM);
+		//	recorder.RecordGestureInstancesWithCountdown(5, 500, 10);
+		//}
 
 		// Measures hand on screen
 		public HandMeasurements MeasureHand()
@@ -495,6 +505,8 @@ namespace LeapGestureRecognition.ViewModel
 
 			CurrentFrame = _controller.Frame();
 
+			OnFrameReceived(CurrentFrame);
+
 			switch (Mode)
 			{
 				case LGR_Mode.EditStatic:
@@ -502,17 +514,19 @@ namespace LeapGestureRecognition.ViewModel
 					else _glHelper.DrawFrame(CurrentFrame, ShowArms);
 					break;
 				case LGR_Mode.EditDynamic:
+					
 					if (_editDynamicGestureControl.VM.RecordingInProgress)
 					{
-						DynamicGestureRecorder.ProcessFrame(CurrentFrame);
-						ClearOutputWindow();
-						WriteLineToOutputWindow("Dynamic Gesture Recorder Debug Info:");
-						WriteLineToOutputWindow(DynamicGestureRecorder.DebugMessage);
+						//DynamicGestureRecorder.ProcessFrame(CurrentFrame);
+						//ClearOutputWindow();
+						//WriteLineToOutputWindow("Dynamic Gesture Recorder Debug Info:");
+						//WriteLineToOutputWindow(DynamicGestureRecorder.DebugMessage);
+						_editDynamicGestureControl.VM.ProcessFrame(CurrentFrame);
 						_glHelper.DrawFrame(CurrentFrame, ShowArms);
 					}
 					else
 					{
-						if (SelectedDynamicGesture != null && !_editDynamicGestureControl.VM.RecordingInProgress)
+						if (SelectedDynamicGesture != null)
 						{
 							int sampleIndex = dynamicGestureStep % SelectedDynamicGesture.Samples.Count;
 							_glHelper.DrawStaticGesture(SelectedDynamicGesture.Samples[sampleIndex], ShowArms);
@@ -522,7 +536,8 @@ namespace LeapGestureRecognition.ViewModel
 					
 					break;
 				case LGR_Mode.Recognize:
-					_glHelper.DrawFrame(CurrentFrame, ShowArms); 
+					_glHelper.DrawFrame(CurrentFrame, ShowArms);
+					_recognitionMonitorControl.VM.ProcessFrame(CurrentFrame);
 					break;
 				case LGR_Mode.Debug:
 					_glHelper.DrawFrame(CurrentFrame, ShowArms);
@@ -537,14 +552,14 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		public void DisplayStaticGesture(StaticGestureInstance gestureInstance)
+		public void ViewStaticGesture(StaticGestureInstance gestureInstance)
 		{
 			Mode = LGR_Mode.EditStatic;
 			SelectedStaticGesture = gestureInstance;
 		}
 
 		private int dynamicGestureStep = 0;
-		public void DisplayDynamicGesture(DynamicGestureInstance gestureInstance)
+		public void ViewDynamicGesture(DynamicGestureInstance gestureInstance)
 		{
 			Mode = LGR_Mode.EditDynamic;
 			SelectedDynamicGesture = gestureInstance;
@@ -602,9 +617,8 @@ namespace LeapGestureRecognition.ViewModel
 		public void EditStaticGesture(StaticGestureClassWrapper gesture, bool newGesture = false)
 		{
 			_editStaticGestureControl.VM = new EditStaticGestureViewModel(this, gesture, newGesture);
-			//_editGestureControl.Visibility = Visibility.Visible;
 			Mode = LGR_Mode.EditStatic;
-			if (!newGesture) DisplayStaticGesture(gesture.SampleInstance);
+			if (!newGesture) ViewStaticGesture(gesture.SampleInstance);
 		}
 
 		public void NewDynamicGesture()
@@ -616,22 +630,23 @@ namespace LeapGestureRecognition.ViewModel
 		{
 			_editDynamicGestureControl.VM = new EditDynamicGestureViewModel(this, gesture, newGesture);
 			Mode = LGR_Mode.EditDynamic;
+			if (!newGesture) ViewDynamicGesture(gesture.SampleInstance);
 		}
 		#endregion
 
 		#region Output Window
-		public void WriteLineToOutputWindow(string message)
+		public static void WriteLineToOutputWindow(string message)
 		{
 			WriteToOutputWindow(message + "\n");
 		}
 
-		public void WriteToOutputWindow(string message)
+		public static void WriteToOutputWindow(string message)
 		{
 			// TODO: Might want to restrict the size of log
 			OutputWindowContent += "> " + message;
 		}
 
-		public void ClearOutputWindow()
+		public static void ClearOutputWindow()
 		{
 			OutputWindowContent = "";
 		}
@@ -661,6 +676,11 @@ namespace LeapGestureRecognition.ViewModel
 		public void UpdateDynamicGestureLibrary()
 		{
 			DynamicGestures = _sqliteProvider.GetAllDynamicGestureClasses();
+		}
+
+		public void UpdateClassifier()
+		{
+			_classifier = new StatisticalClassifier(StaticGestures, DynamicGestures);
 		}
 		#endregion
 
@@ -711,18 +731,6 @@ namespace LeapGestureRecognition.ViewModel
 			newDynamicGesture.Command = new CustomCommand(a => NewDynamicGesture());
 			MenuBar.Add(newDynamicGesture);
 			#endregion
-		}
-
-		private float recognitionThreshold = 1.5f;
-		private void updateRankedStaticGestures(Frame frame)
-		{
-			if (frame.Hands.Count == 0) return;
-			var distances = _classifier.GetDistancesFromAllClasses(new StaticGestureInstance(frame));
-			RankedStaticGestures = new ObservableCollection<GestureDistance>(distances.OrderBy(g => g.Value).Select(g => new GestureDistance(g.Key.Name, g.Value)));
-
-			var closestGesture = RankedStaticGestures.FirstOrDefault();
-			if (closestGesture != null && closestGesture.Distance < 3.0f) RecognizedGesture = closestGesture.Name;
-			else RecognizedGesture = "";
 		}
 		#endregion
 

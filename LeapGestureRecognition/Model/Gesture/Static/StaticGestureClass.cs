@@ -12,19 +12,22 @@ namespace LGR
 	public class StaticGestureClass
 	{
 		public StaticGestureClass() { }
-		public StaticGestureClass(ObservableCollection<StaticGestureInstanceWrapper> instances)
+		public StaticGestureClass(ObservableCollection<StaticGestureInstanceWrapper> instances, Dictionary<string, int> featureWeights)
 		{
 			computeMeanValuesAndHandConfiguration(instances);
 			computeStdDevValues(instances);
+			FeatureWeights = featureWeights ?? GetDefaultFeatureWeights();
 		}
 
 		#region Public Properties
-		public GestureType GestureType { get { return GestureType.Dynamic; } }
+		public GestureType GestureType { get { return GestureType.Static; } }
 
 		[DataMember]
 		public Dictionary<FeatureName, object> MeanValues { get; set; }
 		[DataMember]
-		public Dictionary<FeatureName, object> StdDevValues { get; set; } // Should I leave as float? Or change to object?
+		public Dictionary<FeatureName, object> StdDevValues { get; set; }
+		[DataMember]
+		public Dictionary<string, int> FeatureWeights { get; set; } // Key is FeatureName.ToString() + [FingerType.ToString()]
 
 
 		// Need to consider edge cases with hands
@@ -42,6 +45,29 @@ namespace LGR
 		};
 
 		#region Public Methods
+		// Returns an initialized Dictionary with all feature weights set to 1
+		public static Dictionary<string, int> GetDefaultFeatureWeights()
+		{
+			var featureWeights = new Dictionary<string, int>();
+			//var fingerType in (Finger.FingerType[])Enum.GetValues(typeof(Finger.FingerType))
+			foreach (var feature in (FeatureName[])Enum.GetValues(typeof(FeatureName)))
+			{
+				string featureString = feature.ToString();
+				if (featureString.Contains("Finger"))
+				{
+					foreach (var fingerType in (Finger.FingerType[])Enum.GetValues(typeof(Finger.FingerType)))
+					{
+						featureWeights.Add(featureString + fingerType, 1);
+					}
+				}
+				else
+				{
+					featureWeights.Add(featureString, 1);
+				}
+			}
+			return featureWeights;
+		}
+
 		public float DistanceTo(StaticGestureInstance gestureInstance)
 		{
 			try
@@ -51,34 +77,38 @@ namespace LGR
 
 				float distance = 0;
 				int featureCount = 0; // Necessary to do this because some features (like Dictionary's) are really 5 features.
+				int featureWeight;
 				foreach (var feature in gestureInstance.FeatureVector)
 				{
 					if (featuresToSkip.Contains(feature.Name)) continue;
 
 					if (feature.Value is Vec3)
 					{
+						featureWeight = FeatureWeights[feature.Name.ToString()];
 						Vec3 mean = ((Newtonsoft.Json.Linq.JObject)MeanValues[feature.Name]).ToObject<Vec3>();
-						distance += feature.Weight * ((Vec3)(feature.Value)).DistanceTo(mean) / ((float)(double)StdDevValues[feature.Name]);
-						featureCount += feature.Weight;
+						distance += featureWeight * ((Vec3)(feature.Value)).DistanceTo(mean) / ((float)(double)StdDevValues[feature.Name]);
+						featureCount += featureWeight;
 					}
 					else if (feature.Value is float)
 					{
+						featureWeight = FeatureWeights[feature.Name.ToString()];
 						// float values include Yaw, Pitch, Roll, and Sphere Radius
-						distance += feature.Weight * Math.Abs(((float)feature.Value - (float)(double)MeanValues[feature.Name]) / ((float)(double)StdDevValues[feature.Name]));
-						featureCount += feature.Weight;
+						distance += featureWeight * Math.Abs(((float)feature.Value - (float)(double)MeanValues[feature.Name]) / ((float)(double)StdDevValues[feature.Name]));
+						featureCount += featureWeight;
 					}
 					else if (feature.Value is Dictionary<Finger.FingerType, Vec3>)
 					{
 						// This is just for fingersTipPositions
 						foreach (var fingerTipPosition in (Dictionary<Finger.FingerType, Vec3>)feature.Value)
 						{
+							Finger.FingerType fingerType = fingerTipPosition.Key;
+							featureWeight = FeatureWeights[feature.Name.ToString() + fingerType];
 							var meanFingerTipPositions = ((Newtonsoft.Json.Linq.JObject)MeanValues[feature.Name]).ToObject<Dictionary<Finger.FingerType, Vec3>>();
 							var stdDevFingerTipPositions = ((Newtonsoft.Json.Linq.JObject)StdDevValues[feature.Name]).ToObject<Dictionary<Finger.FingerType, float>>();
 							//var stdDevFingerTipPositions = (Dictionary<Finger.FingerType, float>)StdDevValues[feature.Name];
-							Finger.FingerType fingerType = fingerTipPosition.Key;
 							Vec3 instancePos = fingerTipPosition.Value;
-							distance += feature.Weight * (instancePos).DistanceTo(meanFingerTipPositions[fingerType]) / stdDevFingerTipPositions[fingerType];
-							featureCount += feature.Weight;
+							distance += featureWeight * (instancePos).DistanceTo(meanFingerTipPositions[fingerType]) / stdDevFingerTipPositions[fingerType];
+							featureCount += featureWeight;
 						}
 					}
 					else if (feature.Value is Dictionary<Finger.FingerType, bool>)
@@ -87,17 +117,18 @@ namespace LGR
 						foreach (var fingerExtended in (Dictionary<Finger.FingerType, bool>)feature.Value)
 						{
 							Finger.FingerType fingerType = fingerExtended.Key;
+							featureWeight = FeatureWeights[feature.Name.ToString() + fingerType];
 							bool isExtended = fingerExtended.Value;
 							float fingerExtendedPercentage = (((Newtonsoft.Json.Linq.JObject)MeanValues[feature.Name]).ToObject<Dictionary<Finger.FingerType, float>>())[fingerType];
 							if (fingerExtendedPercentage >= 0.5f) // finger should be extended
 							{
-								if (!isExtended) distance += feature.Weight; //distance += fingerExtendedPercentage;
+								if (!isExtended) distance += featureWeight; //distance += fingerExtendedPercentage;
 							}
 							else
 							{
-								if (isExtended) distance += feature.Weight; //distance += 1 - fingerExtendedPercentage;
+								if (isExtended) distance += featureWeight; //distance += 1 - fingerExtendedPercentage;
 							}
-							featureCount += feature.Weight;
+							featureCount += featureWeight;
 						}
 					}
 				}

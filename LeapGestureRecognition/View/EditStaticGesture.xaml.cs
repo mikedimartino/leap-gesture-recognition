@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Globalization;
 
 namespace LGR_Controls
 {
@@ -61,13 +62,14 @@ namespace LGR_Controls
 
 		private void Cancel_Button_Click(object sender, RoutedEventArgs e)
 		{
-			if (_vm.RecordingInProgress) return;
-			_mvm.Mode = LGR_Mode.Recognize;
+			//if (_vm.RecordingInProgress) return; //TODO: Cancel in progress recording
+			//_mvm.Mode = LGR_Mode.Recognize;
+			_vm.CancelEdit();
 		}
 
 		private void RecordNewInstances_Button_Click(object sender, RoutedEventArgs e)
 		{
-			_mvm.RecordGestureInstances(_vm);
+			_vm.RecordGestureInstances();
 		}
 
 		private void DeleteInstance(object sender, RoutedEventArgs e)
@@ -91,6 +93,12 @@ namespace LGR_Controls
 			}
 		}
 
+		private void Instance_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			var instance = ((sender as ListBox).SelectedItem as StaticGestureInstanceWrapper);
+			  _vm.ViewInstance(instance);
+		}
+
 		#region PropertyChanged
 		// This should probably be in ViewModel. Oh well..
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -105,6 +113,17 @@ namespace LGR_Controls
 		}
 		#endregion
 
+
+		private void InstanceKeyDown(object sender, KeyEventArgs e)
+		{
+			switch (e.Key)
+			{
+				case Key.Delete:
+					if (_vm.SelectedInstance != null) _vm.DeleteInstance(_vm.SelectedInstance);
+					break;
+			}
+		}
 		
 	}
+
 }

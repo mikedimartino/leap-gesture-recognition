@@ -1,4 +1,5 @@
 ﻿using Leap;
+using LeapGestureRecognition.Util;
 using LeapGestureRecognition.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -16,20 +17,25 @@ namespace LGR
 		InEndPosition,
 	}
 
+
 	public class DynamicGestureRecorder
 	{
 		#region Private Variables
-		private const int _maxStillFramesCount = 3; //10; // If hands are still for this many frames, change state.
-		private Frame _lastFrame;
-		private int _frameRate;
-		private MainViewModel _mvm;
+		MainViewModel _mvm;
+		Frame _lastFrame;
+		int _frameRate;
+		bool _inRecordMode; // Record Mode (save multiple instances) or Recognize Mode (just store most recent instance).
+		float _stillSeconds = 1.0f; // Number of seconds hands must be still
+		float _stillDistance = 1f;
 		#endregion
 
 		#region Constructor
-		public DynamicGestureRecorder(int frameRate)
+		public DynamicGestureRecorder(MainViewModel mvm = null, bool inRecordMode = true) // TODO: Remove leapListener code
 		{
-			_frameRate = frameRate;
+			_mvm = mvm;
+			_frameRate = Constants.FrameRate;
 			_lastFrame = null;
+			_inRecordMode = inRecordMode;
 			State = DGRecorderState.WaitingForHands;
 			DebugMessage = "";
 			Instances = new List<DynamicGestureInstance>();
@@ -41,13 +47,23 @@ namespace LGR
 		public string DebugMessage { get; set; }
 
 		public List<DynamicGestureInstance> Instances { get; set; }
+		public DynamicGestureInstance MostRecentInstance { get; set; }
 		#endregion
 
+
 		#region Public Methods
-		DynamicGestureInstanceSample _startOfGesture;
-		List<DynamicGestureInstanceSample> _gestureSamples;
+		StaticGestureInstance _startOfGesture;
+		List<StaticGestureInstance> _gestureSamples;
+
 		public void ProcessFrame(Frame frame)
 		{
+			if (_mvm != null)
+			{
+				MainViewModel.ClearOutputWindow();
+				MainViewModel.WriteLineToOutputWindow("Dynamic Gesture Recorder Debug Info:");
+				MainViewModel.WriteLineToOutputWindow(DebugMessage);
+			}
+
 			if (_lastFrame == null)
 			{
 				_lastFrame = frame;
@@ -70,9 +86,10 @@ namespace LGR
 				case DGRecorderState.WaitingToStart:
 					if (handsStill)
 					{
-						_startOfGesture = new DynamicGestureInstanceSample(frame);
-						_gestureSamples = new List<DynamicGestureInstanceSample>();
+						_startOfGesture = new StaticGestureInstance(frame);
+						_gestureSamples = new List<StaticGestureInstance>();
 						_gestureSamples.Add(_startOfGesture);
+
 						State = DGRecorderState.InStartPosition;
 					}
 					break;
@@ -85,12 +102,21 @@ namespace LGR
 				case DGRecorderState.RecordingGesture:
 					if (handsStill)
 					{
-						Instances.Add(new DynamicGestureInstance(_gestureSamples));
-						State = DGRecorderState.InEndPosition;
+						// Trim the extra samples in back (from holding hand still for X seconds)
+						int stillFrames = (int) (_frameRate * _stillSeconds);
+						_gestureSamples.RemoveRange(_gestureSamples.Count - stillFrames, stillFrames);
+
+						MostRecentInstance = new DynamicGestureInstance(_gestureSamples);
+						if (_inRecordMode)
+						{
+							Instances.Add(MostRecentInstance);
+						}
+
+						State = DGRecorderState.InEndPosition; // Put this first so "InEndPosition" is printed while we process the frames
 					}
 					else
 					{
-						_gestureSamples.Add(new DynamicGestureInstanceSample(frame, _startOfGesture));
+						_gestureSamples.Add(new StaticGestureInstance(frame));
 					}
 					break;
 				case DGRecorderState.InEndPosition:
@@ -106,9 +132,6 @@ namespace LGR
 		#endregion
 
 		#region Private Methods
-
-		float _stillSeconds = 1.0f; // Number of seconds hands must be still
-		float _stillDistance = 1f;
 		StaticGestureInstance _stillGesture = null;
 		int _stillFramesCount = 0;
 
@@ -128,7 +151,7 @@ namespace LGR
 			}
 			DebugMessage += String.Format("Left hand velocity magnitude: {0}\nRight hand velocity magnitude: {1}", leftHandVelocityMagnitude, rightHandVelocityMagnitude);
 
-			if (palmsAreMoving(frame) || _stillGesture == null || liveStaticGesture.DistanceTo(_stillGesture) > _stillDistance)
+			if (palmsAreMoving(frame) || liveStaticGesture.DistanceTo(_stillGesture) > _stillDistance)
 			{// TODO: Add DistanceTo() to Instances (not just Class)
 				_stillGesture = liveStaticGesture;
 				_stillFramesCount = 0;
