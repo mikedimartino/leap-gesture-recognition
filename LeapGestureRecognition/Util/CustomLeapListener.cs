@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Leap;
 
-namespace LeapGestureRecognition.Util
+namespace LGR
 {
 	public class CustomLeapListener : Listener
 	{

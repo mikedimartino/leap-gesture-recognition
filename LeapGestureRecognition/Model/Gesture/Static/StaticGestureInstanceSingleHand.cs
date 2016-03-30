@@ -142,7 +142,6 @@ namespace LGR
 			get { return FingerJointPositions_World[Finger.FingerType.TYPE_THUMB][Finger.FingerJoint.JOINT_MCP]; }
 		}
 
-
 		#region Private Methods
 		private void setFingerJointPositions_World(Hand hand)
 		{

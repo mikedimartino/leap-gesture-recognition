@@ -1,5 +1,4 @@
 ﻿using Leap;
-using LeapGestureRecognition.Util;
 using LGR;
 using System;
 using System.Collections.Generic;
@@ -99,14 +98,14 @@ namespace LeapGestureRecognition.ViewModel
 			}
 
 			var editedGesture = new DynamicGestureClass(Instances);
-			//var sampleInstance = (Instances.Any()) ? Instances.FirstOrDefault().Instance : null;
+			var sampleInstance = (Instances.Any()) ? Instances.FirstOrDefault().Instance : null;
 
 			var gestureWrapper = new DynamicGestureClassWrapper()
 			{
 				Id = this.Id,
 				Name = this.Name,
 				Gesture = editedGesture,
-				SampleInstance = null
+				SampleInstance = sampleInstance
 			};
 
 			_provider.SaveDynamicGestureClass(gestureWrapper);

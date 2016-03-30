@@ -1,5 +1,5 @@
 ﻿using LGR;
-using LeapGestureRecognition.Util;
+
 using LeapGestureRecognition.ViewModel;
 using System;
 using System.Collections.Generic;

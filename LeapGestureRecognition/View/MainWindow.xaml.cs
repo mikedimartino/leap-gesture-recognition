@@ -15,7 +15,7 @@ using SharpGL.SceneGraph;
 using SharpGL;
 using LeapGestureRecognition.ViewModel;
 using Leap;
-using LeapGestureRecognition.Util;
+
 using LGR;
 
 namespace LeapGestureRecognition

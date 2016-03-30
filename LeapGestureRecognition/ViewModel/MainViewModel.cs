@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media;
 using Leap;
-using LeapGestureRecognition.Util;
+
 using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows;
@@ -16,6 +16,7 @@ using LeapGestureRecognition.View;
 using System.Threading;
 using System.Windows.Threading;
 using LGR_Controls;
+using Newtonsoft.Json;
 
 namespace LeapGestureRecognition.ViewModel
 {
@@ -77,6 +78,7 @@ namespace LeapGestureRecognition.ViewModel
 			_recognitionMonitorControl.VM = new RecognitionMonitorViewModel(_classifier);
 			
 			FrameReceived += _recognitionMonitorControl.VM.OnFrameReceived;
+
 		}
 
 		#region Events
@@ -126,6 +128,7 @@ namespace LeapGestureRecognition.ViewModel
 			set 
 			{ 
 				_ShowRecognitionMonitor = value;
+				_recognitionMonitorControl.VM.Active = _ShowRecognitionMonitor;
 				OnPropertyChanged("ShowRecognitionMonitor");
 			}
 		}
@@ -399,6 +402,31 @@ namespace LeapGestureRecognition.ViewModel
 						var instances = DynamicGestureRecorder.Instances;
 					}
 					break;
+
+				case Key.D:
+
+					//var sgi1 = SQLiteProvider.GetStaticGestureInstances(64).First().Gesture;
+					//var sgi2 = SQLiteProvider.GetStaticGestureInstances(65).First().Gesture;
+					//sgi1.UpdateFeatureVector();
+					//sgi2.UpdateFeatureVector();
+					//var lerped = sgi1.Lerp(sgi2, 0.5f);
+					//lerped.UpdateFeatureVector();
+
+					//var sgc1 = SQLiteProvider.GetStaticGestureClass(64).Gesture;
+					//var sgc2 = SQLiteProvider.GetStaticGestureClass(65).Gesture;
+
+					//var dist1 = sgc1.DistanceTo(sgi1);
+					//var dist2 = sgc2.DistanceTo(sgi2);
+
+					//var dist3 = sgc1.DistanceTo(sgi2);
+					//var dist4 = sgc1.DistanceTo(lerped);
+					//var dist5 = lerped.DistanceTo(sgc2);
+					//var dist6 = sgc2.DistanceTo(sgi1);
+
+					//SelectedStaticGesture = lerped;
+					//Mode = LGR_Mode.Debug;
+
+					break;
 			}
 		}
 
@@ -464,9 +492,9 @@ namespace LeapGestureRecognition.ViewModel
 					else _glHelper.DrawFrame(CurrentFrame, ShowArms);
 					break;
 				case LGR_Mode.EditDynamic:
-					
 					if (_editDynamicGestureControl.VM.RecordingInProgress)
-					{//TODO: Get rid of these calls and set up event listeners in EditDynamicGestureVM and glHelper
+					{
+						//TODO: Get rid of these calls and set up event listeners in EditDynamicGestureVM and glHelper
 						_editDynamicGestureControl.VM.ProcessFrame(CurrentFrame);
 						_glHelper.DrawFrame(CurrentFrame, ShowArms);
 					}
@@ -485,11 +513,7 @@ namespace LeapGestureRecognition.ViewModel
 					_glHelper.DrawFrame(CurrentFrame, ShowArms);
 					break;
 				case LGR_Mode.Debug:
-					_glHelper.DrawFrame(CurrentFrame, ShowArms);
-					DynamicGestureRecorder.ProcessFrame(CurrentFrame);
-					ClearOutputWindow();
-					WriteLineToOutputWindow("Dynamic Gesture Recorder Debug Info:");
-					WriteLineToOutputWindow(DynamicGestureRecorder.DebugMessage);
+					_glHelper.DrawStaticGesture(SelectedStaticGesture);
 					break;
 				default:
 					_glHelper.DrawFrame(CurrentFrame, ShowArms);

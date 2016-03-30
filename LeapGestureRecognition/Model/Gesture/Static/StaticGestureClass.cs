@@ -11,14 +11,6 @@ namespace LGR
 	[DataContract]
 	public class StaticGestureClass
 	{
-		public StaticGestureClass() { }
-		public StaticGestureClass(ObservableCollection<StaticGestureInstanceWrapper> instances, Dictionary<string, int> featureWeights)
-		{
-			computeMeanValuesAndHandConfiguration(instances);
-			computeStdDevValues(instances);
-			FeatureWeights = featureWeights ?? GetDefaultFeatureWeights();
-		}
-
 		#region Public Properties
 		public GestureType GestureType { get { return GestureType.Static; } }
 
@@ -36,12 +28,31 @@ namespace LGR
 		public HandConfiguration HandConfiguration { get; set; }
 		#endregion
 
+		#region Constructors
+		public StaticGestureClass() { }
+
+		// Should be StaticGestureInstance (not wrapper). Also try to do IEnumerable or List instead of ObservableCollection.
+		public StaticGestureClass(ObservableCollection<StaticGestureInstanceWrapper> sgInstances, Dictionary<string, int> featureWeights = null)
+			: this(sgInstances.Select(sgi => sgi.Gesture).ToList(), featureWeights) { }
+
+		public StaticGestureClass(List<StaticGestureInstance> sgInstances, Dictionary<string, int> featureWeights = null)
+		{
+			computeMeanValuesAndHandConfiguration(sgInstances);
+			computeStdDevValues(sgInstances);
+			FeatureWeights = featureWeights ?? GetDefaultFeatureWeights();
+		}
+		#endregion
+
+
+
 		HashSet<FeatureName> featuresToSkip = new HashSet<FeatureName>()
 		{
 			FeatureName.LeftPalmPosition,
 			FeatureName.RightPalmPosition,
 			FeatureName.LeftPalmSphereCenter,
 			FeatureName.RightPalmSphereCenter,
+			FeatureName.LeftPalmSphereRadius, // Issue with this
+			FeatureName.RightPalmSphereRadius, // Issue with this
 		};
 
 		#region Public Methods
@@ -70,80 +81,73 @@ namespace LGR
 
 		public float DistanceTo(StaticGestureInstance gestureInstance)
 		{
-			try
+			// Check if same hand configuration (BothHands, LeftHandOnly, RightHandOnly)...
+			if (HandConfiguration != gestureInstance.HandConfiguration) return Single.PositiveInfinity;
+
+			float distance = 0;
+			int featureCount = 0; // Necessary to do this because some features (like Dictionary's) are really 5 features.
+			int featureWeight;
+			foreach (var feature in gestureInstance.FeatureVector)
 			{
-				// Check if same hand configuration (BothHands, LeftHandOnly, RightHandOnly)...
-				if (HandConfiguration != gestureInstance.HandConfiguration) return Single.PositiveInfinity;
+				if (featuresToSkip.Contains(feature.Name)) continue;
 
-				float distance = 0;
-				int featureCount = 0; // Necessary to do this because some features (like Dictionary's) are really 5 features.
-				int featureWeight;
-				foreach (var feature in gestureInstance.FeatureVector)
+				if (feature.Value is Vec3)
 				{
-					if (featuresToSkip.Contains(feature.Name)) continue;
-
-					if (feature.Value is Vec3)
+					featureWeight = FeatureWeights[feature.Name.ToString()];
+					Vec3 mean = ((Newtonsoft.Json.Linq.JObject)MeanValues[feature.Name]).ToObject<Vec3>();
+					distance += featureWeight * ((Vec3)(feature.Value)).DistanceTo(mean) / ((float)StdDevValues[feature.Name]);
+					featureCount += featureWeight;
+				}
+				else if (feature.Value is float)
+				{
+					featureWeight = FeatureWeights[feature.Name.ToString()];
+					// float values include Yaw, Pitch, Roll, and Sphere Radius
+					distance += featureWeight * Math.Abs(((float)feature.Value - (float)(double)MeanValues[feature.Name]) / ((float)(double)StdDevValues[feature.Name]));
+					featureCount += featureWeight;
+				}
+				else if (feature.Value is Dictionary<Finger.FingerType, Vec3>)
+				{
+					// This is just for fingersTipPositions
+					foreach (var fingerTipPosition in (Dictionary<Finger.FingerType, Vec3>)feature.Value)
 					{
-						featureWeight = FeatureWeights[feature.Name.ToString()];
-						Vec3 mean = ((Newtonsoft.Json.Linq.JObject)MeanValues[feature.Name]).ToObject<Vec3>();
-						distance += featureWeight * ((Vec3)(feature.Value)).DistanceTo(mean) / ((float)(double)StdDevValues[feature.Name]);
+						Finger.FingerType fingerType = fingerTipPosition.Key;
+						featureWeight = FeatureWeights[feature.Name.ToString() + fingerType];
+						var meanFingerTipPositions = ((Newtonsoft.Json.Linq.JObject)MeanValues[feature.Name]).ToObject<Dictionary<Finger.FingerType, Vec3>>();
+						var stdDevFingerTipPositions = ((Newtonsoft.Json.Linq.JObject)StdDevValues[feature.Name]).ToObject<Dictionary<Finger.FingerType, float>>();
+						//var stdDevFingerTipPositions = (Dictionary<Finger.FingerType, float>)StdDevValues[feature.Name];
+						Vec3 instancePos = fingerTipPosition.Value;
+						distance += featureWeight * (instancePos).DistanceTo(meanFingerTipPositions[fingerType]) / stdDevFingerTipPositions[fingerType];
 						featureCount += featureWeight;
-					}
-					else if (feature.Value is float)
-					{
-						featureWeight = FeatureWeights[feature.Name.ToString()];
-						// float values include Yaw, Pitch, Roll, and Sphere Radius
-						distance += featureWeight * Math.Abs(((float)feature.Value - (float)(double)MeanValues[feature.Name]) / ((float)(double)StdDevValues[feature.Name]));
-						featureCount += featureWeight;
-					}
-					else if (feature.Value is Dictionary<Finger.FingerType, Vec3>)
-					{
-						// This is just for fingersTipPositions
-						foreach (var fingerTipPosition in (Dictionary<Finger.FingerType, Vec3>)feature.Value)
-						{
-							Finger.FingerType fingerType = fingerTipPosition.Key;
-							featureWeight = FeatureWeights[feature.Name.ToString() + fingerType];
-							var meanFingerTipPositions = ((Newtonsoft.Json.Linq.JObject)MeanValues[feature.Name]).ToObject<Dictionary<Finger.FingerType, Vec3>>();
-							var stdDevFingerTipPositions = ((Newtonsoft.Json.Linq.JObject)StdDevValues[feature.Name]).ToObject<Dictionary<Finger.FingerType, float>>();
-							//var stdDevFingerTipPositions = (Dictionary<Finger.FingerType, float>)StdDevValues[feature.Name];
-							Vec3 instancePos = fingerTipPosition.Value;
-							distance += featureWeight * (instancePos).DistanceTo(meanFingerTipPositions[fingerType]) / stdDevFingerTipPositions[fingerType];
-							featureCount += featureWeight;
-						}
-					}
-					else if (feature.Value is Dictionary<Finger.FingerType, bool>)
-					{
-						// This is just for fingers.IsExtended
-						foreach (var fingerExtended in (Dictionary<Finger.FingerType, bool>)feature.Value)
-						{
-							Finger.FingerType fingerType = fingerExtended.Key;
-							featureWeight = FeatureWeights[feature.Name.ToString() + fingerType];
-							bool isExtended = fingerExtended.Value;
-							float fingerExtendedPercentage = (((Newtonsoft.Json.Linq.JObject)MeanValues[feature.Name]).ToObject<Dictionary<Finger.FingerType, float>>())[fingerType];
-							if (fingerExtendedPercentage >= 0.5f) // finger should be extended
-							{
-								if (!isExtended) distance += featureWeight; //distance += fingerExtendedPercentage;
-							}
-							else
-							{
-								if (isExtended) distance += featureWeight; //distance += 1 - fingerExtendedPercentage;
-							}
-							featureCount += featureWeight;
-						}
 					}
 				}
-				//return distance / (gestureInstance.FeatureVector.Count - featuresToSkip.Count);
-				return distance / featureCount;
+				else if (feature.Value is Dictionary<Finger.FingerType, bool>)
+				{
+					// This is just for fingers.IsExtended
+					foreach (var fingerExtended in (Dictionary<Finger.FingerType, bool>)feature.Value)
+					{
+						Finger.FingerType fingerType = fingerExtended.Key;
+						featureWeight = FeatureWeights[feature.Name.ToString() + fingerType];
+						bool isExtended = fingerExtended.Value;
+						float fingerExtendedPercentage = (((Newtonsoft.Json.Linq.JObject)MeanValues[feature.Name]).ToObject<Dictionary<Finger.FingerType, float>>())[fingerType];
+						if (fingerExtendedPercentage >= 0.5f) // finger should be extended
+						{
+							if (!isExtended) distance += featureWeight; //distance += fingerExtendedPercentage;
+						}
+						else
+						{
+							if (isExtended) distance += featureWeight; //distance += 1 - fingerExtendedPercentage;
+						}
+						featureCount += featureWeight;
+					}
+				}
 			}
-			catch (Exception ex) 
-			{
-			}
-			return 0;
+			//return distance / (gestureInstance.FeatureVector.Count - featuresToSkip.Count);
+			return distance / featureCount;
 		}
 		#endregion
 
 		#region Private Methods
-		private void computeMeanValuesAndHandConfiguration(ObservableCollection<StaticGestureInstanceWrapper> instances)
+		private void computeMeanValuesAndHandConfiguration(List<StaticGestureInstance> instances)
 		{
 			Vec3 LeftPalmPosTotal = new Vec3();
 			Vec3 LeftPalmSphereCenterTotal = new Vec3();
@@ -193,8 +197,8 @@ namespace LGR
 				var leftPalmPos = new Vec3(); // for getting hands positions relative to each other totals
 				var rightPalmPos = new Vec3();
 
-				handConfigCounts[instance.Gesture.HandConfiguration]++;
-				foreach (var hand in instance.Gesture.Hands)
+				handConfigCounts[instance.HandConfiguration]++;
+				foreach (var hand in instance.Hands)
 				{
 					if (hand.IsLeft)
 					{
@@ -272,7 +276,7 @@ namespace LGR
 			MeanValues.Add(FeatureName.LeftToRightHand, LeftToRightHandTotal / numInstances);
 		}
 
-		private void computeStdDevValues(ObservableCollection<StaticGestureInstanceWrapper> instances)
+		private void computeStdDevValues(List<StaticGestureInstance> instances)
 		{
 			float LeftPalmPosTotal = 0;
 			float LeftYawTotal = 0;
@@ -303,7 +307,7 @@ namespace LGR
 				var leftPalmPos = new Vec3();
 				var rightPalmPos = new Vec3();
 
-				foreach (var hand in instance.Gesture.Hands)
+				foreach (var hand in instance.Hands)
 				{
 					if (hand.IsLeft)
 					{

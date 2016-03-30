@@ -1,5 +1,5 @@
 ﻿using Leap;
-using LeapGestureRecognition.Util;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +12,8 @@ namespace LGR
 	[DataContract]
 	public class Feature
 	{
+		public Feature() { }
+
 		public Feature(FeatureName name, object value, int weight = 1)
 		{
 			Name = name;

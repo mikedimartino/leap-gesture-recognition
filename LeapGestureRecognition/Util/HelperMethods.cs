@@ -6,8 +6,10 @@ using System.Text;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
+using LGR;
+using Newtonsoft.Json;
 
-namespace LeapGestureRecognition.Util
+namespace LGR
 {
 	public class HelperMethods
 	{
@@ -31,5 +33,18 @@ namespace LeapGestureRecognition.Util
 			return boneName;
 		}
 
+		public static float Lerp(float f1, float f2, float amount)
+		{
+			float delta = (Math.Abs(f1 - f2) * amount) * ((f1 < f2) ? 1 : -1);
+			return f1 + delta;
+		}
+
+
+		public static void TestSerializer(StaticGestureInstance sgi)
+		{
+			string serialized = JsonConvert.SerializeObject(sgi);
+			StaticGestureInstance deserialized = (StaticGestureInstance)JsonConvert.DeserializeObject<StaticGestureInstance>(serialized);
+			deserialized.UpdateFeatureVector();
+		}
 	}
 }

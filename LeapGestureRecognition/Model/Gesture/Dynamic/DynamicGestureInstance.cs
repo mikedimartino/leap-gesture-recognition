@@ -19,17 +19,6 @@ namespace LGR
 		public DynamicGestureInstance() { }
 		public DynamicGestureInstance(List<StaticGestureInstance> samples)
 		{
-			//// Need to think about number of samples to take.
-			//// Use first and last sample, and then divide evenly between the rest.
-			//Samples = new List<StaticGestureInstance>();
-			//int increment = samples.Count / numSamples;
-			//for (int i = 0; i < numSamples - 1; i += increment)
-			//{
-			//	Samples.Add(samples[i]);
-			//}
-			//// Make last sample be the final instance
-			//Samples.Add(samples[samples.Count - 1]);
-
 			Samples = samples; // For now just store all samples
 		}
 
@@ -49,9 +38,27 @@ namespace LGR
 		
 
 		#region Public Methods
-		public float DistanceTo(DynamicGestureInstance otherInstance)
+		public List<StaticGestureInstance> GetResizedSampleList(int size)
 		{
-			throw new NotImplementedException();
+			var samples = new List<StaticGestureInstance>();
+
+			samples.Add(Samples[0]);
+			for (int i = 1; i < size; i++)
+			{
+				float index = (i * Samples.Count) / (float)size; // Actual index (not an int)
+				float lerpAmount = index - ((int)index); // Get fractional amount of index
+
+				if (index < 1)
+				{
+					samples.Add(Samples[0].Lerp(Samples[1], lerpAmount));
+				}
+				else
+				{
+					samples.Add(Samples[(int)index - 1].Lerp(Samples[(int)index], lerpAmount));
+				}
+			}
+
+			return samples;
 		}
 		#endregion
 	}

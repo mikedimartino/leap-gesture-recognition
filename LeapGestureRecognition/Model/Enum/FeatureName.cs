@@ -34,5 +34,6 @@ namespace LGR
 
 		// Position of hands relative to each other (LeftHandPosition - RightHandPosition)
 		LeftToRightHand,
+		HandConfiguration
 	};
 }

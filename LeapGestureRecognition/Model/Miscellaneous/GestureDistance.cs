@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace LGR
 {
+	[DataContract]
 	public class GestureDistance
 	{
 		public GestureDistance() { }
@@ -14,7 +16,9 @@ namespace LGR
 			Distance = distance;
 		}
 
+		[DataMember]
 		public string Name { get; set; }
+		[DataMember]
 		public float Distance { get; set; }
 	}
 }

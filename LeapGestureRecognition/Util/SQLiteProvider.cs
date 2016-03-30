@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media;
 
-namespace LeapGestureRecognition.Util
+namespace LGR
 {
 	public class SQLiteProvider
 	{
@@ -327,11 +327,13 @@ namespace LeapGestureRecognition.Util
 					{
 						while (reader.Read())
 						{
+							var gesture = JsonConvert.DeserializeObject<StaticGestureInstance>(reader.GetString(2));
+							gesture.UpdateFeatureVector();
 							StaticGestureInstanceWrapper instance = new StaticGestureInstanceWrapper()
 							{
 								Id = reader.GetInt32(0),
 								ClassId = reader.GetInt32(1),
-								Gesture = JsonConvert.DeserializeObject<StaticGestureInstance>(reader.GetString(2)),
+								Gesture = gesture,
 							};
 							instance.InstanceName = String.Format("class {0} inst {1}", instance.ClassId, instance.Id);
 							gestureInstances.Add(instance);
@@ -393,6 +395,29 @@ namespace LeapGestureRecognition.Util
 			executeNonQuery(sql);
 		}
 
+		public StaticGestureClassWrapper GetStaticGestureClass(int id)
+		{
+			string sql = "SELECT id, name, gesture_json, sample_instance_json FROM StaticGestureClasses WHERE id=" + id;
+			using (var connection = new SQLiteConnection(_connString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+				{
+					using (SQLiteDataReader reader = command.ExecuteReader())
+					{
+						reader.Read();
+						return new StaticGestureClassWrapper()
+						{
+							Id = reader.GetInt32(0),
+							Name = reader.GetString(1),
+							Gesture = JsonConvert.DeserializeObject<StaticGestureClass>(reader.GetString(2)),
+							SampleInstance = JsonConvert.DeserializeObject<StaticGestureInstance>(reader.GetString(3)) // Don't care about this
+						};
+					}
+				}
+			}
+		}
+
 		public ObservableCollection<StaticGestureClassWrapper> GetAllStaticGestureClasses()
 		{
 			var gestures = new ObservableCollection<StaticGestureClassWrapper>();
@@ -406,13 +431,22 @@ namespace LeapGestureRecognition.Util
 					{
 						while (reader.Read())
 						{
-							gestures.Add(new StaticGestureClassWrapper() 
+							//gestures.Add(new StaticGestureClassWrapper() 
+							//{
+							//	Id = reader.GetInt32(0),
+							//	Name = reader.GetString(1),
+							//	Gesture = JsonConvert.DeserializeObject<StaticGestureClass>(reader.GetString(2)),
+							//	SampleInstance = JsonConvert.DeserializeObject<StaticGestureInstance>(reader.GetString(3))
+							//});
+
+							var currGest = new StaticGestureClassWrapper()
 							{
 								Id = reader.GetInt32(0),
 								Name = reader.GetString(1),
 								Gesture = JsonConvert.DeserializeObject<StaticGestureClass>(reader.GetString(2)),
 								SampleInstance = JsonConvert.DeserializeObject<StaticGestureInstance>(reader.GetString(3))
-							});
+							};
+							gestures.Add(currGest);
 						}
 					}
 				}

@@ -1,5 +1,5 @@
 ﻿using Leap;
-using LeapGestureRecognition.Util;
+
 using LeapGestureRecognition.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -61,13 +61,6 @@ namespace LGR
 
 		public void ProcessFrame(Frame frame)
 		{
-			//if (_mvm != null)
-			//{
-			//	MainViewModel.ClearOutputWindow();
-			//	MainViewModel.WriteLineToOutputWindow("Dynamic Gesture Recorder Debug Info:");
-			//	MainViewModel.WriteLineToOutputWindow(DebugMessage);
-			//}
-
 			if (_lastFrame == null)
 			{
 				_lastFrame = frame;
@@ -158,8 +151,8 @@ namespace LGR
 			}
 			DebugMessage += String.Format("Left hand velocity magnitude: {0}\nRight hand velocity magnitude: {1}", leftHandVelocityMagnitude, rightHandVelocityMagnitude);
 
-			if (palmsAreMoving(frame) || liveStaticGesture.DistanceTo(_stillGesture) > _stillDistance)
-			{// TODO: Add DistanceTo() to Instances (not just Class)
+			if (palmsAreMoving(frame))// || liveStaticGesture.DistanceTo(_stillGesture) > _stillDistance)
+			{
 				_stillGesture = liveStaticGesture;
 				_stillFramesCount = 0;
 				return false;
