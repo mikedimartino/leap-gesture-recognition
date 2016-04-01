@@ -24,7 +24,8 @@ namespace LGR
 
 		public DGClass(List<DGInstance> dgInstances)
 		{
-			buildExactSamples(dgInstances);
+			//buildExactSamples(dgInstances);
+			buildDtwSamples(dgInstances);
 		}
 		#endregion
 
@@ -32,8 +33,8 @@ namespace LGR
 		#region Public Methods
 		public float DistanceTo(DGInstance otherInstance)
 		{
-			//float dist = GetDTWDistance(otherInstance);
-			float dist = GetExactDistance(otherInstance);
+			float dist = GetDTWDistance(otherInstance);
+			//float dist = GetExactDistance(otherInstance);
 			return dist;
 		}
 
@@ -99,19 +100,9 @@ namespace LGR
 						dtw[x - 1, y],
 						dtw[x, y - 1]
 					};
-					if (dtw[x - 1, y] == neighboringCosts.Min())
-					{
-						x--;
-					}
-					else if (dtw[x, y - 1] == neighboringCosts.Min())
-					{
-						y--;
-					}
-					else
-					{
-						x--; 
-						y--;
-					}
+					if (dtw[x - 1, y] == neighboringCosts.Min()) x--;
+					else if (dtw[x, y - 1] == neighboringCosts.Min()) y--;
+					else { x--; y--; }
 				}
 				path.Push(new Tuple<int, int>(x, y));
 			}
@@ -154,11 +145,28 @@ namespace LGR
 			// At this point Samples contains StaticGestureClasses in each array position.
 		}
 
-		// Builds a more accurate representation of the sample list using DTW.
-		public void buildDTWSamples(List<DGInstance> dgInstances)
-		{ 
+		public void buildDtwSamples(List<DGInstance> dgInstances)
+		{
+			Samples = new List<DGClassSample>();
 
+			if (dgInstances == null || dgInstances.Count == 0) return;
+
+			int maxSamples = dgInstances.Max(dgi => dgi.Samples.Count);
+			var longestInstance = dgInstances.Where(dgi => dgi.Samples.Count == maxSamples).First();
+
+			var mappedInstances = new List<DGInstance>();
+			foreach (var instance in dgInstances)
+			{
+				// All of these instances should have the same # of samples
+				mappedInstances.Add(instance.GetDtwMappedInstance(longestInstance));
+			}
+
+			for (int i = 0; i < longestInstance.Samples.Count; i++)
+			{
+				Samples.Add(new DGClassSample(mappedInstances.Select(dgi => dgi.Samples[i]).ToList()));
+			}
 		}
+
 		#endregion
 	}
 }

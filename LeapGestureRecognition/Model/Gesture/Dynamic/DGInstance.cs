@@ -77,6 +77,80 @@ namespace LGR
 
 			return samples;
 		}
-		#endregion
+
+
+		public DGInstance GetDtwMappedInstance(DGInstance target)
+		{
+			DGInstance mappedInstance;
+			GetDtwDistance(target, out mappedInstance);
+			return mappedInstance;
+		}
+
+		public float GetDtwDistance(DGInstance otherInstance, out DGInstance mappedInstance)
+		{
+			float[,] distances = new float[Samples.Count, otherInstance.Samples.Count];
+			for (int i = 0; i < Samples.Count; i++)
+			{
+				for (int j = 0; j < otherInstance.Samples.Count; j++)
+				{
+					distances[i, j] = Samples[i].DistanceTo(otherInstance.Samples[j]);
+				}
+			}
+
+			float[,] dtw = new float[Samples.Count, otherInstance.Samples.Count];
+			for (int i = 0; i < Samples.Count; i++)
+			{
+				for (int j = 0; j < otherInstance.Samples.Count; j++)
+				{
+					float cost = distances[i, j];
+					var precedingCosts = new List<float>() 
+					{ 
+						dtw[Math.Max(i-1, 0), j], 
+						dtw[i, Math.Max(j-1, 0)], 
+						dtw[Math.Max(i-1, 0), Math.Max(j-1, 0)] 
+					
+					};
+					dtw[i, j] = cost + precedingCosts.Min();
+				}
+			}
+
+			// TODO: Backtrack through and find the path (particularly interested in its length)
+			var path = new Stack<Tuple<int, int>>();
+			int x = Samples.Count - 1;
+			int y = otherInstance.Samples.Count - 1;
+			path.Push(new Tuple<int, int>(x, y));
+			while (x > 0 || y > 0)
+			{
+				if (x == 0) y--;
+				else if (y == 0) x--;
+				else
+				{
+					var neighboringCosts = new List<float>() 
+					{ 
+						dtw[x - 1, y - 1],
+						dtw[x - 1, y],
+						dtw[x, y - 1]
+					};
+					if (dtw[x - 1, y] == neighboringCosts.Min()) x--;
+					else if (dtw[x, y - 1] == neighboringCosts.Min()) y--;
+					else { x--; y--; }
+				}
+				path.Push(new Tuple<int, int>(x, y));
+			}
+
+			// x (Item1) is index of this instance; y (Item2) is index of other instance
+			var mappedSamples = new List<DGInstanceSample>();
+			while (path.Count > 0)
+			{
+				int index = path.Pop().Item1;
+				mappedSamples.Add(Samples[index]);
+			}
+
+			mappedInstance = new DGInstance(mappedSamples);
+
+			float distance = dtw[Samples.Count - 1, otherInstance.Samples.Count - 1] / path.Count;
+			return distance;
+		}
+		#endregion 
 	}
 }

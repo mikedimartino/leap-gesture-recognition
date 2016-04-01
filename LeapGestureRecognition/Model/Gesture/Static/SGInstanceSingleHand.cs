@@ -26,14 +26,14 @@ namespace LGR
 			ArmY = new Vec3(hand.Arm.Basis.yBasis);
 			ArmZ = new Vec3(hand.Arm.Basis.zBasis);
 
+			// Normalize these angle values. (They all range between -PI and PI).
+			//Yaw = hand.Direction.Yaw;// / (float)Math.PI;
+			//Pitch = hand.Direction.Pitch;// / (float)Math.PI;
+			//Roll = hand.Direction.Roll;// / (float)Math.PI;
 
-			// Scale yaw, pitch, and roll; Leap.Vector.Yaw is between -PI and PI.
-			//Yaw = (float) (hand.Direction.Yaw / Math.PI);
-			//Pitch = (float) (hand.Direction.Pitch / Math.PI);
-			//Roll = (float) (hand.Direction.Roll / Math.PI);
-			Yaw = hand.Direction.Yaw;
-			Pitch = hand.Direction.Pitch;
-			Roll = hand.Direction.Roll;
+			Yaw = hand.PalmNormal.Yaw;// / (float)Math.PI;
+			Pitch = hand.PalmNormal.Pitch;// / (float)Math.PI;
+			Roll = hand.PalmNormal.Roll;// / (float)Math.PI;
 
 			// World coordinates
 			WristPos_World = new Vec3(hand.WristPosition);
@@ -47,12 +47,15 @@ namespace LGR
 			ElbowPos_Relative = new Vec3(hand.Arm.ElbowPosition);
 			ForearmCenter_Relative = new Vec3(hand.Arm.Center);
 			// NOTE: HandScale and relative finger positions must be calculated after world coordinates. 
-			HandScale = GetFingerLength(Finger.FingerType.TYPE_MIDDLE);
+			//HandScale = GetFingerLength(Finger.FingerType.TYPE_MIDDLE);
+
+			FingerLengths = GetFingerLengths();
+
 			setFingerJointPositions_Relative(hand);
 			setFingerBasePositions_Relative(hand);
 
-			PalmSphereRadius = hand.SphereRadius / HandScale;
-			PalmSphereCenter = new Vec3(HandTransform.TransformPoint(hand.SphereCenter)) / HandScale;
+			PalmSphereRadius = hand.SphereRadius / FingerLengths[Finger.FingerType.TYPE_MIDDLE];
+			PalmSphereCenter = new Vec3(HandTransform.TransformPoint(hand.SphereCenter)) / FingerLengths[Finger.FingerType.TYPE_MIDDLE];
 
 			buildFingerFeatures(hand);
 		}
@@ -82,7 +85,7 @@ namespace LGR
 
 
 		// Coordinates relative to the hand's object space:
-		private float HandScale;
+		//private float HandScale;
 		[DataMember]
 		public Dictionary<Finger.FingerType, Dictionary<Finger.FingerJoint, Vec3>> FingerJointPositions_Relative;
 		[DataMember]
@@ -126,6 +129,9 @@ namespace LGR
 		public Dictionary<Finger.FingerType, bool> FingersExtended { get; set; }
 		[DataMember]
 		public Dictionary<Finger.FingerType, Vec3> FingerTipPositions { get; set; }
+
+		public Dictionary<Finger.FingerType, float> FingerLengths { get; set; }
+
 
 		
 		public Matrix HandTransform { get; set; }
@@ -178,7 +184,7 @@ namespace LGR
 				FingerJointPositions_Relative.Add(finger.Type, new Dictionary<Finger.FingerJoint, Vec3>());
 				foreach (var jointType in (Finger.FingerJoint[])System.Enum.GetValues(typeof(Finger.FingerJoint)))
 				{
-					Vec3 relativePoint = new Vec3(HandTransform.TransformPoint(finger.JointPosition(jointType))) / HandScale;
+					Vec3 relativePoint = new Vec3(HandTransform.TransformPoint(finger.JointPosition(jointType))) / FingerLengths[finger.Type];
 					FingerJointPositions_Relative[finger.Type].Add(jointType, relativePoint);
 				}
 			}
@@ -191,10 +197,10 @@ namespace LGR
 			Leap.Finger ring = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_RING).FirstOrDefault();
 			Leap.Finger pinky = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_PINKY).FirstOrDefault();
 
-			IndexBasePos_Relative = new Vec3(HandTransform.TransformPoint(index.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint)) / HandScale;
-			MiddleBasePos_Relative = new Vec3(HandTransform.TransformPoint(middle.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint)) / HandScale;
-			RingBasePos_Relative = new Vec3(HandTransform.TransformPoint(ring.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint)) / HandScale;
-			PinkyBasePos_Relative = new Vec3(HandTransform.TransformPoint(pinky.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint)) / HandScale;
+			IndexBasePos_Relative = new Vec3(HandTransform.TransformPoint(index.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint)) / FingerLengths[Finger.FingerType.TYPE_INDEX];
+			MiddleBasePos_Relative = new Vec3(HandTransform.TransformPoint(middle.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint)) / FingerLengths[Finger.FingerType.TYPE_MIDDLE];
+			RingBasePos_Relative = new Vec3(HandTransform.TransformPoint(ring.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint)) / FingerLengths[Finger.FingerType.TYPE_RING];
+			PinkyBasePos_Relative = new Vec3(HandTransform.TransformPoint(pinky.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint)) / FingerLengths[Finger.FingerType.TYPE_PINKY];
 		}
 
 		private void buildFingerFeatures(Hand hand)
@@ -224,7 +230,7 @@ namespace LGR
 		#endregion
 
 		#region Public Methods
-		public HandMeasurements GetMeasurements()
+		public HandMeasurements GetMeasurements() // Not used
 		{
 			return new HandMeasurements()
 			{
@@ -247,6 +253,15 @@ namespace LGR
 			return length;
 		}
 
+		public Dictionary<Finger.FingerType, float> GetFingerLengths()
+		{
+			var fingerLengths = new Dictionary<Finger.FingerType, float>();
+			foreach (var fingerType in (Finger.FingerType[])Enum.GetValues(typeof(Finger.FingerType)))
+			{
+				fingerLengths.Add(fingerType, GetFingerLength(fingerType));
+			}
+			return fingerLengths;
+		}
 		#endregion
 	}
 }

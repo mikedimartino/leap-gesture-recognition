@@ -51,7 +51,21 @@ namespace LGR
 			FeatureName.RightPalmSphereCenter,
 			FeatureName.LeftPalmSphereRadius, // Issue with this
 			FeatureName.RightPalmSphereRadius, // Issue with this
+
+			FeatureName.LeftFingersExtended,
+			FeatureName.RightFingersExtended,
 		};
+
+		static HashSet<FeatureName> orientationFeatures = new HashSet<FeatureName>()
+		{
+			FeatureName.LeftPitch,
+			FeatureName.LeftYaw,
+			FeatureName.LeftRoll,
+			FeatureName.RightPitch,
+			FeatureName.RightYaw,
+			FeatureName.RightRoll
+		};
+
 
 		#region Public Methods
 		// Returns an initialized Dictionary with all feature weights set to 1
@@ -59,15 +73,19 @@ namespace LGR
 		{
 			var featureWeights = new Dictionary<string, int>();
 			//var fingerType in (Finger.FingerType[])Enum.GetValues(typeof(Finger.FingerType))
-			foreach (var feature in (FeatureName[])Enum.GetValues(typeof(FeatureName)))
+			foreach (var featureName in (FeatureName[])Enum.GetValues(typeof(FeatureName)))
 			{
-				string featureString = feature.ToString();
+				string featureString = featureName.ToString();
 				if (featureString.Contains("Finger"))
 				{
 					foreach (var fingerType in (Finger.FingerType[])Enum.GetValues(typeof(Finger.FingerType)))
 					{
 						featureWeights.Add(featureString + fingerType, 1);
 					}
+				}
+				else if (orientationFeatures.Contains(featureName))
+				{
+					featureWeights.Add(featureString, 2);
 				}
 				else
 				{
@@ -93,13 +111,12 @@ namespace LGR
 				{
 					featureWeight = FeatureWeights[feature.Name.ToString()];
 					Vec3 mean = ((Newtonsoft.Json.Linq.JObject)MeanValues[feature.Name]).ToObject<Vec3>();
-					distance += featureWeight * ((Vec3)(feature.Value)).DistanceTo(mean) / ((float)StdDevValues[feature.Name]);
+					distance += featureWeight * ((Vec3)(feature.Value)).DistanceTo(mean) / ((float)(double)StdDevValues[feature.Name]);
 					featureCount += featureWeight;
 				}
 				else if (feature.Value is float)
 				{
 					featureWeight = FeatureWeights[feature.Name.ToString()];
-					// float values include Yaw, Pitch, Roll, and Sphere Radius
 					distance += featureWeight * Math.Abs(((float)feature.Value - (float)(double)MeanValues[feature.Name]) / ((float)(double)StdDevValues[feature.Name]));
 					featureCount += featureWeight;
 				}

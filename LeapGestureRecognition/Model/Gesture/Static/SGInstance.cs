@@ -56,6 +56,14 @@ namespace LGR
 			}
 
 			HandConfiguration = getHandConfiguration(Hands);
+
+			if (RightHand != null)
+			{
+				LeapGestureRecognition.ViewModel.MainViewModel.ClearOutputWindow();
+				LeapGestureRecognition.ViewModel.MainViewModel.WriteLineToOutputWindow("Pitch = " + RightHand.Pitch);
+				LeapGestureRecognition.ViewModel.MainViewModel.WriteLineToOutputWindow("Yaw = " + RightHand.Yaw);
+				LeapGestureRecognition.ViewModel.MainViewModel.WriteLineToOutputWindow("Roll = " + RightHand.Roll);
+			}
 		}
 
 		public SGInstance(List<Feature> featureVector)
