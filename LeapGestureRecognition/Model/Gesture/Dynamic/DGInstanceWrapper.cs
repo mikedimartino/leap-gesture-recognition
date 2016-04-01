@@ -6,9 +6,9 @@ using System.Text;
 
 namespace LGR
 {
-	public class DynamicGestureInstanceWrapper
+	public class DGInstanceWrapper
 	{
-		public DynamicGestureInstanceWrapper() 
+		public DGInstanceWrapper() 
 		{
 			Instance = null;
 			Id = -1;
@@ -16,7 +16,7 @@ namespace LGR
 			InstanceName = "new instance";
 		}
 
-		public DynamicGestureInstanceWrapper(DynamicGestureInstance instance)
+		public DGInstanceWrapper(DGInstance instance)
 		{
 			Instance = instance;
 			Id = -1;
@@ -26,7 +26,7 @@ namespace LGR
 
 		public int Id { get; set; }
 		public int ClassId { get; set; }
-		public DynamicGestureInstance Instance { get; set; }
+		public DGInstance Instance { get; set; }
 		public string InstanceName { get; set; }
 	}
 }

@@ -15,15 +15,15 @@ namespace LeapGestureRecognition.ViewModel
 		private MainViewModel _mvm;
 		SQLiteProvider _provider;
 		bool _newGesture;
-		StaticGestureRecorder _recorder;
+		SGRecorder _recorder;
 
 		// NOTE: A new EditGestureViewModel is instantiated on every call to EditGesture()
-		public EditStaticGestureViewModel(MainViewModel mvm, StaticGestureClassWrapper gesture = null, bool newGesture = false)
+		public EditStaticGestureViewModel(MainViewModel mvm, SGClassWrapper gesture = null, bool newGesture = false)
 		{
 			_mvm = mvm;
 			_newGesture = newGesture;
 			_provider = _mvm.SQLiteProvider;
-			_recorder = new StaticGestureRecorder(this, _mvm);
+			_recorder = new SGRecorder(this, _mvm);
 
 			_recorder.RecordingSessionFinished += OnRecordingSessionFinished;
 
@@ -32,8 +32,8 @@ namespace LeapGestureRecognition.ViewModel
 			if (newGesture)
 			{
 				Name = "New Static Gesture";
-				Instances = new ObservableCollection<StaticGestureInstanceWrapper>();
-				featureWeightsDict = StaticGestureClass.GetDefaultFeatureWeights();
+				Instances = new ObservableCollection<SGInstanceWrapper>();
+				featureWeightsDict = SGClass.GetDefaultFeatureWeights();
 			}
 			else
 			{
@@ -51,8 +51,8 @@ namespace LeapGestureRecognition.ViewModel
 		#region Public Properties
 		public int Id { get; set; }
 		public string Name { get; set; }
-		public ObservableCollection<StaticGestureInstanceWrapper> Instances { get; set; }
-		public StaticGestureInstanceWrapper SelectedInstance { get; set; }
+		public ObservableCollection<SGInstanceWrapper> Instances { get; set; }
+		public SGInstanceWrapper SelectedInstance { get; set; }
 		public EditStaticGestureChangeset Changeset { get; set; }
 		public ObservableCollection<FeatureWeight> FeatureWeights { get; set; }
 
@@ -86,10 +86,10 @@ namespace LeapGestureRecognition.ViewModel
 				}
 			}
 
-			var editedGesture = new StaticGestureClass(Instances, featureWeightsDict);
+			var editedGesture = new SGClass(Instances, featureWeightsDict);
 			var sampleInstance = (Instances.Any()) ? Instances.FirstOrDefault().Gesture : null;
 
-			var gestureWrapper = new StaticGestureClassWrapper()
+			var gestureWrapper = new SGClassWrapper()
 			{
 				Id = this.Id,
 				Name = this.Name,
@@ -113,16 +113,15 @@ namespace LeapGestureRecognition.ViewModel
 			}
 
 			_mvm.UpdateStaticGestureLibrary();
-			_mvm.UpdateClassifier();
 		}
 
-		public void AddInstance(StaticGestureInstanceWrapper instance)
+		public void AddInstance(SGInstanceWrapper instance)
 		{
 			Instances.Add(instance);
 			Changeset.NewGestureInstances.Add(instance);
 		}
 
-		public void DeleteInstance(StaticGestureInstanceWrapper instance)
+		public void DeleteInstance(SGInstanceWrapper instance)
 		{
 			Instances.Remove(instance);
 			if (Changeset.NewGestureInstances.Contains(instance))
@@ -135,7 +134,7 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		public void ViewInstance(StaticGestureInstanceWrapper instance)
+		public void ViewInstance(SGInstanceWrapper instance)
 		{
 			SelectedInstance = instance ?? Instances.FirstOrDefault();
 

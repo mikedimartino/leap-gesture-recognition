@@ -76,13 +76,13 @@ namespace LGR_Controls
 
 		private void DeleteInstance(object sender, RoutedEventArgs e)
 		{
-			var instance = (DynamicGestureInstanceWrapper)(e.Source as FrameworkElement).Tag;
+			var instance = (DGInstanceWrapper)(e.Source as FrameworkElement).Tag;
 			_vm.DeleteInstance(instance);
 		}
 
 		private void ViewInstance(object sender, RoutedEventArgs e)
 		{
-			var instance = (DynamicGestureInstanceWrapper)(e.Source as FrameworkElement).Tag;
+			var instance = (DGInstanceWrapper)(e.Source as FrameworkElement).Tag;
 			_vm.ViewInstance(instance);
 		}
 
@@ -90,14 +90,14 @@ namespace LGR_Controls
 		{
 			if (e.ClickCount >= 2) // Double click
 			{
-				var instance = (DynamicGestureInstanceWrapper)(sender as FrameworkElement).Tag;
+				var instance = (DGInstanceWrapper)(sender as FrameworkElement).Tag;
 				_vm.ViewInstance(instance);
 			}
 		}
 
 		private void Instance_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			var instance = ((sender as ListBox).SelectedItem as DynamicGestureInstanceWrapper);
+			var instance = ((sender as ListBox).SelectedItem as DGInstanceWrapper);
 			if(instance != null) _vm.ViewInstance(instance);
 		}
 

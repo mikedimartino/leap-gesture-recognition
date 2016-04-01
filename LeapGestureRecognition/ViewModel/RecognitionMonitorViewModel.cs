@@ -14,15 +14,15 @@ namespace LeapGestureRecognition.ViewModel
 		private StatisticalClassifier _classifier;
 		private ObservableCollection<GestureDistance> _rankedStaticGestures;
 		private ObservableCollection<GestureDistance> _rankedDynamicGestures;
-		private DynamicGestureRecorder _dgRecorder;
+		private DGRecorder _dgRecorder;
 
 
 
 		public RecognitionMonitorViewModel(StatisticalClassifier classifier)
 		{
 			_classifier = classifier;
-			_dgRecorder = new DynamicGestureRecorder(inRecordMode: false);
-			CurrentState = _dgRecorder.State;//.ToString();
+			_dgRecorder = new DGRecorder(inRecordMode: false);
+			CurrentState = _dgRecorder.State;
 			RankedStaticGestures = new ObservableCollection<GestureDistance>();
 			RankedDynamicGestures = new ObservableCollection<GestureDistance>();
 			Mode = GestureType.Static; // Probably not necessary to initialize
@@ -78,7 +78,7 @@ namespace LeapGestureRecognition.ViewModel
 		{
 			if (Mode == GestureType.Static)
 			{
-				var distances = _classifier.GetDistancesFromAllClasses(new StaticGestureInstance(frame));
+				var distances = _classifier.GetDistancesFromAllClasses(new SGInstance(frame));
 				RankedStaticGestures = new ObservableCollection<GestureDistance>(distances.OrderBy(g => g.Value).Select(g => new GestureDistance(g.Key.Name, g.Value)));
 			}
 			else

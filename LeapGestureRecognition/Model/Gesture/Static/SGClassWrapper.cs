@@ -5,11 +5,11 @@ using System.Text;
 
 namespace LGR
 {
-	public class DynamicGestureClassWrapper
+	public class SGClassWrapper
 	{
 		public int Id { get; set; }
 		public string Name { get; set; }
-		public DynamicGestureClass Gesture { get; set; }
-		public DynamicGestureInstance SampleInstance { get; set; }
+		public SGClass Gesture { get; set; }
+		public SGInstance SampleInstance { get; set; } // For drawing
 	}
 }

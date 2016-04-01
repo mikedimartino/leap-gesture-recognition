@@ -8,23 +8,23 @@ namespace LGR
 {
 	public class StatisticalClassifier
 	{
-		private ObservableCollection<StaticGestureClassWrapper> _staticGestureClasses;
-		private ObservableCollection<DynamicGestureClassWrapper> _dynamicGestureClasses;
+		private ObservableCollection<SGClassWrapper> _staticGestureClasses;
+		private ObservableCollection<DGClassWrapper> _dynamicGestureClasses;
 
-		public StatisticalClassifier(ObservableCollection<StaticGestureClassWrapper> staticGestureClasses, ObservableCollection<DynamicGestureClassWrapper> dynamicGestureClasses) 
+		public StatisticalClassifier(ObservableCollection<SGClassWrapper> staticGestureClasses, ObservableCollection<DGClassWrapper> dynamicGestureClasses) 
 		{
 			_staticGestureClasses = staticGestureClasses;
 			_dynamicGestureClasses = dynamicGestureClasses;
 		}
 
 		#region Public Properties
-		public ObservableCollection<StaticGestureClassWrapper> StaticGestureClasses
+		public ObservableCollection<SGClassWrapper> StaticGestureClasses
 		{
 			get { return _staticGestureClasses; }
 			set { _staticGestureClasses = value; }
 		}
 
-		public ObservableCollection<DynamicGestureClassWrapper> DynamicGestureClasses
+		public ObservableCollection<DGClassWrapper> DynamicGestureClasses
 		{
 			get { return _dynamicGestureClasses; }
 			set { _dynamicGestureClasses = value; }
@@ -32,11 +32,11 @@ namespace LGR
 		#endregion
 
 		#region Public Methods
-		public Dictionary<StaticGestureClassWrapper, float> GetDistancesFromAllClasses(StaticGestureInstance gestureInstance)
+		public Dictionary<SGClassWrapper, float> GetDistancesFromAllClasses(SGInstance gestureInstance)
 		{
 				lock (_staticGestureClasses)
 				{
-					var gestureDistances = new Dictionary<StaticGestureClassWrapper, float>();
+					var gestureDistances = new Dictionary<SGClassWrapper, float>();
 					foreach (var gestureClass in _staticGestureClasses)
 					{
 						gestureDistances.Add(gestureClass, gestureClass.Gesture.DistanceTo(gestureInstance));
@@ -45,11 +45,11 @@ namespace LGR
 				}
 		}
 
-		public Dictionary<DynamicGestureClassWrapper, float> GetDistancesFromAllClasses(DynamicGestureInstance gestureInstance)
+		public Dictionary<DGClassWrapper, float> GetDistancesFromAllClasses(DGInstance gestureInstance)
 		{
 			lock (_dynamicGestureClasses)
 			{
-				var gestureDistances = new Dictionary<DynamicGestureClassWrapper, float>();
+				var gestureDistances = new Dictionary<DGClassWrapper, float>();
 				foreach (var gestureClass in _dynamicGestureClasses)
 				{
 					gestureDistances.Add(gestureClass, gestureClass.Gesture.DistanceTo(gestureInstance));

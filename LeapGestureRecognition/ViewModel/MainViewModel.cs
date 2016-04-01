@@ -64,7 +64,7 @@ namespace LeapGestureRecognition.ViewModel
 			_config = new LGR_Configuration(_sqliteProvider);
 			_glHelper = new SharpGLHelper(_gl, _config.BoneColors);
 
-			DynamicGestureRecorder = new DynamicGestureRecorder(this);
+			DynamicGestureRecorder = new DGRecorder(this);
 
 			UpdateStaticGestureLibrary();
 			UpdateDynamicGestureLibrary();
@@ -97,7 +97,7 @@ namespace LeapGestureRecognition.ViewModel
 		public double OpenGLWindowHeight { get; set; }
 		public Frame CurrentFrame { get; set; }
 		public ObservableCollection<CustomMenuItem> MenuBar { get; set; }
-		public DynamicGestureRecorder DynamicGestureRecorder { get; set; }
+		public DGRecorder DynamicGestureRecorder { get; set; }
 
 		private bool _ShowEditStaticGesture = false;
 		public bool ShowEditStaticGesture 
@@ -133,8 +133,8 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		private StaticGestureInstance _SelectedStaticGesture = null;
-		public StaticGestureInstance SelectedStaticGesture
+		private SGInstance _SelectedStaticGesture = null;
+		public SGInstance SelectedStaticGesture
 		{
 			get { return _SelectedStaticGesture; }
 			set
@@ -144,8 +144,8 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		private DynamicGestureInstance _SelectedDynamicGesture = null;
-		public DynamicGestureInstance SelectedDynamicGesture
+		private DGInstance _SelectedDynamicGesture = null;
+		public DGInstance SelectedDynamicGesture
 		{
 			get { return _SelectedDynamicGesture; }
 			set
@@ -214,8 +214,8 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		private ObservableCollection<StaticGestureClassWrapper> _StaticGestures = new ObservableCollection<StaticGestureClassWrapper>();
-		public ObservableCollection<StaticGestureClassWrapper> StaticGestures
+		private ObservableCollection<SGClassWrapper> _StaticGestures = new ObservableCollection<SGClassWrapper>();
+		public ObservableCollection<SGClassWrapper> StaticGestures
 		{
 			get { return _StaticGestures; }
 			set
@@ -230,8 +230,8 @@ namespace LeapGestureRecognition.ViewModel
 		}
 
 
-		private ObservableCollection<DynamicGestureClassWrapper> _DynamicGestures = new ObservableCollection<DynamicGestureClassWrapper>();
-		public ObservableCollection<DynamicGestureClassWrapper> DynamicGestures
+		private ObservableCollection<DGClassWrapper> _DynamicGestures = new ObservableCollection<DGClassWrapper>();
+		public ObservableCollection<DGClassWrapper> DynamicGestures
 		{
 			get { return _DynamicGestures; }
 			set
@@ -470,7 +470,7 @@ namespace LeapGestureRecognition.ViewModel
 		{
 			Hand hand = _controller.Frame().Hands.FirstOrDefault();
 			if (hand == null) return null;
-			return new StaticGestureInstanceSingleHand(hand).GetMeasurements();
+			return new SGInstanceSingleHand(hand).GetMeasurements();
 		}
 
 		public void DrawScene() // This is really the main loop of the entire program. Should maybe rename.
@@ -521,14 +521,14 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		public void ViewStaticGesture(StaticGestureInstance gestureInstance)
+		public void ViewStaticGesture(SGInstance gestureInstance)
 		{
 			Mode = LGR_Mode.EditStatic;
 			SelectedStaticGesture = gestureInstance;
 		}
 
 		private int dynamicGestureStep = 0;
-		public void ViewDynamicGesture(DynamicGestureInstance gestureInstance)
+		public void ViewDynamicGesture(DGInstance gestureInstance)
 		{
 			Mode = LGR_Mode.EditDynamic;
 			SelectedDynamicGesture = gestureInstance;
@@ -580,10 +580,10 @@ namespace LeapGestureRecognition.ViewModel
 
 		public void NewStaticGesture()
 		{
-			EditStaticGesture(new StaticGestureClassWrapper(), newGesture: true);
+			EditStaticGesture(new SGClassWrapper(), newGesture: true);
 		}
 
-		public void EditStaticGesture(StaticGestureClassWrapper gesture, bool newGesture = false)
+		public void EditStaticGesture(SGClassWrapper gesture, bool newGesture = false)
 		{
 			_editStaticGestureControl.VM = new EditStaticGestureViewModel(this, gesture, newGesture);
 			Mode = LGR_Mode.EditStatic;
@@ -591,10 +591,10 @@ namespace LeapGestureRecognition.ViewModel
 
 		public void NewDynamicGesture()
 		{
-			EditDynamicGesture(new DynamicGestureClassWrapper(), newGesture: true);
+			EditDynamicGesture(new DGClassWrapper(), newGesture: true);
 		}
 
-		public void EditDynamicGesture(DynamicGestureClassWrapper gesture, bool newGesture = false)
+		public void EditDynamicGesture(DGClassWrapper gesture, bool newGesture = false)
 		{
 			_editDynamicGestureControl.VM = new EditDynamicGestureViewModel(this, gesture, newGesture);
 			Mode = LGR_Mode.EditDynamic;
@@ -638,17 +638,15 @@ namespace LeapGestureRecognition.ViewModel
 		public void UpdateStaticGestureLibrary()
 		{
 			StaticGestures = _sqliteProvider.GetAllStaticGestureClasses();
+			if(_classifier != null) _classifier.StaticGestureClasses = StaticGestures;
 		}
 
 		public void UpdateDynamicGestureLibrary()
 		{
 			DynamicGestures = _sqliteProvider.GetAllDynamicGestureClasses();
+			if (_classifier != null) _classifier.DynamicGestureClasses = DynamicGestures;
 		}
 
-		public void UpdateClassifier()
-		{
-			_classifier = new StatisticalClassifier(StaticGestures, DynamicGestures);
-		}
 		#endregion
 
 		#region Private Methods

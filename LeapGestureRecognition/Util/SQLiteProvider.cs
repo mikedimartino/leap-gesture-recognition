@@ -314,9 +314,9 @@ namespace LGR
 		#endregion
 
 		#region StaticGestureInstances
-		public ObservableCollection<StaticGestureInstanceWrapper> GetStaticGestureInstances(int classId)
+		public ObservableCollection<SGInstanceWrapper> GetStaticGestureInstances(int classId)
 		{
-			var gestureInstances = new ObservableCollection<StaticGestureInstanceWrapper>();
+			var gestureInstances = new ObservableCollection<SGInstanceWrapper>();
 			string sql = String.Format("SELECT id, class_id, json FROM StaticGestureInstances WHERE class_id='{0}'", classId);
 			using (var connection = new SQLiteConnection(_connString))
 			{
@@ -327,9 +327,9 @@ namespace LGR
 					{
 						while (reader.Read())
 						{
-							var gesture = JsonConvert.DeserializeObject<StaticGestureInstance>(reader.GetString(2));
+							var gesture = JsonConvert.DeserializeObject<SGInstance>(reader.GetString(2));
 							gesture.UpdateFeatureVector();
-							StaticGestureInstanceWrapper instance = new StaticGestureInstanceWrapper()
+							SGInstanceWrapper instance = new SGInstanceWrapper()
 							{
 								Id = reader.GetInt32(0),
 								ClassId = reader.GetInt32(1),
@@ -344,7 +344,7 @@ namespace LGR
 			return gestureInstances;
 		}
 
-		public void SaveNewStaticGestureInstance(int classId, StaticGestureInstance instance) // Whenever this is called it will be a new instance.
+		public void SaveNewStaticGestureInstance(int classId, SGInstance instance) // Whenever this is called it will be a new instance.
 		{
 			string serializedInstance = JsonConvert.SerializeObject(instance);
 			string sql = String.Format("INSERT INTO StaticGestureInstances (class_id, json) VALUES ('{0}', '{1}')", classId, serializedInstance);
@@ -361,7 +361,7 @@ namespace LGR
 		#endregion
 
 		#region StaticGestureClass
-		public int SaveNewStaticGestureClass(string name, StaticGestureClass gesture) // Returns id of gesture
+		public int SaveNewStaticGestureClass(string name, SGClass gesture) // Returns id of gesture
 		{
 			string sql;
 			string gestureJson = JsonConvert.SerializeObject(gesture);
@@ -371,7 +371,7 @@ namespace LGR
 			return singleIntValueQuery("SELECT last_insert_rowid()"); // Get the (auto-incremented) key
 		}
 
-		public void SaveStaticGestureClass(StaticGestureClassWrapper gestureWrapper)
+		public void SaveStaticGestureClass(SGClassWrapper gestureWrapper)
 		{
 			string sql;
 			string gestureJson = JsonConvert.SerializeObject(gestureWrapper.Gesture);
@@ -395,7 +395,7 @@ namespace LGR
 			executeNonQuery(sql);
 		}
 
-		public StaticGestureClassWrapper GetStaticGestureClass(int id)
+		public SGClassWrapper GetStaticGestureClass(int id)
 		{
 			string sql = "SELECT id, name, gesture_json, sample_instance_json FROM StaticGestureClasses WHERE id=" + id;
 			using (var connection = new SQLiteConnection(_connString))
@@ -406,21 +406,21 @@ namespace LGR
 					using (SQLiteDataReader reader = command.ExecuteReader())
 					{
 						reader.Read();
-						return new StaticGestureClassWrapper()
+						return new SGClassWrapper()
 						{
 							Id = reader.GetInt32(0),
 							Name = reader.GetString(1),
-							Gesture = JsonConvert.DeserializeObject<StaticGestureClass>(reader.GetString(2)),
-							SampleInstance = JsonConvert.DeserializeObject<StaticGestureInstance>(reader.GetString(3)) // Don't care about this
+							Gesture = JsonConvert.DeserializeObject<SGClass>(reader.GetString(2)),
+							SampleInstance = JsonConvert.DeserializeObject<SGInstance>(reader.GetString(3)) // Don't care about this
 						};
 					}
 				}
 			}
 		}
 
-		public ObservableCollection<StaticGestureClassWrapper> GetAllStaticGestureClasses()
+		public ObservableCollection<SGClassWrapper> GetAllStaticGestureClasses()
 		{
-			var gestures = new ObservableCollection<StaticGestureClassWrapper>();
+			var gestures = new ObservableCollection<SGClassWrapper>();
 			string sql = "SELECT id, name, gesture_json, sample_instance_json FROM StaticGestureClasses";
 			using (var connection = new SQLiteConnection(_connString))
 			{
@@ -439,12 +439,12 @@ namespace LGR
 							//	SampleInstance = JsonConvert.DeserializeObject<StaticGestureInstance>(reader.GetString(3))
 							//});
 
-							var currGest = new StaticGestureClassWrapper()
+							var currGest = new SGClassWrapper()
 							{
 								Id = reader.GetInt32(0),
 								Name = reader.GetString(1),
-								Gesture = JsonConvert.DeserializeObject<StaticGestureClass>(reader.GetString(2)),
-								SampleInstance = JsonConvert.DeserializeObject<StaticGestureInstance>(reader.GetString(3))
+								Gesture = JsonConvert.DeserializeObject<SGClass>(reader.GetString(2)),
+								SampleInstance = JsonConvert.DeserializeObject<SGInstance>(reader.GetString(3))
 							};
 							gestures.Add(currGest);
 						}
@@ -457,9 +457,9 @@ namespace LGR
 
 
 		#region DynamicGestureInstances
-		public ObservableCollection<DynamicGestureInstanceWrapper> GetDynamicGestureInstances(int classId)
+		public ObservableCollection<DGInstanceWrapper> GetDynamicGestureInstances(int classId)
 		{
-			var gestureInstances = new ObservableCollection<DynamicGestureInstanceWrapper>();
+			var gestureInstances = new ObservableCollection<DGInstanceWrapper>();
 			string sql = String.Format("SELECT id, class_id, json FROM DynamicGestureInstances WHERE class_id='{0}'", classId);
 			using (var connection = new SQLiteConnection(_connString))
 			{
@@ -470,11 +470,11 @@ namespace LGR
 					{
 						while (reader.Read())
 						{
-							DynamicGestureInstanceWrapper instance = new DynamicGestureInstanceWrapper()
+							DGInstanceWrapper instance = new DGInstanceWrapper()
 							{
 								Id = reader.GetInt32(0),
 								ClassId = reader.GetInt32(1),
-								Instance = JsonConvert.DeserializeObject<DynamicGestureInstance>(reader.GetString(2)),
+								Instance = JsonConvert.DeserializeObject<DGInstance>(reader.GetString(2)),
 							};
 							instance.InstanceName = String.Format("class {0} inst {1}", instance.ClassId, instance.Id);
 							gestureInstances.Add(instance);
@@ -485,7 +485,7 @@ namespace LGR
 			return gestureInstances;
 		}
 
-		public void SaveNewDynamicGestureInstance(int classId, DynamicGestureInstance instance) // Whenever this is called it will be a new instance.
+		public void SaveNewDynamicGestureInstance(int classId, DGInstance instance) // Whenever this is called it will be a new instance.
 		{
 			string serializedInstance = JsonConvert.SerializeObject(instance);
 			string sql = String.Format("INSERT INTO DynamicGestureInstances (class_id, json) VALUES ('{0}', '{1}')", classId, serializedInstance);
@@ -502,7 +502,7 @@ namespace LGR
 		#endregion
 
 		#region DynamicGestureClass
-		public int SaveNewDynamicGestureClass(string name, DynamicGestureClass gesture) // Returns id of gesture
+		public int SaveNewDynamicGestureClass(string name, DGClass gesture) // Returns id of gesture
 		{
 			string sql;
 			string gestureJson = JsonConvert.SerializeObject(gesture);
@@ -512,7 +512,7 @@ namespace LGR
 			return singleIntValueQuery("SELECT last_insert_rowid()"); // Get the (auto-incremented) key
 		}
 
-		public void SaveDynamicGestureClass(DynamicGestureClassWrapper gestureWrapper)
+		public void SaveDynamicGestureClass(DGClassWrapper gestureWrapper)
 		{
 			string sql;
 			string gestureJson = JsonConvert.SerializeObject(gestureWrapper.Gesture);
@@ -536,9 +536,9 @@ namespace LGR
 			executeNonQuery(sql);
 		}
 
-		public ObservableCollection<DynamicGestureClassWrapper> GetAllDynamicGestureClasses()
+		public ObservableCollection<DGClassWrapper> GetAllDynamicGestureClasses()
 		{
-			var gestures = new ObservableCollection<DynamicGestureClassWrapper>();
+			var gestures = new ObservableCollection<DGClassWrapper>();
 			string sql = "SELECT id, name, gesture_json, sample_instance_json FROM DynamicGestureClasses";
 			using (var connection = new SQLiteConnection(_connString))
 			{
@@ -549,12 +549,12 @@ namespace LGR
 					{
 						while (reader.Read())
 						{
-							gestures.Add(new DynamicGestureClassWrapper()
+							gestures.Add(new DGClassWrapper()
 							{
 								Id = reader.GetInt32(0),
 								Name = reader.GetString(1),
-								Gesture = JsonConvert.DeserializeObject<DynamicGestureClass>(reader.GetString(2)),
-								SampleInstance = JsonConvert.DeserializeObject<DynamicGestureInstance>(reader.GetString(3))
+								Gesture = JsonConvert.DeserializeObject<DGClass>(reader.GetString(2)),
+								SampleInstance = JsonConvert.DeserializeObject<DGInstance>(reader.GetString(3))
 							});
 						}
 					}

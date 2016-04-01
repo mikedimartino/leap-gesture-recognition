@@ -9,13 +9,13 @@ namespace LGR
 	{
 		public string NewName;
 		public List<int> DeletedGestureInstances;
-		public List<DynamicGestureInstanceWrapper> NewGestureInstances;
+		public List<DGInstanceWrapper> NewGestureInstances;
 
 		public EditDynamicGestureChangeset()
 		{
 			NewName = null;
 			DeletedGestureInstances = new List<int>();
-			NewGestureInstances = new List<DynamicGestureInstanceWrapper>();
+			NewGestureInstances = new List<DGInstanceWrapper>();
 		}
 
 		public bool ChangesExist()

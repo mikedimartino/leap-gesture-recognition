@@ -10,13 +10,13 @@ namespace LGR
 	{
 		public string NewName;
 		public List<int> DeletedGestureInstances;
-		public List<StaticGestureInstanceWrapper> NewGestureInstances;
+		public List<SGInstanceWrapper> NewGestureInstances;
 
 		public EditStaticGestureChangeset()
 		{
 			NewName = null;
 			DeletedGestureInstances = new List<int>();
-			NewGestureInstances = new List<StaticGestureInstanceWrapper>();
+			NewGestureInstances = new List<SGInstanceWrapper>();
 		}
 
 		public bool ChangesExist()

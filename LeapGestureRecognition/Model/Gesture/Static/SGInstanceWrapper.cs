@@ -6,9 +6,9 @@ using System.Text;
 
 namespace LGR
 {
-	public class StaticGestureInstanceWrapper
+	public class SGInstanceWrapper
 	{
-		public StaticGestureInstanceWrapper() 
+		public SGInstanceWrapper() 
 		{
 			Gesture = null;
 			Id = -1;
@@ -16,7 +16,7 @@ namespace LGR
 			InstanceName = "new instance";
 		}
 
-		public StaticGestureInstanceWrapper(StaticGestureInstance instance)
+		public SGInstanceWrapper(SGInstance instance)
 		{
 			Gesture = instance;
 			Id = -1;
@@ -24,9 +24,9 @@ namespace LGR
 			InstanceName = "new instance";
 		}
 
-		public StaticGestureInstanceWrapper(Frame frame)
+		public SGInstanceWrapper(Frame frame)
 		{
-			Gesture = new StaticGestureInstance(frame);
+			Gesture = new SGInstance(frame);
 			Id = -1;
 			ClassId = -1;
 			InstanceName = "new instance";
@@ -34,7 +34,7 @@ namespace LGR
 
 		public int Id { get; set; }
 		public int ClassId { get; set; }
-		public StaticGestureInstance Gesture { get; set; }
+		public SGInstance Gesture { get; set; }
 		public string InstanceName { get; set; }
 	}
 }

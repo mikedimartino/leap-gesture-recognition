@@ -115,26 +115,28 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\Gesture\Dynamic\DGClassSample.cs" />
+    <Compile Include="Model\Gesture\Dynamic\DGInstanceSample.cs" />
     <Compile Include="Model\Miscellaneous\FeatureWeight.cs" />
-    <Compile Include="Model\Gesture\Dynamic\DynamicGestureClass.cs" />
-    <Compile Include="Model\Gesture\Dynamic\DynamicGestureClassWrapper.cs" />
-    <Compile Include="Model\Gesture\Dynamic\DynamicGestureInstance.cs" />
-    <Compile Include="Model\Gesture\Dynamic\DynamicGestureInstanceWrapper.cs" />
-    <Compile Include="Model\Gesture\Dynamic\DynamicGestureRecorder.cs" />
+    <Compile Include="Model\Gesture\Dynamic\DGClass.cs" />
+    <Compile Include="Model\Gesture\Dynamic\DGClassWrapper.cs" />
+    <Compile Include="Model\Gesture\Dynamic\DGInstance.cs" />
+    <Compile Include="Model\Gesture\Dynamic\DGInstanceWrapper.cs" />
+    <Compile Include="Model\Gesture\Dynamic\DGRecorder.cs" />
     <Compile Include="Model\Interface\IGestureClass.cs" />
     <Compile Include="Model\Interface\IGestureInstance.cs" />
     <Compile Include="Model\Miscellaneous\EditDynamicGestureChangeset.cs" />
     <Compile Include="Model\Miscellaneous\GestureDistance.cs" />
-    <Compile Include="Model\Gesture\Static\StaticGestureClassWrapper.cs" />
+    <Compile Include="Model\Gesture\Static\SGClassWrapper.cs" />
     <Compile Include="Model\Miscellaneous\Feature.cs" />
     <Compile Include="Model\Miscellaneous\CustomCommand.cs" />
     <Compile Include="Model\Miscellaneous\CustomMenuItem.cs" />
     <Compile Include="Model\Miscellaneous\Camera.cs" />
     <Compile Include="Model\Miscellaneous\EditStaticGestureChangeset.cs" />
-    <Compile Include="Model\Gesture\Static\StaticGestureInstance.cs" />
-    <Compile Include="Model\Gesture\Static\StaticGestureClass.cs" />
-    <Compile Include="Model\Gesture\Static\StaticGestureInstanceWrapper.cs" />
-    <Compile Include="Model\Gesture\Static\StaticGestureRecorder.cs" />
+    <Compile Include="Model\Gesture\Static\SGInstance.cs" />
+    <Compile Include="Model\Gesture\Static\SGClass.cs" />
+    <Compile Include="Model\Gesture\Static\SGInstanceWrapper.cs" />
+    <Compile Include="Model\Gesture\Static\SGRecorder.cs" />
     <Compile Include="Model\Enum\HandConfiguration.cs" />
     <Compile Include="Model\Enum\FeatureName.cs" />
     <Compile Include="Model\Enum\GestureType.cs" />
@@ -142,7 +144,7 @@
     <Compile Include="Model\Miscellaneous\Vec3.cs" />
     <Compile Include="Model\Miscellaneous\LGR_Configuration.cs" />
     <Compile Include="Model\Miscellaneous\HandMeasurements.cs" />
-    <Compile Include="Model\Gesture\Static\StaticGestureInstanceSingleHand.cs" />
+    <Compile Include="Model\Gesture\Static\SGInstanceSingleHand.cs" />
     <Compile Include="Model\Miscellaneous\OptionsChangeset.cs" />
     <Compile Include="Model\Miscellaneous\User.cs" />
     <Compile Include="Util\Constants.cs" />

@@ -31,7 +31,7 @@ namespace LGR
 			foreach (Hand hand in frame.Hands)
 			{
 				float opacity = hand.Confidence;
-				DrawHand(new StaticGestureInstanceSingleHand(hand), showArms, opacity);
+				DrawHand(new SGInstanceSingleHand(hand), showArms, opacity);
 			}
 		}
 
@@ -133,7 +133,7 @@ namespace LGR
 			_rotation += 3.0f;
 		}
 
-		public void DrawStaticGesture(StaticGestureInstance gesture, bool showArms = true) 
+		public void DrawStaticGesture(SGInstance gesture, bool showArms = true) 
 		{
 			foreach (var hand in gesture.Hands)
 			{
@@ -142,7 +142,7 @@ namespace LGR
 		}
 
 		// Diagram of hand: https://blog.leapmotion.com/wp-content/uploads/2014/05/boneapi1.png
-		public void DrawHand(StaticGestureInstanceSingleHand hand, bool showArms, float opacity = 1)
+		public void DrawHand(SGInstanceSingleHand hand, bool showArms, float opacity = 1)
 		{
 			// Draw wrist position
 			DrawSphere(hand.WristPos_World, Constants.WristSphereRadius, _boneColors[Constants.BoneNames.Wrist], opacity);

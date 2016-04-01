@@ -14,19 +14,19 @@ namespace LeapGestureRecognition.ViewModel
 		private MainViewModel _mvm;
 		SQLiteProvider _provider;
 		bool _newGesture;
-		DynamicGestureRecorder _recorder;
+		DGRecorder _recorder;
 
-		public EditDynamicGestureViewModel(MainViewModel mvm, DynamicGestureClassWrapper gesture = null, bool newGesture = false)
+		public EditDynamicGestureViewModel(MainViewModel mvm, DGClassWrapper gesture = null, bool newGesture = false)
 		{
 			_mvm = mvm;
 			_newGesture = newGesture;
 			_provider = _mvm.SQLiteProvider;
-			_recorder = new DynamicGestureRecorder(_mvm);
+			_recorder = new DGRecorder(_mvm);
 
 			if (newGesture)
 			{
 				Name = "New Dynamic Gesture";
-				Instances = new ObservableCollection<DynamicGestureInstanceWrapper>();
+				Instances = new ObservableCollection<DGInstanceWrapper>();
 			}
 			else
 			{
@@ -41,7 +41,7 @@ namespace LeapGestureRecognition.ViewModel
 		#region Public Properties
 		public int Id { get; set; }
 		public string Name { get; set; }
-		public ObservableCollection<DynamicGestureInstanceWrapper> Instances { get; set; }
+		public ObservableCollection<DGInstanceWrapper> Instances { get; set; }
 		public EditDynamicGestureChangeset Changeset { get; set; }
 		public ObservableCollection<FeatureWeight> FeatureWeights { get; set; }
 
@@ -97,10 +97,10 @@ namespace LeapGestureRecognition.ViewModel
 				Id = _provider.SaveNewDynamicGestureClass(Name, null); // Need to get id
 			}
 
-			var editedGesture = new DynamicGestureClass(Instances);
+			var editedGesture = new DGClass(Instances);
 			var sampleInstance = (Instances.Any()) ? Instances.FirstOrDefault().Instance : null;
 
-			var gestureWrapper = new DynamicGestureClassWrapper()
+			var gestureWrapper = new DGClassWrapper()
 			{
 				Id = this.Id,
 				Name = this.Name,
@@ -124,7 +124,6 @@ namespace LeapGestureRecognition.ViewModel
 			}
 
 			_mvm.UpdateDynamicGestureLibrary();
-			_mvm.UpdateClassifier();
 		}
 
 		public void CancelEdit()
@@ -132,7 +131,7 @@ namespace LeapGestureRecognition.ViewModel
 			_mvm.Mode = LGR_Mode.Recognize;
 		}
 
-		public void DeleteInstance(DynamicGestureInstanceWrapper instance)
+		public void DeleteInstance(DGInstanceWrapper instance)
 		{
 			Instances.Remove(instance);
 			if (Changeset.NewGestureInstances.Contains(instance))
@@ -145,7 +144,7 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		public void ViewInstance(DynamicGestureInstanceWrapper instance)
+		public void ViewInstance(DGInstanceWrapper instance)
 		{
 			_mvm.ViewDynamicGesture(instance.Instance);
 		}
@@ -161,7 +160,7 @@ namespace LeapGestureRecognition.ViewModel
 			RecordingInProgress = false;
 			foreach (var instance in _recorder.Instances)
 			{
-				var instanceWrapper = new DynamicGestureInstanceWrapper(instance);
+				var instanceWrapper = new DGInstanceWrapper(instance);
 				Instances.Add(instanceWrapper);
 				Changeset.NewGestureInstances.Add(instanceWrapper);
 			}

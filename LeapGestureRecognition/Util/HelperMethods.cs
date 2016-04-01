@@ -40,10 +40,10 @@ namespace LGR
 		}
 
 
-		public static void TestSerializer(StaticGestureInstance sgi)
+		public static void TestSerializer(SGInstance sgi)
 		{
 			string serialized = JsonConvert.SerializeObject(sgi);
-			StaticGestureInstance deserialized = (StaticGestureInstance)JsonConvert.DeserializeObject<StaticGestureInstance>(serialized);
+			SGInstance deserialized = (SGInstance)JsonConvert.DeserializeObject<SGInstance>(serialized);
 			deserialized.UpdateFeatureVector();
 		}
 	}

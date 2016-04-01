@@ -43,40 +43,40 @@ namespace LGR_Controls
 		private void ViewGesture(object sender, RoutedEventArgs e)
 		{
 			object gesture = (e.Source as FrameworkElement).Tag;
-			if (gesture is StaticGestureClassWrapper)
+			if (gesture is SGClassWrapper)
 			{
-				_mvm.ViewStaticGesture(((StaticGestureClassWrapper)gesture).SampleInstance);
+				_mvm.ViewStaticGesture(((SGClassWrapper)gesture).SampleInstance);
 			}
-			else if (gesture is DynamicGestureClassWrapper)
+			else if (gesture is DGClassWrapper)
 			{
-				_mvm.ViewDynamicGesture(((DynamicGestureClassWrapper)gesture).SampleInstance);
+				_mvm.ViewDynamicGesture(((DGClassWrapper)gesture).SampleInstance);
 			}
 		}
 
 		private void EditGesture(object sender, RoutedEventArgs e)
 		{
 			object gesture = (e.Source as FrameworkElement).Tag;
-			if (gesture is StaticGestureClassWrapper)
+			if (gesture is SGClassWrapper)
 			{
-				_mvm.EditStaticGesture((StaticGestureClassWrapper)gesture);
+				_mvm.EditStaticGesture((SGClassWrapper)gesture);
 			}
-			else if (gesture is DynamicGestureClassWrapper)
+			else if (gesture is DGClassWrapper)
 			{
-				_mvm.EditDynamicGesture((DynamicGestureClassWrapper)gesture);
+				_mvm.EditDynamicGesture((DGClassWrapper)gesture);
 			}
 		}
 
 		private void DeleteGesture(object sender, RoutedEventArgs e)
 		{
 			object gesture = (e.Source as FrameworkElement).Tag;
-			if (gesture is StaticGestureClassWrapper)
+			if (gesture is SGClassWrapper)
 			{
-				_mvm.SQLiteProvider.DeleteStaticGestureClass(((StaticGestureClassWrapper)gesture).Id);
+				_mvm.SQLiteProvider.DeleteStaticGestureClass(((SGClassWrapper)gesture).Id);
 				_mvm.UpdateStaticGestureLibrary();
 			}
-			else if (gesture is DynamicGestureClassWrapper)
+			else if (gesture is DGClassWrapper)
 			{
-				_mvm.SQLiteProvider.DeleteDynamicGestureClass(((DynamicGestureClassWrapper)gesture).Id);
+				_mvm.SQLiteProvider.DeleteDynamicGestureClass(((DGClassWrapper)gesture).Id);
 				_mvm.UpdateDynamicGestureLibrary();
 			}
 		}
@@ -85,7 +85,7 @@ namespace LGR_Controls
 		{
 			if (e.ClickCount >= 2) // Double click
 			{
-				var gesture = (StaticGestureClassWrapper)(sender as FrameworkElement).Tag;
+				var gesture = (SGClassWrapper)(sender as FrameworkElement).Tag;
 				_mvm.EditStaticGesture(gesture);
 			}
 		}
@@ -94,7 +94,7 @@ namespace LGR_Controls
 		{
 			if (e.ClickCount >= 2) // Double click    
 			{
-				var gesture = (DynamicGestureClassWrapper)(sender as FrameworkElement).Tag;
+				var gesture = (DGClassWrapper)(sender as FrameworkElement).Tag;
 				_mvm.EditDynamicGesture(gesture);
 			}
 		}
