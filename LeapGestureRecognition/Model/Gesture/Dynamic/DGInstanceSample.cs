@@ -29,7 +29,7 @@ namespace LGR
 		{
 			foreach (var hand in frame.Hands)
 			{
-				if (hand.IsLeft) LeftPalmVelocity = new Vec3(hand.PalmVelocity);
+				if (hand.IsLeft) LeftPalmVelocity = new Vec3(hand.PalmVelocity.Normalized);
 				if (hand.IsRight) RightPalmVelocity = new Vec3(hand.PalmVelocity);
 			}
 		}

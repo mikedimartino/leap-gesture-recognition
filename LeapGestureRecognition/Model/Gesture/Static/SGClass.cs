@@ -54,6 +54,8 @@ namespace LGR
 
 			FeatureName.LeftFingersExtended,
 			FeatureName.RightFingersExtended,
+
+			FeatureName.LeftToRightHand
 		};
 
 		static HashSet<FeatureName> orientationFeatures = new HashSet<FeatureName>()
@@ -78,14 +80,15 @@ namespace LGR
 				string featureString = featureName.ToString();
 				if (featureString.Contains("Finger"))
 				{
+					int weight = featureString.Contains("Position") ? 3 : 1;
 					foreach (var fingerType in (Finger.FingerType[])Enum.GetValues(typeof(Finger.FingerType)))
 					{
-						featureWeights.Add(featureString + fingerType, 1);
+						featureWeights.Add(featureString + fingerType, weight);
 					}
 				}
 				else if (orientationFeatures.Contains(featureName))
 				{
-					featureWeights.Add(featureString, 2);
+					featureWeights.Add(featureString, 5);
 				}
 				else
 				{
@@ -387,7 +390,6 @@ namespace LGR
 
 			StdDevValues.Add(FeatureName.LeftToRightHand, LeftToRightHandTotal / numInstances);
 		}
-
 		#endregion
 
 	}

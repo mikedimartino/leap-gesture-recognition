@@ -38,6 +38,7 @@ namespace LGR
 		public void RecordGestureInstancesWithCountdown(int countdownSeconds, int betweenDelayMilliseconds, int numInstances)
 		{
 			_startTimerCountdown = countdownSeconds;
+			_startTimer = new DispatcherTimer();
 			_startTimer.Tick += startTimerCountdown_Tick;
 			_startTimer.Interval = new TimeSpan(0, 0, 1);
 			_startTimer.Start();
@@ -48,6 +49,7 @@ namespace LGR
 		public void RecordGestureInstances(int numInstances)
 		{
 			_remainingSnapshots = numInstances;
+			_recordSnapshotTimer = new DispatcherTimer();
 			_recordSnapshotTimer.Tick += recordSnapshotTimer_Tick;
 			_recordSnapshotTimer.Interval = new TimeSpan(0, 0, 1);
 			_recordSnapshotTimer.Start();

@@ -10,47 +10,24 @@ namespace LGR
 	[DataContract]
 	public class DGInstance
 	{
-		private int numSamples = 5;
-
 		[DataMember]
 		public List<DGInstanceSample> Samples { get; set; }
 		[DataMember]
-		public Vec3 RightStartPos { get; set; }
+		public bool IncludesLeftHand { get; set; }
 		[DataMember]
-		public Vec3 LeftStartPos { get; set; }
-
+		public bool IncludesRightHand { get; set; }
+		[DataMember]
+		public float RightHandPathLength { get; set; }
+		[DataMember]
+		public float LeftHandPathLength { get; set; }
 
 		public DGInstance() { }
 		public DGInstance(List<DGInstanceSample> samples)
 		{
 			Samples = samples; // For now just store all samples
-		}
-
-		public DGInstance(List<Frame> frames)
-		{
-			// Need to think about number of samples to take.
-			// Use first and last sample, and then divide evenly between the rest.
-			Samples = new List<DGInstanceSample>();
-			int increment = frames.Count / numSamples;
-			for (int i = 0; i < numSamples - 1; i++)
-			{
-				Samples.Add(new DGInstanceSample(frames[i * increment]));
-			}
-			// Make last sample be the final instance
-			Samples.Add(new DGInstanceSample(frames[frames.Count - 1]));
-
-			if (Samples.Count > 0)
-			{
-				var firstSample = Samples.First();
-				if (firstSample.LeftHand != null)
-				{
-					LeftStartPos = firstSample.LeftHand.PalmPosition;
-				}
-				if (firstSample.RightHand != null)
-				{
-					RightStartPos = firstSample.RightHand.PalmPosition;
-				}
-			}
+			IncludesLeftHand = samples.Any(s => s.LeftHand != null);
+			IncludesRightHand = samples.Any(s => s.RightHand != null);
+			computePathLengths(samples);
 		}
 
 
@@ -59,19 +36,22 @@ namespace LGR
 		{
 			var samples = new List<DGInstanceSample>();
 
-			samples.Add(Samples[0]);
-			for (int i = 1; i < size; i++)
+			if (Samples.Count > 0)
 			{
-				float index = (i * Samples.Count) / (float)size; // Actual index (not an int)
-				float lerpAmount = index - ((int)index); // Get fractional amount of index
+				samples.Add(Samples[0]);
+				for (int i = 1; i < size; i++)
+				{
+					float index = (i * (Samples.Count - 1)) / (float)(size - 1); // Actual index (not an int)
+					float lerpAmount = index - ((int)index); // Get fractional amount of index
 
-				if (index < 1)
-				{
-					samples.Add(Samples[0].Lerp(Samples[1], lerpAmount));
-				}
-				else
-				{
-					samples.Add(Samples[(int)index - 1].Lerp(Samples[(int)index], lerpAmount));
+					if (index < 1)
+					{
+						samples.Add(Samples[0].Lerp(Samples[0], lerpAmount));
+					}
+					else
+					{
+						samples.Add(Samples[(int)index - 1].Lerp(Samples[(int)index], lerpAmount));
+					}
 				}
 			}
 
@@ -88,6 +68,10 @@ namespace LGR
 
 		public float GetDtwDistance(DGInstance otherInstance, out DGInstance mappedInstance)
 		{
+			mappedInstance = null;
+
+			if (Samples.Count == 0 || otherInstance.Samples.Count == 0) return float.PositiveInfinity;
+
 			float[,] distances = new float[Samples.Count, otherInstance.Samples.Count];
 			for (int i = 0; i < Samples.Count; i++)
 			{
@@ -152,5 +136,29 @@ namespace LGR
 			return distance;
 		}
 		#endregion 
+
+		#region Private Methods
+		private void computePathLengths(List<DGInstanceSample> samples)
+		{
+			LeftHandPathLength = 0;
+			RightHandPathLength = 0;
+
+			if(samples.Count == 0 || samples.Count == 1) return;
+
+			for (int i = 1; i < samples.Count; i++)
+			{
+				if (samples[i - 1].HandConfiguration != samples[i].HandConfiguration) continue;
+
+				if (samples[i].LeftHand != null)
+				{
+					LeftHandPathLength += samples[i - 1].LeftHand.PalmPosition.DistanceTo(samples[i].LeftHand.PalmPosition);
+				}
+				if (samples[i].RightHand != null)
+				{
+					RightHandPathLength += samples[i - 1].RightHand.PalmPosition.DistanceTo(samples[i].RightHand.PalmPosition);
+				}
+			}
+		}
+		#endregion
 	}
 }

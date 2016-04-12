@@ -160,6 +160,7 @@ namespace LeapGestureRecognition.ViewModel
 			RecordingInProgress = false;
 			foreach (var instance in _recorder.Instances)
 			{
+				if (instance.Samples.Count == 0) return;
 				var instanceWrapper = new DGInstanceWrapper(instance);
 				Instances.Add(instanceWrapper);
 				Changeset.NewGestureInstances.Add(instanceWrapper);

@@ -500,7 +500,7 @@ namespace LeapGestureRecognition.ViewModel
 					}
 					else
 					{
-						if (SelectedDynamicGesture != null)
+						if (SelectedDynamicGesture != null && SelectedDynamicGesture.Samples.Count > 0)
 						{
 							int sampleIndex = Math.Abs(dynamicGestureStep % SelectedDynamicGesture.Samples.Count);
 							_glHelper.DrawStaticGesture(SelectedDynamicGesture.Samples[sampleIndex], ShowArms);

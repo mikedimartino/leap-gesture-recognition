@@ -56,14 +56,6 @@ namespace LGR
 			}
 
 			HandConfiguration = getHandConfiguration(Hands);
-
-			if (RightHand != null)
-			{
-				LeapGestureRecognition.ViewModel.MainViewModel.ClearOutputWindow();
-				LeapGestureRecognition.ViewModel.MainViewModel.WriteLineToOutputWindow("Pitch = " + RightHand.Pitch);
-				LeapGestureRecognition.ViewModel.MainViewModel.WriteLineToOutputWindow("Yaw = " + RightHand.Yaw);
-				LeapGestureRecognition.ViewModel.MainViewModel.WriteLineToOutputWindow("Roll = " + RightHand.Roll);
-			}
 		}
 
 		public SGInstance(List<Feature> featureVector)
@@ -80,19 +72,8 @@ namespace LGR
 			{
 				HandConfiguration = (HandConfiguration)Features[FeatureName.HandConfiguration].Value;
 			}
-
-			//Hands = new List<StaticGestureInstanceSingleHand>();
-			//if(HandConfiguration == HandConfiguration.LeftHandOnly || HandConfiguration == HandConfiguration.BothHands) {
-			//	Hands.Add(new StaticGestureInstanceSingleHand(){ IsLeft = true });
-			//}
-			//else if(HandConfiguration == HandConfiguration.RightHandOnly || HandConfiguration == HandConfiguration.BothHands) {
-			//	Hands.Add(new StaticGestureInstanceSingleHand(){ IsRight = true });
-			//}
-			//foreach(var feature)
 		}
 		#endregion
-
-
 
 		HashSet<FeatureName> featuresToSkip = new HashSet<FeatureName>()
 		{
@@ -165,59 +146,6 @@ namespace LGR
 		{
 			return gestureClass.DistanceTo(this);
 		}
-
-
-		#region old lerp
-		//public StaticGestureInstance Lerp(StaticGestureInstance otherInstance, float amount)
-		//{
-		//	if (this.HandConfiguration != otherInstance.HandConfiguration) return this; // Maybe throw an exception or handle another way.
-
-
-		//	var lerpedFeatureVector = new List<Feature>();
-
-		//	foreach (var feature in FeatureVector)
-		//	{ 
-		//		if (feature.Value is Vec3)
-		//		{
-		//			Vec3 lerped = ((Vec3)feature.Value).Lerp((Vec3)otherInstance.Features[feature.Name].Value, amount);
-		//			lerpedFeatureVector.Add(new Feature(feature.Name, lerped, feature.Weight));
-		//		}
-		//		else if (feature.Value is float)
-		//		{
-		//			float lerped = HelperMethods.Lerp((float)feature.Value, (float)otherInstance.Features[feature.Name].Value, amount);
-		//			lerpedFeatureVector.Add(new Feature(feature.Name, lerped, feature.Weight));
-		//		}
-		//		else if (feature.Value is Dictionary<Finger.FingerType, Vec3>)
-		//		{
-		//			// This is just for fingersTipPositions
-		//			Dictionary<Finger.FingerType, Vec3> thisHandFingersTipPositions = (Dictionary<Finger.FingerType, Vec3>)(Features[feature.Name].Value);
-		//			var lerpedTipPositions = new Dictionary<Finger.FingerType, Vec3>();
-		//			foreach (var fingerTipPosition in (Dictionary<Finger.FingerType, Vec3>)feature.Value)
-		//			{
-		//				//var theFingerTipPositions = ((Newtonsoft.Json.Linq.JObject)Features[feature.Name].Value).ToObject<Dictionary<Finger.FingerType, Vec3>>();
-		//				Finger.FingerType fingerType = fingerTipPosition.Key;
-		//				Vec3 otherPos = fingerTipPosition.Value;
-		//				Vec3 lerpedTip = thisHandFingersTipPositions[fingerType].Lerp(otherPos, amount);
-		//				lerpedTipPositions.Add(fingerType, lerpedTip);
-		//			}
-		//			lerpedFeatureVector.Add(new Feature(feature.Name, lerpedTipPositions));
-		//		}
-		//		else if (feature.Value is Dictionary<Finger.FingerType, bool>)
-		//		{
-		//			// This is just for fingers.IsExtended // Don't do any lerping for now.
-		//			//lerpedFeatureVector.Add(new Feature(feature.Name, feature.Value));
-		//		}
-		//		else if(feature.Value is HandConfiguration) 
-		//		{
-		//			lerpedFeatureVector.Add(new Feature(FeatureName.HandConfiguration, feature.Value));
-		//		}
-		//	}
-
-		//	var lerpedInstance = new StaticGestureInstance(lerpedFeatureVector); // TODO: Create constructor for this.
-
-		//	return lerpedInstance;
-		//}
-		#endregion
 
 		public SGInstance Lerp(SGInstance otherInstance, float amount)
 		{
@@ -369,7 +297,7 @@ namespace LGR
 
 			foreach (var hand in Hands)
 			{
-				if (hand.IsLeft)
+				if (hand.IsLeft && !featureVector.Any(f => f.Name.ToString().StartsWith("Left")))
 				{
 					featureVector.Add(new Feature(FeatureName.LeftPalmPosition, hand.PalmPosition));
 					featureVector.Add(new Feature(FeatureName.LeftYaw, hand.Yaw, 1));
@@ -382,7 +310,7 @@ namespace LGR
 					
 					leftPalmPos = hand.PalmPosition;
 				}
-				else
+				else if (hand.IsRight && !featureVector.Any(f => f.Name.ToString().StartsWith("Right")))
 				{
 					featureVector.Add(new Feature(FeatureName.RightPalmPosition, hand.PalmPosition));
 					featureVector.Add(new Feature(FeatureName.RightYaw, hand.Yaw, 1));

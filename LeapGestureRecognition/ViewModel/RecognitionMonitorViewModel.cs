@@ -88,6 +88,8 @@ namespace LeapGestureRecognition.ViewModel
 				switch (CurrentState)
 				{
 					case DGRecorderState.RecordingJustFinished:
+						if (_dgRecorder.MostRecentInstance.Samples.Count == 0) break;
+
 						var distances = _classifier.GetDistancesFromAllClasses(_dgRecorder.MostRecentInstance);
 						RankedDynamicGestures = new ObservableCollection<GestureDistance>(distances.OrderBy(g => g.Value).Select(g => new GestureDistance(g.Key.Name, g.Value)));
 						break;

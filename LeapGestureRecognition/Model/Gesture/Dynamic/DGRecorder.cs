@@ -30,8 +30,9 @@ namespace LGR
 		Frame _lastFrame;
 		int _frameRate;
 		bool _inRecordMode; // Record Mode (save multiple instances) or Recognize Mode (just store most recent instance).
-		float _stillSeconds = 1.0f; // Number of seconds hands must be still
-		float _stillDistance = 1f;
+		float _stillSeconds = 0.8f; // Number of seconds hands must be still
+		float _stillDistance = 0.3f;
+		float _twoHandStillDistance = 1.0f;
 		#endregion
 
 		#region Constructor
@@ -151,7 +152,8 @@ namespace LGR
 			}
 			DebugMessage += String.Format("Left hand velocity magnitude: {0}\nRight hand velocity magnitude: {1}", leftHandVelocityMagnitude, rightHandVelocityMagnitude);
 
-			if (palmsAreMoving(frame))// || liveStaticGesture.DistanceTo(_stillGesture) > _stillDistance)
+			float stillDistance = (frame.Hands.Count == 2) ? _twoHandStillDistance : _stillDistance;
+			if (palmsAreMoving(frame) || liveStaticGesture.DistanceTo(_stillGesture) > stillDistance)
 			{
 				_stillGesture = liveStaticGesture;
 				_stillFramesCount = 0;

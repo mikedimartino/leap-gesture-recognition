@@ -35,25 +35,31 @@ namespace LGR
 		#region Public Methods
 		public float DistanceTo(DGInstanceSample otherInstance)
 		{
-			float distance = 0;
+			float dgDistance = 0;
 
-			distance += (this as SGClass).DistanceTo(otherInstance);
+			//distance += (this as SGClass).DistanceTo(otherInstance);
 
 			// Need to figure out how to weight these DG features appropriately.
-			int featureCount = 0;
+			int dgFeatureCount = 0;
 			if (otherInstance.LeftHand != null)
 			{
-				distance += MeanLeftPalmVelocity.DistanceTo(otherInstance.LeftPalmVelocity) / StdDevLeftPalmVelocity;
-				featureCount++;
+				dgDistance += MeanLeftPalmVelocity.DistanceTo(otherInstance.LeftPalmVelocity) / StdDevLeftPalmVelocity;
+				dgFeatureCount++;
 			}
 			if (otherInstance.RightHand != null)
 			{
-				distance += MeanRightPalmVelocity.DistanceTo(otherInstance.RightPalmVelocity) / StdDevRightPalmVelocity;
-				featureCount++;
+				dgDistance += MeanRightPalmVelocity.DistanceTo(otherInstance.RightPalmVelocity) / StdDevRightPalmVelocity;
+				dgFeatureCount++;
 			}
 
-			distance /= (float)featureCount;
-			float result = (distance + base.DistanceTo(otherInstance as SGInstance)) / 2.0f;
+			dgDistance /= (float)dgFeatureCount;
+			float sgDistance = base.DistanceTo(otherInstance as SGInstance);
+
+			// The two weights must add up to 1.0f
+			float sgWeight = 0.5f;
+			float dgWeight = 0.5f;
+
+			float result = (dgDistance * dgWeight) + (sgDistance * sgWeight);
 			return result;
 		}
 		#endregion

@@ -98,10 +98,11 @@
 				</Grid.RowDefinitions>
 				
 				<sharpGL:OpenGLControl 
-					Name="openGLControl" OpenGLDraw="openGLControl_OpenGLDraw" 
-					OpenGLInitialized="openGLControl_OpenGLInitialized" Resized="openGLControl_Resized"
-					DrawFPS="True" RenderContextType="FBO" 
-					Grid.Row="0" />
+					Name="openGLControl" Grid.Row="0" RenderContextType="FBO"
+					OpenGLDraw="openGLControl_OpenGLDraw" 
+					OpenGLInitialized="openGLControl_OpenGLInitialized" 
+					Resized="openGLControl_Resized"  
+					/>
 
 				<GridSplitter Grid.Row="1" Height="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#444444" />
 

@@ -13,7 +13,6 @@ namespace LGR
 	public class SharpGLHelper
 	{
 		private OpenGL _gl;
-		private IntPtr _quadric;
 		private Dictionary<string, Color> _boneColors;
 
 		// TODO: Define quadrics for every sphere / cylinder so that new ones don't have to be initialized every time.
@@ -21,7 +20,6 @@ namespace LGR
 		public SharpGLHelper(OpenGL gl, Dictionary<string, Color> boneColors)
 		{
 			_gl = gl;
-			_quadric = _gl.NewQuadric();
 			_boneColors = boneColors;
 		}
 
@@ -68,6 +66,7 @@ namespace LGR
 			IntPtr cylQuadric = _gl.NewQuadric(); //TODO: Define these somewhere else so new ones aren't initialized every time
 			double height = basePosition.DistanceTo(topPosition);
 			_gl.Cylinder(cylQuadric, radius, radius, height, 10, 10);
+			_gl.DeleteQuadric(cylQuadric);
 		}
 
 		public void DrawCylinder(double radius, Vec3 basePosition, Vec3 topPosition, Color color, float opacity = 1)
@@ -84,6 +83,7 @@ namespace LGR
 			
 			IntPtr sphereQuadric = _gl.NewQuadric(); //TODO: Define these somewhere else so new ones aren't initialized every time
 			_gl.Sphere(sphereQuadric, radius, 25, 25);
+			_gl.DeleteQuadric(sphereQuadric);
 		}
 
 		public void DrawSphere(Vec3 position, double radius, Color color, float opacity = 1)
