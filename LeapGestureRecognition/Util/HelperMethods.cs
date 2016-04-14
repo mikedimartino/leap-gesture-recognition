@@ -6,10 +6,9 @@ using System.Text;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
-using LGR;
 using Newtonsoft.Json;
 
-namespace LGR
+namespace LeapGestureRecognition
 {
 	public class HelperMethods
 	{
@@ -37,14 +36,6 @@ namespace LGR
 		{
 			float delta = (Math.Abs(f1 - f2) * amount) * ((f1 < f2) ? 1 : -1);
 			return f1 + delta;
-		}
-
-
-		public static void TestSerializer(SGInstance sgi)
-		{
-			string serialized = JsonConvert.SerializeObject(sgi);
-			SGInstance deserialized = (SGInstance)JsonConvert.DeserializeObject<SGInstance>(serialized);
-			deserialized.UpdateFeatureVector();
 		}
 	}
 }

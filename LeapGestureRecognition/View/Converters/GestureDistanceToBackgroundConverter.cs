@@ -1,12 +1,11 @@
-﻿using LGR;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace LGR_Converters
+namespace LeapGestureRecognition.Converters
 {
 	public class GestureDistanceToBackgroundConverter : IValueConverter
 	{

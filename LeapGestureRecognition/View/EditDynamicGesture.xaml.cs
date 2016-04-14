@@ -1,5 +1,4 @@
 ﻿using LeapGestureRecognition.ViewModel;
-using LGR;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace LGR_Controls
+namespace LeapGestureRecognition.View
 {
 	/// <summary>
 	/// Interaction logic for EditDynamicGesture.xaml
@@ -65,13 +64,11 @@ namespace LGR_Controls
 		private void StartRecordingSession_Button_Click(object sender, RoutedEventArgs e)
 		{
 			_vm.StartRecordingSession();
-			//_vm.RecordingInProgress = true;
 		}
 
 		private void EndRecordingSession_Button_Click(object sender, RoutedEventArgs e)
 		{
 			_vm.EndRecordingSession();
-			//_vm.RecordingInProgress = false;
 		}
 
 		private void DeleteInstance(object sender, RoutedEventArgs e)

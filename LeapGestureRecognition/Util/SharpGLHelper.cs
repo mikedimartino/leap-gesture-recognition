@@ -1,5 +1,4 @@
 ﻿using Leap;
-using LGR;
 using LeapGestureRecognition.ViewModel;
 using SharpGL;
 using System;
@@ -8,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media;
 
-namespace LGR
+namespace LeapGestureRecognition
 {
 	public class SharpGLHelper
 	{
@@ -22,7 +21,6 @@ namespace LGR
 			_gl = gl;
 			_boneColors = boneColors;
 		}
-
 
 		public void DrawFrame(Frame frame, bool showArms)
 		{
@@ -74,7 +72,6 @@ namespace LGR
 			DrawCylinder(radius, basePosition.ToLeapVector(), topPosition.ToLeapVector(), color, opacity);
 		}
 
-
 		public void DrawSphere(Vector position, double radius, Color color, float opacity = 1) 
 		{
 			_gl.LoadIdentity();
@@ -91,7 +88,7 @@ namespace LGR
 			DrawSphere(position.ToLeapVector(), radius, color, opacity);
 		}
 
-		// Temp, just for drawing pyramid
+		// Not used, but example of how to draw a pyramid.
 		private static float _rotation = 0;
 		public void DrawRotatingPyramid()
 		{

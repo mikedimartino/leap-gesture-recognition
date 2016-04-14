@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Runtime.Serialization;
 
-namespace LGR
+namespace LeapGestureRecognition
 {
 	[DataContract]
 	public class SGInstanceSingleHand
@@ -27,10 +27,6 @@ namespace LGR
 			ArmZ = new Vec3(hand.Arm.Basis.zBasis);
 
 			// Normalize these angle values. (They all range between -PI and PI).
-			//Yaw = hand.Direction.Yaw;// / (float)Math.PI;
-			//Pitch = hand.Direction.Pitch;// / (float)Math.PI;
-			//Roll = hand.Direction.Roll;// / (float)Math.PI;
-
 			Yaw = hand.PalmNormal.Yaw;// / (float)Math.PI;
 			Pitch = hand.PalmNormal.Pitch;// / (float)Math.PI;
 			Roll = hand.PalmNormal.Roll;// / (float)Math.PI;
@@ -165,10 +161,10 @@ namespace LGR
 
 		private void setFingerBasePositions_World(Hand hand)
 		{
-			Leap.Finger index = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_INDEX).FirstOrDefault();
-			Leap.Finger middle = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_MIDDLE).FirstOrDefault();
-			Leap.Finger ring = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_RING).FirstOrDefault();
-			Leap.Finger pinky = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_PINKY).FirstOrDefault();
+			Finger index = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_INDEX).FirstOrDefault();
+			Finger middle = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_MIDDLE).FirstOrDefault();
+			Finger ring = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_RING).FirstOrDefault();
+			Finger pinky = hand.Fingers.Where(f => f.Type == Finger.FingerType.TYPE_PINKY).FirstOrDefault();
 
 			IndexBasePos_World = new Vec3(index.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint);
 			MiddleBasePos_World = new Vec3(middle.Bone(Bone.BoneType.TYPE_METACARPAL).PrevJoint);
@@ -230,18 +226,6 @@ namespace LGR
 		#endregion
 
 		#region Public Methods
-		public HandMeasurements GetMeasurements() // Not used
-		{
-			return new HandMeasurements()
-			{
-				PinkyLength = GetFingerLength(Finger.FingerType.TYPE_PINKY),
-				RingLength = GetFingerLength(Finger.FingerType.TYPE_RING),
-				MiddleLength = GetFingerLength(Finger.FingerType.TYPE_MIDDLE),
-				IndexLength = GetFingerLength(Finger.FingerType.TYPE_INDEX),
-				ThumbLength = GetFingerLength(Finger.FingerType.TYPE_THUMB)
-			};
-		}
-
 		public float GetFingerLength(Finger.FingerType fingerType)
 		{
 			// Finger length = dist(PalmCenter, MCP) + dist(MCP, PIP) + dist(PIP, DIP) + dist(DIP, TIP)

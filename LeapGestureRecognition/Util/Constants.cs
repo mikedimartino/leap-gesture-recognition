@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media;
 
-namespace LGR
+namespace LeapGestureRecognition
 {
 	public static class Constants
 	{
@@ -88,27 +88,12 @@ namespace LGR
 		{
 			{ BoolOptionsNames.ShowAxes, true },
 			{ BoolOptionsNames.ShowArms, true },
-			{ BoolOptionsNames.ShowGestureLibrary, true },
-			{ BoolOptionsNames.ShowOutputWindow, true }
 		};
 
 		public static class BoolOptionsNames
 		{
 			public const string ShowAxes = "Show Axes";
 			public const string ShowArms = "Show Arms";
-			public const string ShowGestureLibrary = "Show Gesture Library";
-			public const string ShowOutputWindow = "Show Output Window";
-		}
-
-
-		public static Dictionary<string, string> DefaultStringOptions = new Dictionary<string, string>()
-		{
-			{ StringOptionsNames.ActiveUser, "NO ACTIVE USER" },
-		};
-
-		public static class StringOptionsNames
-		{
-			public const string ActiveUser = "Active User";
 		}
 
 	}

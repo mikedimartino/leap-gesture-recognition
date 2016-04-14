@@ -10,12 +10,10 @@ using Leap;
 using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows;
-using LGR;
 using System.Collections.ObjectModel;
-using LeapGestureRecognition.View;
 using System.Threading;
 using System.Windows.Threading;
-using LGR_Controls;
+using LeapGestureRecognition.View;
 using Newtonsoft.Json;
 
 namespace LeapGestureRecognition.ViewModel
@@ -38,19 +36,18 @@ namespace LeapGestureRecognition.ViewModel
 
 		private static Camera _camera;
 
-		private CustomLeapListener _listener;
 		private SharpGLHelper _glHelper;
 		private SQLiteProvider _sqliteProvider;
 		private LGR_Configuration _config;
 
 		private StatisticalClassifier _classifier;
 
-		public MainViewModel(OpenGL gl, System.Windows.Controls.ScrollViewer scrollViewer, System.Windows.Controls.TextBox outputWindowTextBox, GestureLibrary gestureLibraryControl, EditStaticGesture editStaticGestureControl, EditDynamicGesture editDynamicGestureControl, RecognitionMonitor recognitionMonitorControl, Controller controller, CustomLeapListener listener)
+		public MainViewModel(OpenGL gl, System.Windows.Controls.ScrollViewer scrollViewer, System.Windows.Controls.TextBox outputWindowTextBox, 
+			GestureLibrary gestureLibraryControl, EditStaticGesture editStaticGestureControl, EditDynamicGesture editDynamicGestureControl, 
+			RecognitionMonitor recognitionMonitorControl, Controller controller)
 		{
 			_gl = gl;
 			_controller = controller;
-			_listener = listener;
-			_controller.AddListener(_listener);
 			_camera = new Camera(_gl);
 			_scrollViewer = scrollViewer;
 			_outputWindowTextBox = outputWindowTextBox;
@@ -165,7 +162,6 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-		//private LGR_Mode _Mode = LGR_Mode.Default;
 		private LGR_Mode _Mode = LGR_Mode.Recognize;
 		public LGR_Mode Mode
 		{
@@ -179,7 +175,6 @@ namespace LeapGestureRecognition.ViewModel
 						ShowRecognitionMonitor = true;
 						ShowEditStaticGesture = false;
 						ShowEditDynamicGesture = false;
-						//_recognitionMonitorControl.VM = new RecognitionMonitorViewModel(_classifier);
 						break;
 					case LGR_Mode.EditStatic:
 						ShowRecognitionMonitor = false;
@@ -197,7 +192,6 @@ namespace LeapGestureRecognition.ViewModel
 						ShowEditDynamicGesture = false;
 						break;
 				}
-				//OnPropertyChanged("Mode");
 				OnPropertyChanged("ShowRecognitionMonitor");
 				OnPropertyChanged("ShowEditStaticGesture");
 				OnPropertyChanged("ShowEditDynamicGesture");
@@ -210,7 +204,6 @@ namespace LeapGestureRecognition.ViewModel
 			set
 			{
 				_config = value;
-				//OnPropertyChanged("Config");
 			}
 		}
 
@@ -246,8 +239,6 @@ namespace LeapGestureRecognition.ViewModel
 		}
 
 
-		public User ActiveUser { get { return _config.ActiveUser; } }
-
 		private string _RecognizedGesture;
 		public string RecognizedGesture 
 		{
@@ -279,9 +270,7 @@ namespace LeapGestureRecognition.ViewModel
 		#region Event Handling Methods
 		public void OnClosing(object sender, CancelEventArgs e)
 		{
-			_controller.RemoveListener(_listener);
 			_controller.Dispose();
-			_listener.Dispose();
 		}
 
 		public void OnMouseWheel(object sender, MouseWheelEventArgs e)
@@ -402,31 +391,6 @@ namespace LeapGestureRecognition.ViewModel
 						var instances = DynamicGestureRecorder.Instances;
 					}
 					break;
-
-				case Key.D:
-
-					//var sgi1 = SQLiteProvider.GetStaticGestureInstances(64).First().Gesture;
-					//var sgi2 = SQLiteProvider.GetStaticGestureInstances(65).First().Gesture;
-					//sgi1.UpdateFeatureVector();
-					//sgi2.UpdateFeatureVector();
-					//var lerped = sgi1.Lerp(sgi2, 0.5f);
-					//lerped.UpdateFeatureVector();
-
-					//var sgc1 = SQLiteProvider.GetStaticGestureClass(64).Gesture;
-					//var sgc2 = SQLiteProvider.GetStaticGestureClass(65).Gesture;
-
-					//var dist1 = sgc1.DistanceTo(sgi1);
-					//var dist2 = sgc2.DistanceTo(sgi2);
-
-					//var dist3 = sgc1.DistanceTo(sgi2);
-					//var dist4 = sgc1.DistanceTo(lerped);
-					//var dist5 = lerped.DistanceTo(sgc2);
-					//var dist6 = sgc2.DistanceTo(sgi1);
-
-					//SelectedStaticGesture = lerped;
-					//Mode = LGR_Mode.Debug;
-
-					break;
 			}
 		}
 
@@ -451,27 +415,16 @@ namespace LeapGestureRecognition.ViewModel
 
 		public void OnStaticTabClicked()
 		{
-			//_recognitionMonitorControl.VM.Mode = GestureType.Static;
 			_recognitionMonitorControl.SwitchToStaticMode();
 			_gestureLibraryControl.ShowStaticGestures();
 		}
 
 		public void OnDynamicTabClicked()
 		{
-			//_recognitionMonitorControl.VM.Mode = GestureType.Dynamic;
 			_recognitionMonitorControl.SwitchToDynamicMode();
 			_gestureLibraryControl.ShowDynamicGestures();
 		}
 		#endregion
-
-
-		// Measures hand on screen
-		public HandMeasurements MeasureHand()
-		{
-			Hand hand = _controller.Frame().Hands.FirstOrDefault();
-			if (hand == null) return null;
-			return new SGInstanceSingleHand(hand).GetMeasurements();
-		}
 
 		public void DrawScene() // This is really the main loop of the entire program. Should maybe rename.
 		{
@@ -553,28 +506,6 @@ namespace LeapGestureRecognition.ViewModel
 					_sqliteProvider.UpdateBoneColor(boneColor.Key, boneColor.Value);
 					_config.BoneColors[boneColor.Key] = boneColor.Value;
 				}
-				// Users
-				User newActiveUser = optionsDialog.Changeset.ActiveUser;
-				if (newActiveUser != null && newActiveUser.Id != _config.ActiveUser.Id)
-				{
-					_sqliteProvider.SetActiveUser(newActiveUser.Id);
-					_config.ActiveUser = newActiveUser;
-					OnPropertyChanged("ActiveUser");
-				}
-				foreach (var newUser in optionsDialog.Changeset.NewUsers)
-				{
-					_sqliteProvider.SaveNewUser(newUser);
-				}
-				foreach (var modifiedUser in optionsDialog.Changeset.ModifiedUsers)
-				{
-					_sqliteProvider.UpdateUser(modifiedUser);
-				}
-				foreach (int userId in optionsDialog.Changeset.DeletedUserIds)
-				{
-					_sqliteProvider.DeleteUser(userId);
-				}
-
-				_config.AllUsers = _sqliteProvider.GetAllUsers(); // Just to make sure it's up to date  
 			}
 		}
 

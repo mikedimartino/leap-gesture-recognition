@@ -1,6 +1,4 @@
-﻿using LGR;
-
-using LeapGestureRecognition.ViewModel;
+﻿using LeapGestureRecognition.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +28,6 @@ namespace LeapGestureRecognition.View
 			DataContext = _vm;
 			ActiveTab = OptionsTab.General;
 			generalListBoxItem.IsSelected = true;
-			userRows.ItemsSource = _vm.Users;
 		}
 
 		#region Public Properties
@@ -38,7 +35,6 @@ namespace LeapGestureRecognition.View
 		{ 
 			General, 
 			BoneColors,
-			Users
 		}
 
 		private OptionsTab _ActiveTab;
@@ -102,49 +98,6 @@ namespace LeapGestureRecognition.View
 			string tabName = (string)(e.Source as FrameworkElement).Tag;
 			OptionsTab selectedTab = (OptionsTab) Enum.Parse(typeof(OptionsTab), tabName);
 			ActiveTab = selectedTab;
-		}
-
-		private void User_RadioButton_Click(object sender, RoutedEventArgs e)
-		{
-			User activeUser = (User)(e.Source as FrameworkElement).Tag;
-			_vm.ActiveUserChanged(activeUser);
-		}
-
-		private void Edit_Button_Click(object sender, RoutedEventArgs e)
-		{
-			Button editButton = e.Source as Button;
-			User user = (User) editButton.Tag;
-			user.ShowEditInfo = !user.ShowEditInfo;
-			editButton.Content = user.ShowEditInfo ? "Done" : "Edit";
-		}
-
-		private void Delete_Button_Click(object sender, RoutedEventArgs e)
-		{
-			User user = (User)(e.Source as FrameworkElement).Tag;
-			_vm.DeleteUser(user);
-		}
-
-		private void UserName_TextBox_TextChanged(object sender, TextChangedEventArgs e)
-		{
-			User user = (User)(e.Source as FrameworkElement).Tag;
-			_vm.UserEdited(user);
-		}
-
-		private void UserName_TextBox_LostFocus(object sender, RoutedEventArgs e)
-		{
-			User user = (User)(e.Source as FrameworkElement).Tag;
-			_vm.UserEdited(user);
-		}
-
-		private void Remeasure_Hands_Button_Click(object sender, RoutedEventArgs e)
-		{
-			User user = (User)(e.Source as FrameworkElement).Tag;
-			_vm.RemeasureHand(user);
-		}
-
-		private void NewUser_Button_Click(object sender, RoutedEventArgs e)
-		{
-			_vm.CreateNewUser();
 		}
 		#endregion
 

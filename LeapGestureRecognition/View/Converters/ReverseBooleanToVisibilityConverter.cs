@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Data;
 
-namespace LGR_Converters
+namespace LeapGestureRecognition.Converters
 {
 	public class ReverseBooleanToVisibilityConverter : IValueConverter
 	{

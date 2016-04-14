@@ -123,8 +123,6 @@
     <Compile Include="Model\Gesture\Dynamic\DGInstance.cs" />
     <Compile Include="Model\Gesture\Dynamic\DGInstanceWrapper.cs" />
     <Compile Include="Model\Gesture\Dynamic\DGRecorder.cs" />
-    <Compile Include="Model\Interface\IGestureClass.cs" />
-    <Compile Include="Model\Interface\IGestureInstance.cs" />
     <Compile Include="Model\Miscellaneous\EditDynamicGestureChangeset.cs" />
     <Compile Include="Model\Miscellaneous\GestureDistance.cs" />
     <Compile Include="Model\Gesture\Static\SGClassWrapper.cs" />
@@ -143,17 +141,13 @@
     <Compile Include="Model\Enum\LGR_Mode.cs" />
     <Compile Include="Model\Miscellaneous\Vec3.cs" />
     <Compile Include="Model\Miscellaneous\LGR_Configuration.cs" />
-    <Compile Include="Model\Miscellaneous\HandMeasurements.cs" />
     <Compile Include="Model\Gesture\Static\SGInstanceSingleHand.cs" />
     <Compile Include="Model\Miscellaneous\OptionsChangeset.cs" />
-    <Compile Include="Model\Miscellaneous\User.cs" />
     <Compile Include="Util\Constants.cs" />
-    <Compile Include="Util\CustomLeapListener.cs" />
     <Compile Include="Util\HelperMethods.cs" />
-    <Compile Include="ViewModel\OutputWindowViewModel.cs" />
     <Compile Include="Util\SQLiteProvider.cs" />
     <Compile Include="Util\SharpGLHelper.cs" />
-    <Compile Include="Util\StatisticalClassifier.cs" />
+    <Compile Include="Model\Gesture\StatisticalClassifier.cs" />
     <Compile Include="ViewModel\EditDynamicGestureViewModel.cs" />
     <Compile Include="ViewModel\EditStaticGestureViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
@@ -181,20 +175,11 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="View\MeasureHandDialog.xaml.cs">
-      <DependentUpon>MeasureHandDialog.xaml</DependentUpon>
-    </Compile>
     <Compile Include="View\OptionsDialog.xaml.cs">
       <DependentUpon>OptionsDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\RecognitionMonitor.xaml.cs">
       <DependentUpon>RecognitionMonitor.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\RenameGestureDialog.xaml.cs">
-      <DependentUpon>RenameGestureDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\SaveGestureDialog.xaml.cs">
-      <DependentUpon>SaveGestureDialog.xaml</DependentUpon>
     </Compile>
     <Page Include="View\EditDynamicGesture.xaml">
       <SubType>Designer</SubType>
@@ -212,23 +197,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\MeasureHandDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="View\OptionsDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\RecognitionMonitor.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\RenameGestureDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="View\SaveGestureDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -252,6 +225,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="ClassDiagram2.cd" />
+    <None Include="ClassDiagram3.cd" />
+    <None Include="ClassDiagram4.cd" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

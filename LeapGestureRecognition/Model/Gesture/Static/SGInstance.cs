@@ -8,7 +8,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace LGR
+namespace LeapGestureRecognition
 {
 	[DataContract]
 	public class SGInstance
@@ -85,61 +85,66 @@ namespace LGR
 
 		public float DistanceTo(SGInstance otherInstance)
 		{
-			// Check if same hand configuration (BothHands, LeftHandOnly, RightHandOnly)...
-			if (HandConfiguration != otherInstance.HandConfiguration) return Single.PositiveInfinity;
-
-			float distance = 0;
-			int featureCount = 0; // Necessary to do this because some features (like Dictionary's) are really 5 features.
-			foreach (var feature in otherInstance.FeatureVector)
+			try
 			{
-				if (featuresToSkip.Contains(feature.Name)) continue;
+				// Check if same hand configuration (BothHands, LeftHandOnly, RightHandOnly)...
+				if (HandConfiguration != otherInstance.HandConfiguration) return Single.PositiveInfinity;
 
-				if (feature.Value is Vec3)
+				float distance = 0;
+				int featureCount = 0; // Necessary to do this because some features (like Dictionary's) are really 5 features.
+				foreach (var feature in otherInstance.FeatureVector)
 				{
-					distance += feature.Weight * ((Vec3)(feature.Value)).DistanceTo((Vec3)Features[feature.Name].Value);
-					featureCount += feature.Weight;
-				}
-				else if (feature.Value is float)
-				{
-					// float values include Yaw, Pitch, Roll, and Sphere Radius
-					distance += feature.Weight * Math.Abs((float)feature.Value - (float)Features[feature.Name].Value);
-					featureCount += feature.Weight;
-				}
-				else if (feature.Value is Dictionary<Finger.FingerType, Vec3>)
-				{
-					// This is just for fingersTipPositions
-					Dictionary<Finger.FingerType, Vec3> thisHandFingersTipPositions = (Dictionary<Finger.FingerType, Vec3>)(Features[feature.Name].Value);
-					foreach (var fingerTipPosition in (Dictionary<Finger.FingerType, Vec3>)feature.Value)
+					if (featuresToSkip.Contains(feature.Name)) continue;
+
+					if (feature.Value is Vec3)
 					{
-						//var theFingerTipPositions = ((Newtonsoft.Json.Linq.JObject)Features[feature.Name].Value).ToObject<Dictionary<Finger.FingerType, Vec3>>();
-						Finger.FingerType fingerType = fingerTipPosition.Key;
-						Vec3 instancePos = fingerTipPosition.Value;
-						distance += feature.Weight * (instancePos).DistanceTo(thisHandFingersTipPositions[fingerType]);
+						distance += feature.Weight * ((Vec3)(feature.Value)).DistanceTo((Vec3)Features[feature.Name].Value);
 						featureCount += feature.Weight;
 					}
-				}
-				else if (feature.Value is Dictionary<Finger.FingerType, bool>)
-				{
-					// This is just for fingers.IsExtended
-					Dictionary<Finger.FingerType, bool> thisHandFingersExtended = (Dictionary<Finger.FingerType, bool>)(Features[feature.Name].Value);
-					foreach (var fingerExtended in (Dictionary<Finger.FingerType, bool>)feature.Value)
+					else if (feature.Value is float)
 					{
-						Finger.FingerType fingerType = fingerExtended.Key;
-						bool isExtended = fingerExtended.Value;
-						if (thisHandFingersExtended[fingerType]) // finger should be extended
-						{
-							if (!isExtended) distance += feature.Weight; //distance += fingerExtendedPercentage;
-						}
-						else
-						{
-							if (isExtended) distance += feature.Weight; //distance += 1 - fingerExtendedPercentage;
-						}
+						// float values include Yaw, Pitch, Roll, and Sphere Radius
+						distance += feature.Weight * Math.Abs((float)feature.Value - (float)Features[feature.Name].Value);
 						featureCount += feature.Weight;
 					}
+					else if (feature.Value is Dictionary<Finger.FingerType, Vec3>)
+					{
+						// This is just for fingersTipPositions
+						Dictionary<Finger.FingerType, Vec3> thisHandFingersTipPositions = (Dictionary<Finger.FingerType, Vec3>)(Features[feature.Name].Value);
+						foreach (var fingerTipPosition in (Dictionary<Finger.FingerType, Vec3>)feature.Value)
+						{
+							//var theFingerTipPositions = ((Newtonsoft.Json.Linq.JObject)Features[feature.Name].Value).ToObject<Dictionary<Finger.FingerType, Vec3>>();
+							Finger.FingerType fingerType = fingerTipPosition.Key;
+							Vec3 instancePos = fingerTipPosition.Value;
+							distance += feature.Weight * (instancePos).DistanceTo(thisHandFingersTipPositions[fingerType]);
+							featureCount += feature.Weight;
+						}
+					}
+					else if (feature.Value is Dictionary<Finger.FingerType, bool>)
+					{
+						// This is just for fingers.IsExtended
+						Dictionary<Finger.FingerType, bool> thisHandFingersExtended = (Dictionary<Finger.FingerType, bool>)(Features[feature.Name].Value);
+						foreach (var fingerExtended in (Dictionary<Finger.FingerType, bool>)feature.Value)
+						{
+							Finger.FingerType fingerType = fingerExtended.Key;
+							bool isExtended = fingerExtended.Value;
+							if (thisHandFingersExtended[fingerType]) // finger should be extended
+							{
+								if (!isExtended) distance += feature.Weight; //distance += fingerExtendedPercentage;
+							}
+							else
+							{
+								if (isExtended) distance += feature.Weight; //distance += 1 - fingerExtendedPercentage;
+							}
+							featureCount += feature.Weight;
+						}
+					}
 				}
+				//return distance / (gestureInstance.FeatureVector.Count - featuresToSkip.Count);
+				return distance / featureCount;
 			}
-			//return distance / (gestureInstance.FeatureVector.Count - featuresToSkip.Count);
-			return distance / featureCount;
+
+			catch(Exception ex) { return -555; }
 		}
 
 		public float DistanceTo(SGClass gestureClass)

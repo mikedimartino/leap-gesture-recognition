@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using GlmNet;
 
-namespace LGR
+namespace LeapGestureRecognition
 {
 	public class Camera
 	{

@@ -16,9 +16,7 @@ using SharpGL;
 using LeapGestureRecognition.ViewModel;
 using Leap;
 
-using LGR;
-
-namespace LeapGestureRecognition
+namespace LeapGestureRecognition.View
 {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
@@ -33,10 +31,10 @@ namespace LeapGestureRecognition
 		public MainWindow()
 		{
 			InitializeComponent();
-			_vm = new MainViewModel(openGLControl.OpenGL, outputWindowScrollViewer, outputWindowTextBox, gestureLibraryControl, editStaticGestureControl, editDynamicGestureControl, recognitionMonitorControl, new Controller(), new CustomLeapListener());
+			_vm = new MainViewModel(openGLControl.OpenGL, outputWindowScrollViewer, outputWindowTextBox, 
+				gestureLibraryControl, editStaticGestureControl, editDynamicGestureControl, 
+				recognitionMonitorControl, new Controller());
 			DataContext = _vm;
-			//DataContext = new MainViewModel(new Controller(), new CustomLeapListener());
-			//_vm = (MainViewModel)this.DataContext;
 			Closing += _vm.OnClosing;
 			// Handle mouse wheel event on OpenGl window to zoom
 			openGLControl.MouseWheel += _vm.OnMouseWheel;

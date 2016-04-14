@@ -6,14 +6,12 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace LGR
+namespace LeapGestureRecognition
 {
 	[DataContract]
 	public class SGClass
 	{
 		#region Public Properties
-		public GestureType GestureType { get { return GestureType.Static; } }
-
 		[DataMember]
 		public Dictionary<FeatureName, object> MeanValues { get; set; }
 		[DataMember]

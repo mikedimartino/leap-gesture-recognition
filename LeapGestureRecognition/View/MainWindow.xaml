@@ -1,11 +1,11 @@
-﻿<Window x:Class="LeapGestureRecognition.MainWindow"
+﻿<Window x:Class="LeapGestureRecognition.View.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="SharpGL WPF Application"  
         xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF"
 				xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
-				xmlns:lgrControls="clr-namespace:LGR_Controls;assembly="
-				xmlns:converters="clr-namespace:LGR_Converters;assembly="
+				xmlns:lgrControls="clr-namespace:LeapGestureRecognition.View;assembly="
+				xmlns:converters="clr-namespace:LeapGestureRecognition.Converters;assembly="
 				WindowStartupLocation="CenterScreen" WindowState="Maximized"
 				DataContext="{Binding MainViewModel}">
 	<Window.Resources>

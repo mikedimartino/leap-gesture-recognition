@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Data;
 
-namespace LGR_Converters
+namespace LeapGestureRecognition.Converters
 {
 	public class FeatureWeightKeyToLabelConverter : IValueConverter
 	{

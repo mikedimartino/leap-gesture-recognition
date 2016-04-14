@@ -1,5 +1,4 @@
 ﻿using LeapGestureRecognition.ViewModel;
-using LGR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace LGR_Controls
+namespace LeapGestureRecognition.View
 {
 	/// <summary>
 	/// Interaction logic for RecognitionMonitor.xaml
@@ -27,7 +26,6 @@ namespace LGR_Controls
 		{
 			InitializeComponent();
 		}
-
 
 		public RecognitionMonitorViewModel VM
 		{

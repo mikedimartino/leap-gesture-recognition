@@ -5,13 +5,12 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace LGR
+namespace LeapGestureRecognition
 {
 	[DataContract]
 	public class DGClass 
 	{
 		#region Public Properties
-		public GestureType GestureType { get { return GestureType.Dynamic; } }
 		//[DataMember]
 		//public List<DGClassSample> Samples { get; set; }
 		[DataMember]

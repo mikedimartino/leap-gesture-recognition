@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Windows.Media;
 
-namespace LGR
+namespace LeapGestureRecognition
 {
 	[DataContract]
 	public class Vec3

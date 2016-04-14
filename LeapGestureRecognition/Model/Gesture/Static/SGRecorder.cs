@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Threading;
 
-namespace LGR
+namespace LeapGestureRecognition
 {
 	public class SGRecorder
 	{

@@ -1,5 +1,4 @@
 ﻿using Leap;
-using LGR;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media;
 
-namespace LGR
+namespace LeapGestureRecognition
 {
 	public class SQLiteProvider
 	{
@@ -19,81 +18,9 @@ namespace LGR
 		public SQLiteProvider(string fileName)
 		{
 			_connString = String.Format("Data Source={0};Version=3;Pooling=True;Max Pool Size=100;", fileName);
-			  initDB(fileName);
 		}
 
 		#region Private Methods
-		private void initDB(string fileName)
-		{
-			if (File.Exists(fileName)) return;
-			SQLiteConnection.CreateFile(fileName);
-			using (var connection = new SQLiteConnection(_connString))
-			{
-				connection.Open();
-				// Create Gestures table
-				string sql = "CREATE TABLE Gestures (name TEXT(50), json TEXT)";
-				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-				{
-					command.ExecuteNonQuery();
-				}
-
-				// Create BoneColors table
-				sql = "CREATE TABLE BoneColors (bone TEXT(50), color TEXT(10))";
-				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-				{
-					command.ExecuteNonQuery();
-				}
-				// Fill BoneColors table with default values
-				foreach (var boneColor in Constants.DefaultBoneColors)
-				{
-					sql = String.Format("INSERT INTO BoneColors (bone, color) VALUES ('{0}', '{1}')", boneColor.Key, boneColor.Value.ToString());
-					using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-					{
-						command.ExecuteNonQuery();
-					}
-				}
-
-				// Create BoolOptions table
-				sql = "CREATE TABLE BoolOptions (name TEXT(50), value INTEGER(1))";
-				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-				{
-					command.ExecuteNonQuery();
-				}
-				// Fill BoolOptions table with default values
-				foreach (var boolOption in Constants.DefaultBoolOptions)
-				{
-					sql = String.Format("INSERT INTO BoolOptions (name, value) VALUES ('{0}', '{1}')", boolOption.Key, boolOption.Value ? 1 : 0);
-					using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-					{
-						command.ExecuteNonQuery();
-					}
-				}
-
-				// Create StringOptions table
-				sql = "CREATE TABLE StringOptions (name TEXT, value TEXT, pinky REAL, ring REAL, middle REAL, index REAL, thumb REAL)";
-				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-				{
-					command.ExecuteNonQuery();
-				}
-				// Fill StringOptions table with default values
-				foreach (var stringOption in Constants.DefaultStringOptions)
-				{
-					sql = String.Format("INSERT INTO StringOptions (name, value) VALUES ('{0}', '{1}')", stringOption.Key, stringOption.Value);
-					using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-					{
-						command.ExecuteNonQuery();
-					}
-				}
-
-				// Create Users table
-				sql = "CREATE TABLE Users (name TEXT(50), is_active INTEGER(1), pinky REAL, ring REAL, middle REAL, index REAL, thumb REAL)";
-				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-				{
-					command.ExecuteNonQuery();
-				}
-			}
-		}
-
 
 		#region SQLite Wrapper Methods
 		private int executeNonQuery(string sql)
@@ -211,104 +138,6 @@ namespace LGR
 		public void UpdateBoolOption(string name, bool value)
 		{
 			string sql = String.Format("UPDATE BoolOptions SET value='{0}' WHERE name='{1}'", value ? 1 : 0, name);
-			executeNonQuery(sql);
-		}
-		#endregion
-
-		#region Users
-		public User GetActiveUser()
-		{
-			//string sql = String.Format("SELECT value FROM StringOptions WHERE name='{0}'", Constants.StringOptionsNames.ActiveUser);
-			//string activeUserName = singleValueQuery(sql);
-			string sql = "SELECT name, pinky_length, ring_length, middle_length, index_length, thumb_length, id FROM Users WHERE is_active=1";
-			using (var connection = new SQLiteConnection(_connString))
-			{
-				connection.Open();
-				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-				{
-					using (SQLiteDataReader reader = command.ExecuteReader())
-					{
-						reader.Read();
-						return new User()
-						{
-							Name = reader.GetString(0),
-							IsActive = true,
-							PinkyLength = reader.GetFloat(1),
-							RingLength = reader.GetFloat(2),
-							MiddleLength = reader.GetFloat(3),
-							IndexLength = reader.GetFloat(4),
-							ThumbLength = reader.GetFloat(5),
-							Id = reader.GetInt32(6)
-						};
-					}
-				}
-			}
-		}
-
-		public void SetActiveUser(int id)
-		{
-			List<string> queries = new List<string>()
-			{
-				"UPDATE Users SET is_active=0",
-				String.Format("UPDATE Users SET is_active=1 WHERE id='{0}'", id)
-			};
-			executeBatchNonQuery(queries);
-		}
-
-		public void UpdateUser(User user)
-		{
-			string sql = String.Format("UPDATE Users SET name='{0}', is_active='{1}', pinky_length='{2}', " + 
-				"ring_length='{3}', middle_length='{4}', index_length='{5}', thumb_length='{6}' WHERE id='{7}'",
-				user.Name, user.IsActive ? 1 : 0, user.PinkyLength, user.RingLength, user.MiddleLength,
-				user.IndexLength, user.ThumbLength, user.Id);
-
-			executeNonQuery(sql);
-		}
-
-		public void SaveNewUser(User user) // Return the id of the user
-		{
-			string sql = String.Format("INSERT INTO Users (name, is_active, pinky_length, ring_length, middle_length, index_length, thumb_length) " +
-				"VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')", user.Name, user.IsActive ? 1 : 0,
-				user.PinkyLength, user.RingLength, user.MiddleLength, user.IndexLength, user.ThumbLength);
-
-			executeNonQuery(sql);
-			// Set the id of user:
-		}
-
-		public List<User> GetAllUsers()
-		{
-			List<User> users = new List<User>();
-			string sql = "SELECT name, is_active, pinky_length, ring_length, middle_length, index_length, thumb_length, id FROM Users";
-			using (var connection = new SQLiteConnection(_connString))
-			{
-				connection.Open();
-				using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-				{
-					using (SQLiteDataReader reader = command.ExecuteReader())
-					{
-						while (reader.Read())
-						{
-							users.Add(new User()
-							{
-								Name = reader.GetString(0),
-								IsActive = reader.GetInt32(1) == 1,
-								PinkyLength = reader.GetFloat(2),
-								RingLength = reader.GetFloat(3),
-								MiddleLength = reader.GetFloat(4),
-								IndexLength = reader.GetFloat(5),
-								ThumbLength = reader.GetFloat(6),
-								Id = reader.GetInt32(7)
-							});
-						}
-					}
-				}
-			}
-			return users;
-		}
-
-		public void DeleteUser(int id) // Might want to return a bool to indicate success or failure
-		{
-			string sql = String.Format("DELETE FROM Users WHERE id='{0}'", id);
 			executeNonQuery(sql);
 		}
 		#endregion

@@ -1,5 +1,4 @@
-﻿using LGR;
-using LeapGestureRecognition.ViewModel;
+﻿using LeapGestureRecognition.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,11 +16,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Globalization;
 
-namespace LGR_Controls
+namespace LeapGestureRecognition.View
 {
-	/// <summary>
-	/// Interaction logic for EditGesture.xaml
-	/// </summary>
 	public partial class EditStaticGesture : UserControl
 	{
 		private MainViewModel _mvm;
@@ -62,8 +58,6 @@ namespace LGR_Controls
 
 		private void Cancel_Button_Click(object sender, RoutedEventArgs e)
 		{
-			//if (_vm.RecordingInProgress) return; //TODO: Cancel in progress recording
-			//_mvm.Mode = LGR_Mode.Recognize;
 			_vm.CancelEdit();
 		}
 
