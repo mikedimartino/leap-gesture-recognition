@@ -9,7 +9,7 @@ namespace LeapGestureRecognition
 {
 	public static class Constants
 	{
-		public static string SQLiteFileName = "gesture_store.sqlite";
+		public static string SQLiteFileName = "lgr_db.sqlite";
 
 		public static double FingerTipRadius = 3;
 		public static double PalmSphereRadius = 8;
@@ -27,31 +27,31 @@ namespace LeapGestureRecognition
 
 		public static Dictionary<string, Color> DefaultBoneColors = new Dictionary<string, Color>() 
 		{
-			{ BoneNames.Palm, Colors.White },
-			{ BoneNames.Wrist, Colors.White },
-			{ BoneNames.ForearmCenter, Colors.White },
-			{ BoneNames.Elbow, Colors.White },
-			{ BoneNames.Arm, Colors.White },
-			{ BoneNames.BaseOfHand, Colors.White },
-			{ BoneNames.Pinky_Distal, Colors.White },
-			{ BoneNames.Pinky_Intermediate, Colors.White },
-			{ BoneNames.Pinky_Proximal, Colors.White },
-			{ BoneNames.Pinky_Metacarpal, Colors.White },
-			{ BoneNames.Ring_Distal, Colors.White },
-			{ BoneNames.Ring_Intermediate, Colors.White },
-			{ BoneNames.Ring_Proximal, Colors.White },
-			{ BoneNames.Ring_Metacarpal, Colors.White },
-			{ BoneNames.Middle_Distal, Colors.White },
-			{ BoneNames.Middle_Intermediate, Colors.White },
-			{ BoneNames.Middle_Proximal, Colors.White },
-			{ BoneNames.Middle_Metacarpal, Colors.White },
-			{ BoneNames.Index_Distal, Colors.White },
-			{ BoneNames.Index_Intermediate, Colors.White },
-			{ BoneNames.Index_Proximal, Colors.White },
-			{ BoneNames.Index_Metacarpal, Colors.White },
-			{ BoneNames.Thumb_Distal, Colors.White },
-			{ BoneNames.Thumb_Intermediate, Colors.White },
-			{ BoneNames.Thumb_Proximal, Colors.White },
+			{ BoneNames.Palm, (Color)ColorConverter.ConvertFromString("#FF008000") },
+			{ BoneNames.Wrist, (Color)ColorConverter.ConvertFromString("#FF008000") },
+			{ BoneNames.ForearmCenter, (Color)ColorConverter.ConvertFromString("#FF00FFFF") },
+			{ BoneNames.Elbow, (Color)ColorConverter.ConvertFromString("#FF00FFFF") },
+			{ BoneNames.Arm, (Color)ColorConverter.ConvertFromString("#FF800080") },
+			{ BoneNames.BaseOfHand, (Color)ColorConverter.ConvertFromString("#FFDAA520") },
+			{ BoneNames.Pinky_Distal, (Color)ColorConverter.ConvertFromString("#FFFF0000") },
+			{ BoneNames.Pinky_Intermediate, (Color)ColorConverter.ConvertFromString("#FF0000CD") },
+			{ BoneNames.Pinky_Proximal, (Color)ColorConverter.ConvertFromString("#FF008000") },
+			{ BoneNames.Pinky_Metacarpal, (Color)ColorConverter.ConvertFromString("#FFFFFF00") },
+			{ BoneNames.Ring_Distal, (Color)ColorConverter.ConvertFromString("#FFFF0000") },
+			{ BoneNames.Ring_Intermediate, (Color)ColorConverter.ConvertFromString("#FF0000CD") },
+			{ BoneNames.Ring_Proximal, (Color)ColorConverter.ConvertFromString("#FF008000") },
+			{ BoneNames.Ring_Metacarpal, (Color)ColorConverter.ConvertFromString("#FFFFFF00") },
+			{ BoneNames.Middle_Distal, (Color)ColorConverter.ConvertFromString("#FFFF0000") },
+			{ BoneNames.Middle_Intermediate, (Color)ColorConverter.ConvertFromString("#FF0000CD") },
+			{ BoneNames.Middle_Proximal, (Color)ColorConverter.ConvertFromString("#FF008000") },
+			{ BoneNames.Middle_Metacarpal, (Color)ColorConverter.ConvertFromString("#FFFFFF00") },
+			{ BoneNames.Index_Distal, (Color)ColorConverter.ConvertFromString("#FFFF0000") },
+			{ BoneNames.Index_Intermediate, (Color)ColorConverter.ConvertFromString("#FF0000CD") },
+			{ BoneNames.Index_Proximal, (Color)ColorConverter.ConvertFromString("#FF008000") },
+			{ BoneNames.Index_Metacarpal, (Color)ColorConverter.ConvertFromString("#FFFFFF00") },
+			{ BoneNames.Thumb_Distal, (Color)ColorConverter.ConvertFromString("#FFFF0000") },
+			{ BoneNames.Thumb_Intermediate, (Color)ColorConverter.ConvertFromString("#FF0000CD") },
+			{ BoneNames.Thumb_Proximal, (Color)ColorConverter.ConvertFromString("#FF008000") },
 		};
 
 		// Meant for the BoneColors table. Some aren't technically bones, like palm sphere, wrist sphere, etc..
@@ -88,12 +88,14 @@ namespace LeapGestureRecognition
 		{
 			{ BoolOptionsNames.ShowAxes, true },
 			{ BoolOptionsNames.ShowArms, true },
+			{ BoolOptionsNames.UseDTW, false },
 		};
 
 		public static class BoolOptionsNames
 		{
 			public const string ShowAxes = "Show Axes";
 			public const string ShowArms = "Show Arms";
+			public const string UseDTW = "Use DTW";
 		}
 
 	}

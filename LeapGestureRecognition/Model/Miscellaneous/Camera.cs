@@ -114,24 +114,6 @@ namespace LeapGestureRecognition
 			UpdateView();
 		}
 
-		//public void Rotate()
-		//{
-		//	if (Yaw != 0)
-		//	{ // Rotate about y-axis
-		//		OrientationMatrix = glm.rotate(OrientationMatrix, _radians * Yaw, new vec3(0, 1, 0));
-		//	}
-		//	if (Pitch != 0)
-		//	{ // Rotate about x-axis
-		//		OrientationMatrix = glm.rotate(OrientationMatrix, _radians * Pitch, new vec3(1, 0, 0));
-		//	}
-
-		//	// Update camera position (since we're doing arcball)
-		//	Eye = At * DistanceFromOrigin;
-
-		//	UpdateView();
-		//}
-
-
 		private float yawRadians = 0;
 		private float pitchRadians = -0.2f;
 		public void Revolve()
@@ -146,7 +128,6 @@ namespace LeapGestureRecognition
 			
 			newOrientationMatrix = glm.translate(newOrientationMatrix, DistanceFromOrigin * new vec3(0, 0, 1));
 			// Update camera position (since we're doing arcball)
-			//Eye = At * DistanceFromOrigin;
 			OrientationMatrix = newOrientationMatrix;
 
 			UpdateView();

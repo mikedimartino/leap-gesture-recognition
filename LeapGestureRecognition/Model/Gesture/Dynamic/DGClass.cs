@@ -64,12 +64,9 @@ namespace LeapGestureRecognition
 
 
 		#region Public Methods
-		public float DistanceTo(DGInstance otherInstance)
+		public float DistanceTo(DGInstance otherInstance, bool useDTW)
 		{
-			float dtwDist = GetDTWDistance(otherInstance);
-			float lerpedDist = GetLerpedDistance(otherInstance);
-
-			float dist = (dtwDist + lerpedDist) / 2.0f;
+			float dist = useDTW ? GetDTWDistance(otherInstance) : GetLerpedDistance(otherInstance);
 
 			// Factor in path length (with weight 1/5):
 			int newFeatureCount = 0;
@@ -89,9 +86,7 @@ namespace LeapGestureRecognition
 			float additionalDistWeight = 0;// 0.1f;
 			dist = ((1 - additionalDistWeight) * dist) + (additionalDistWeight * additionalDist);
 
-			//return dist;
-			return lerpedDist;
-			//return dtwDist;
+			return dist;
 		}
 
 		// Lerps instance to make its sample collection same size as this class.

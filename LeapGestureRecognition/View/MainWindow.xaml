@@ -29,11 +29,6 @@
 				</Style>
 			</Menu.ItemContainerStyle>
 		</Menu>
-		
-		<TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10 0">
-			<Run Text="Gesture: " />
-			<Run Text="{Binding RecognizedGesture}"/>
-		</TextBlock>
 
 		<Grid Grid.Row="1">
 			<Grid.ColumnDefinitions>
@@ -47,6 +42,7 @@
 					<Grid.RowDefinitions>
 						<RowDefinition Height="Auto" />
 						<RowDefinition Height="*" />
+						<RowDefinition Height="Auto" />
 						<RowDefinition Height="*" />
 					</Grid.RowDefinitions>
 
@@ -70,17 +66,20 @@
 					<GridSplitter Grid.Row="2" Height="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#444444" />
 
 					<!-- For some reason it helps to wrap the below lgrControls on Grid.Row=2 in Grid for toggling visibility -->
-					<Grid Grid.Row="2" Visibility="{Binding ShowEditStaticGesture, Converter={StaticResource BoolToVis}}">
-						<lgrControls:EditStaticGesture x:Name="editStaticGestureControl" />
-					</Grid>
+					<Grid Grid.Row="3">
+						<Grid Visibility="{Binding ShowEditStaticGesture, Converter={StaticResource BoolToVis}}">
+							<lgrControls:EditStaticGesture x:Name="editStaticGestureControl" />
+						</Grid>
 
-					<Grid Grid.Row="2" Visibility="{Binding ShowEditDynamicGesture, Converter={StaticResource BoolToVis}}">
-						<lgrControls:EditDynamicGesture x:Name="editDynamicGestureControl" />
-					</Grid>
+						<Grid Visibility="{Binding ShowEditDynamicGesture, Converter={StaticResource BoolToVis}}">
+							<lgrControls:EditDynamicGesture x:Name="editDynamicGestureControl" />
+						</Grid>
 
-					<Grid Grid.Row="2" Visibility="{Binding ShowRecognitionMonitor, Converter={StaticResource BoolToVis}}">
-						<lgrControls:RecognitionMonitor Grid.Row="2" x:Name="recognitionMonitorControl" />
+						<Grid Visibility="{Binding ShowRecognitionMonitor, Converter={StaticResource BoolToVis}}">
+							<lgrControls:RecognitionMonitor Grid.Row="2" x:Name="recognitionMonitorControl" />
+						</Grid>
 					</Grid>
+					
 					
 
 				</Grid>

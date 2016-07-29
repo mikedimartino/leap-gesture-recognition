@@ -18,9 +18,40 @@ namespace LeapGestureRecognition
 		public SQLiteProvider(string fileName)
 		{
 			_connString = String.Format("Data Source={0};Version=3;Pooling=True;Max Pool Size=100;", fileName);
+			initDB(fileName);
 		}
 
 		#region Private Methods
+		private void initDB(string fileName)
+		{
+			if (!File.Exists(fileName))
+			{
+				SQLiteConnection.CreateFile(fileName);
+
+				// Create tables
+				var createStatements = new List<string>() 
+				{
+					"CREATE TABLE BoneColors (bone TEXT(50), color TEXT(10))",
+					"CREATE TABLE BoolOptions (name TEXT(50), value INTEGER(1))",
+					"CREATE TABLE DynamicGestureClasses (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT, `gesture_json` TEXT, `sample_instance_json` TEXT )",
+					"CREATE TABLE DynamicGestureInstances (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `class_id` INTEGER NOT NULL, `json` TEXT NOT NULL)",
+					"CREATE TABLE StaticGestureClasses (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT, `gesture_json` TEXT, `sample_instance_json` TEXT)",
+					"CREATE TABLE StaticGestureInstances (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `class_id` INTEGER NOT NULL, `json` TEXT NOT NULL)"
+				};
+				executeBatchNonQuery(createStatements);
+
+				// Insert default values into tables
+				foreach (var kvp in Constants.DefaultBoneColors)
+				{
+					AddBoneColor(kvp.Key, kvp.Value);
+				}
+				foreach (var kvp in Constants.DefaultBoolOptions)
+				{
+					AddBoolOption(kvp.Key, kvp.Value);
+				}
+			}
+		}
+
 
 		#region SQLite Wrapper Methods
 		private int executeNonQuery(string sql)
@@ -109,6 +140,12 @@ namespace LeapGestureRecognition
 			string sql = String.Format("UPDATE BoneColors SET color='{0}' WHERE bone='{1}'", color.ToString(), name);
 			executeNonQuery(sql);
 		}
+
+		public void AddBoneColor(string name, Color color)
+		{
+			string sql = String.Format("INSERT INTO BoneColors (color, bone) VALUES ('{0}', '{1}')", color.ToString(), name);
+			executeNonQuery(sql);
+		}
 		#endregion
 
 		#region BoolOptions
@@ -138,6 +175,12 @@ namespace LeapGestureRecognition
 		public void UpdateBoolOption(string name, bool value)
 		{
 			string sql = String.Format("UPDATE BoolOptions SET value='{0}' WHERE name='{1}'", value ? 1 : 0, name);
+			executeNonQuery(sql);
+		}
+
+		public void AddBoolOption(string name, bool value)
+		{
+			string sql = String.Format("INSERT INTO BoolOptions (name, value) VALUES ('{0}', '{1}')", name, value ? 1 : 0);
 			executeNonQuery(sql);
 		}
 		#endregion

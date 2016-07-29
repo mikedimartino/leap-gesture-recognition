@@ -12,7 +12,6 @@ namespace LeapGestureRecognition
 	{
 		public SGInstanceSingleHand() { }
 
-		// Gotta figure out how to handle both hands
 		public SGInstanceSingleHand(Hand hand)
 		{
 			HandTransform = getHandTransform(hand);
@@ -27,9 +26,12 @@ namespace LeapGestureRecognition
 			ArmZ = new Vec3(hand.Arm.Basis.zBasis);
 
 			// Normalize these angle values. (They all range between -PI and PI).
-			Yaw = hand.PalmNormal.Yaw;// / (float)Math.PI;
-			Pitch = hand.PalmNormal.Pitch;// / (float)Math.PI;
-			Roll = hand.PalmNormal.Roll;// / (float)Math.PI;
+			//Yaw = hand.PalmNormal.Yaw;
+			//Pitch = hand.PalmNormal.Pitch;
+			//Roll = hand.PalmNormal.Roll;
+			Yaw = hand.Direction.Yaw;
+			Pitch = hand.Direction.Pitch;
+			Roll = hand.PalmNormal.Roll;
 
 			// World coordinates
 			WristPos_World = new Vec3(hand.WristPosition);
@@ -42,9 +44,8 @@ namespace LeapGestureRecognition
 			WristPos_Relative = new Vec3(hand.WristPosition);
 			ElbowPos_Relative = new Vec3(hand.Arm.ElbowPosition);
 			ForearmCenter_Relative = new Vec3(hand.Arm.Center);
-			// NOTE: HandScale and relative finger positions must be calculated after world coordinates. 
-			//HandScale = GetFingerLength(Finger.FingerType.TYPE_MIDDLE);
 
+			// NOTE: FingerLengths and relative finger positions must be calculated after world coordinates. 
 			FingerLengths = GetFingerLengths();
 
 			setFingerJointPositions_Relative(hand);
@@ -81,7 +82,6 @@ namespace LeapGestureRecognition
 
 
 		// Coordinates relative to the hand's object space:
-		//private float HandScale;
 		[DataMember]
 		public Dictionary<Finger.FingerType, Dictionary<Finger.FingerJoint, Vec3>> FingerJointPositions_Relative;
 		[DataMember]
@@ -99,7 +99,7 @@ namespace LeapGestureRecognition
 		[DataMember]
 		public Vec3 ForearmCenter_Relative { get; set; }
 
-		// World coordinates: // May want to consider scaling these as well
+		// World coordinates:
 		[DataMember]
 		public Dictionary<Finger.FingerType, Dictionary<Finger.FingerJoint, Vec3>> FingerJointPositions_World;
 		[DataMember]

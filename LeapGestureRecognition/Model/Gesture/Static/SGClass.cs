@@ -41,7 +41,7 @@ namespace LeapGestureRecognition
 		}
 		#endregion
 
-		HashSet<FeatureName> featuresToSkip = new HashSet<FeatureName>()
+		static HashSet<FeatureName> featuresToSkip = new HashSet<FeatureName>()
 		{
 			FeatureName.LeftPalmPosition,
 			FeatureName.RightPalmPosition,
@@ -75,6 +75,7 @@ namespace LeapGestureRecognition
 			//var fingerType in (Finger.FingerType[])Enum.GetValues(typeof(Finger.FingerType))
 			foreach (var featureName in (FeatureName[])Enum.GetValues(typeof(FeatureName)))
 			{
+				if (featuresToSkip.Contains(featureName) || featureName == FeatureName.HandConfiguration) continue;
 				string featureString = featureName.ToString();
 				if (featureString.Contains("Finger"))
 				{

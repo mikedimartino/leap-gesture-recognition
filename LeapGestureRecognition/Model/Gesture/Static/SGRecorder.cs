@@ -26,7 +26,6 @@ namespace LeapGestureRecognition
 			_mvm = mvm;
 			_startTimer = new DispatcherTimer();
 			_recordSnapshotTimer = new DispatcherTimer();
-
 			RecordingInProgress = false;
 		}
 
@@ -42,7 +41,6 @@ namespace LeapGestureRecognition
 			_startTimer.Tick += startTimerCountdown_Tick;
 			_startTimer.Interval = new TimeSpan(0, 0, 1);
 			_startTimer.Start();
-
 			RecordingInProgress = true;
 		}
 
@@ -53,7 +51,6 @@ namespace LeapGestureRecognition
 			_recordSnapshotTimer.Tick += recordSnapshotTimer_Tick;
 			_recordSnapshotTimer.Interval = new TimeSpan(0, 0, 1);
 			_recordSnapshotTimer.Start();
-
 			RecordingInProgress = true;
 		}
 

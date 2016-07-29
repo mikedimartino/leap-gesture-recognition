@@ -61,8 +61,6 @@ namespace LeapGestureRecognition.ViewModel
 			_config = new LGR_Configuration(_sqliteProvider);
 			_glHelper = new SharpGLHelper(_gl, _config.BoneColors);
 
-			DynamicGestureRecorder = new DGRecorder(this);
-
 			UpdateStaticGestureLibrary();
 			UpdateDynamicGestureLibrary();
 
@@ -94,7 +92,6 @@ namespace LeapGestureRecognition.ViewModel
 		public double OpenGLWindowHeight { get; set; }
 		public Frame CurrentFrame { get; set; }
 		public ObservableCollection<CustomMenuItem> MenuBar { get; set; }
-		public DGRecorder DynamicGestureRecorder { get; set; }
 
 		private bool _ShowEditStaticGesture = false;
 		public bool ShowEditStaticGesture 
@@ -238,19 +235,6 @@ namespace LeapGestureRecognition.ViewModel
 			}
 		}
 
-
-		private string _RecognizedGesture;
-		public string RecognizedGesture 
-		{
-			get { return _RecognizedGesture; }
-			set
-			{
-				_RecognizedGesture = value;
-				OnPropertyChanged("RecognizedGesture");
-			}
-		}
-
-
 		#region Options
 		public bool ShowAxes
 		{
@@ -383,14 +367,6 @@ namespace LeapGestureRecognition.ViewModel
 				case Key.Right:
 					dynamicGestureStep++;
 					break;
-
-				// End the dynamic gesture recording:
-				case Key.Enter:
-					if (Mode == LGR_Mode.Debug)
-					{
-						var instances = DynamicGestureRecorder.Instances;
-					}
-					break;
 			}
 		}
 
@@ -460,13 +436,12 @@ namespace LeapGestureRecognition.ViewModel
 						}
 						else _glHelper.DrawFrame(CurrentFrame, ShowArms);
 					}
-					
 					break;
 				case LGR_Mode.Recognize:
 					_glHelper.DrawFrame(CurrentFrame, ShowArms);
 					break;
 				case LGR_Mode.Debug:
-					_glHelper.DrawStaticGesture(SelectedStaticGesture);
+					if (SelectedStaticGesture != null) _glHelper.DrawStaticGesture(SelectedStaticGesture);
 					break;
 				default:
 					_glHelper.DrawFrame(CurrentFrame, ShowArms);
@@ -492,13 +467,17 @@ namespace LeapGestureRecognition.ViewModel
 		public void DisplayOptionsDialog()
 		{
 			OptionsDialog optionsDialog = new OptionsDialog(this);
-			if (optionsDialog.ShowDialog() == true)
+			if (optionsDialog.ShowDialog() == true) // User hit Save
 			{
 				// General Options
 				foreach (var boolOption in optionsDialog.Changeset.BoolOptionsChangeset)
 				{
 					_sqliteProvider.UpdateBoolOption(boolOption.Key, boolOption.Value);
 					_config.BoolOptions[boolOption.Key] = boolOption.Value;
+					if (boolOption.Key == Constants.BoolOptionsNames.UseDTW)
+					{
+						_classifier.UseDTW = boolOption.Value;
+					}
 				}
 				// Bone Colors
 				foreach (var boneColor in optionsDialog.Changeset.BoneColorsChangeset)
@@ -591,12 +570,6 @@ namespace LeapGestureRecognition.ViewModel
 			MenuBar.Add(resetCamera);
 			#endregion
 
-			#region DEFAULT MODE
-			// Might want to rename to "Live Mode"
-			CustomMenuItem defaultMode = new CustomMenuItem("Default Mode");
-			defaultMode.Command = new CustomCommand(a => Mode = LGR_Mode.Default);
-			MenuBar.Add(defaultMode);
-			#endregion
 
 			#region RECOGNIZE MODE
 			CustomMenuItem recognizeMode = new CustomMenuItem("Recognize Mode");
@@ -605,9 +578,9 @@ namespace LeapGestureRecognition.ViewModel
 			#endregion
 
 			#region DEBUG MODE
-			CustomMenuItem debugMode = new CustomMenuItem("Debug Mode");
-			debugMode.Command = new CustomCommand(a => Mode = LGR_Mode.Debug);
-			MenuBar.Add(debugMode);
+			//CustomMenuItem debugMode = new CustomMenuItem("Debug Mode");
+			//debugMode.Command = new CustomCommand(a => Mode = LGR_Mode.Debug);
+			//MenuBar.Add(debugMode);
 			#endregion
 
 			#region OPTIONS
